@@ -1,12 +1,12 @@
-fastapi>=0.109.0
-uvicorn>=0.27.0
+fastapi>=0.115.0
+uvicorn>=0.30.0
 python-multipart
-spacy>=3.7.4
+spacy>=3.8.0
 pymupdf
 python-docx
 sentence-transformers
 scikit-learn
-pydantic>=2.6.0
+pydantic>=2.10.0
 python-jose[cryptography]
 passlib[bcrypt]
 reportlab
