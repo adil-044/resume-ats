@@ -4,6 +4,8 @@ python-multipart
 spacy>=3.8.0
 pymupdf
 python-docx
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch
 sentence-transformers
 scikit-learn
 pydantic>=2.10.0
