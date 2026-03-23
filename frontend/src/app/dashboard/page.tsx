@@ -7,11 +7,13 @@ import { supabase } from '@/lib/supabase';
 import { 
   Upload, FileText, ArrowRight, Loader2, Sparkles, 
   History, LogOut, LayoutDashboard, Plus, Search,
-  TrendingUp, Clock, CheckCircle2, ShieldCheck, Briefcase
+  TrendingUp, Clock, CheckCircle2, ShieldCheck, Briefcase,
+  Zap, AlertTriangle
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import BridgeGapModal from '@/components/BridgeGapModal';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -31,6 +33,8 @@ export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'scan' | 'history'>('scan');
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
+  const [isGapModalOpen, setIsGapModalOpen] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
 
   useEffect(() => {
     const getUser = async () => {
@@ -88,7 +92,8 @@ export default function Dashboard() {
           format: 'markdown',
           raw_text: item.optimized_text || item.original_text
         },
-        job_title: item.job_title
+        job_title: item.job_title,
+        job_description: item.job_description // Store the JD so we can re-optimize
       })));
     }
     setIsLoadingHistory(false);
@@ -135,14 +140,14 @@ export default function Dashboard() {
           original_text: result.original_text || '',
           optimized_text: result.optimized_content.raw_text,
           before_score: result.initial_score,
-          after_score: result.overall_score
+          after_score: result.overall_score,
+          job_description: jobDescription
         })
         .select()
         .single();
 
       if (error) throw error;
 
-      // Update result ID to database ID
       result.id = data.id;
       setAnalysisResult(result);
       router.push(`/workspace/${data.id}`);
@@ -154,10 +159,30 @@ export default function Dashboard() {
     }
   };
 
+  const openBridgeGap = (e: React.MouseEvent, taskId: string) => {
+    e.stopPropagation();
+    setSelectedTaskId(taskId);
+    setIsGapModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-white flex flex-col font-sans">
       <Navbar />
       
+      <AnimatePresence>
+        {isGapModalOpen && selectedTaskId && (
+          <BridgeGapModal 
+            isOpen={isGapModalOpen} 
+            onClose={() => {
+              setIsGapModalOpen(false);
+              fetchHistory(user.id); // Refresh history after optimization
+            }} 
+            taskId={selectedTaskId} 
+            onComplete={() => {}} 
+          />
+        )}
+      </AnimatePresence>
+
       <div className="flex-1 flex overflow-hidden">
         {/* Executive Sidebar */}
         <aside className="w-72 bg-slate-50 border-r border-slate-200 hidden lg:flex flex-col p-8">
@@ -165,14 +190,14 @@ export default function Dashboard() {
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 px-4">Management</p>
             <button 
               onClick={() => setActiveTab('scan')}
-              className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'scan' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-500 hover:bg-slate-100'}`}
+              className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'scan' ? 'bg-white text-indigo-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:bg-slate-100'}`}
             >
               <Plus className="h-4 w-4" />
               New Executive Scan
             </button>
             <button 
               onClick={() => setActiveTab('history')}
-              className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'history' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-500 hover:bg-slate-100'}`}
+              className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'history' ? 'bg-white text-indigo-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:bg-slate-100'}`}
             >
               <History className="h-4 w-4" />
               Scan History
@@ -205,7 +230,7 @@ export default function Dashboard() {
         </aside>
 
         {/* Main Executive Content */}
-        <main className="flex-1 overflow-y-auto bg-white p-12">
+        <main className="flex-1 overflow-y-auto bg-white p-12 intelligence-scrollbar">
           <AnimatePresence mode="wait">
             {activeTab === 'scan' ? (
               <motion.div
@@ -333,12 +358,12 @@ export default function Dashboard() {
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
                     {history.map((item) => (
                       <motion.div 
                         key={item.id}
                         whileHover={{ y: -5 }}
-                        className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 group cursor-pointer"
+                        className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 group cursor-pointer flex flex-col"
                         onClick={() => {
                           setAnalysisResult(item);
                           router.push(`/workspace/${item.id}`);
@@ -356,11 +381,26 @@ export default function Dashboard() {
                         <h3 className="text-lg font-black text-slate-900 mb-2 truncate uppercase tracking-tight">
                           {item.job_title || 'Untitled Optimization'}
                         </h3>
-                        <div className="flex items-center justify-between pt-6 border-t border-slate-50">
-                          <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest group-hover:translate-x-1 transition-transform inline-flex items-center gap-2">
-                            View Stream <ArrowRight className="h-3.5 w-3.5" />
-                          </span>
-                          <span className="text-[10px] font-bold text-slate-300">Initial: {item.initial_score}%</span>
+                        <div className="flex items-center gap-4 text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-6">
+                          <div className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> Recent</div>
+                          <div className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-green-500" /> Verified</div>
+                        </div>
+                        
+                        <div className="mt-auto space-y-3 pt-6 border-t border-slate-50">
+                          <div className="flex items-center justify-between text-[10px] font-bold">
+                            <span className="text-slate-300">Initial: {item.initial_score}%</span>
+                            <span className="text-indigo-600 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                              Workspace <ArrowRight className="h-3 w-3" />
+                            </span>
+                          </div>
+                          {item.overall_score < 90 && (
+                            <button 
+                              onClick={(e) => openBridgeGap(e, item.id)}
+                              className="w-full py-3 bg-indigo-50 text-indigo-600 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-indigo-600 hover:text-white transition-all border border-indigo-100"
+                            >
+                              <Zap className="h-3 w-3" /> Bridge the Gap
+                            </button>
+                          )}
                         </div>
                       </motion.div>
                     ))}
