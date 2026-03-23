@@ -1,7 +1,7 @@
-# Checkpoint: ResumeATS V8 - Next-Gen Sales Funnel
+# Checkpoint: HireReady V10 - Rebrand & Core Pages
 
 **Status:** WORKING (Verified on March 14, 2026)
-**Git Commit:** `54f3771`
+**Git Commit:** `959d753`
 
 ---
 
@@ -11,12 +11,12 @@
 - **Host:** `127.0.0.1`
 - **Port:** `9000`
 - **Model:** `gemini-flash-latest` (Locked via Google GenAI SDK)
-- **New Features:** Pre-cleaning protocol for raw text, DOCX header extraction.
+- **New Features:** Pre-cleaning protocol for raw text, DOCX header extraction, Deep Gap Analysis.
 
 ### Frontend (Next.js)
 - **Framework:** Next.js 15+ (App Router)
-- **3D Engine:** Three.js + @react-three/fiber
-- **Funnel Logic:** Teaser Scan -> Conversion Modal -> Auth Redirect
+- **Brand:** HireReady (Rebranded from RESUBOOST)
+- **Pages:** Home, Dashboard, Workspace, Privacy, Terms, Pricing, Docs.
 - **Auth:** Supabase OAuth + Profile Sync (Name/Location)
 
 ---

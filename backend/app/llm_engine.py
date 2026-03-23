@@ -85,23 +85,27 @@ def optimize_resume_text(resume_markdown: str, job_description: str, missing_key
         print(error_msg)
         return f"# AI OPTIMIZATION ERROR\n\n{error_msg}\n\nPlease check your backend terminal for details."
 
-def generate_gap_questions(missing_keywords: List[str], job_description: str) -> List[str]:
-    """Generate specific questions focused on missing keystrings to hit 90%+."""
-    if not client or not missing_keywords:
-        return ["Describe your experience with the technical requirements of this role."]
-    
-    keystrings = missing_keywords[:10]
+def generate_gap_questions(missing_keywords: List[str], job_description: str, resume_content: str = "") -> List[str]:
+    """Perform a deep delta analysis to generate high-signal questions."""
+    if not client:
+        return ["Could you describe your technical experience relevant to this role?"]
+
     prompt = f"""
-    You are an expert ATS Optimizer. 
-    The following specific KEYSTRINGS are missing from the resume but are critical for a 95% match score.
-    
-    MISSING KEYSTRINGS: {', '.join(keystrings)}
-    
-    TASK: Generate 5 targeted interview-style questions. Each question MUST ask about 1-2 of these keystrings specifically.
-    
-    OUTPUT: A JSON list of 5 strings. No markdown blocks, just raw JSON.
+    ROLE: Expert Technical Recruiter & ATS Analyst.
+    TASK: Analyze the 'GAP' between the Candidate's Resume and the Job Description.
+
+    CANDIDATE DATA: {resume_content[:2000]}
+    JOB REQUIREMENTS: {job_description[:2000]}
+    IDENTIFIED MISSING KEYWORDS: {', '.join(missing_keywords[:15])}
+
+    INSTRUCTIONS:
+    1. Identify the 5 most critical missing technical or leadership skills that are in the JD but NOT in the resume.
+    2. Generate 5 targeted, short interview questions that ask for SPECIFIC evidence of these skills.
+    3. Ensure questions are professional and executive-level.
+
+    OUTPUT: A raw JSON list of 5 strings. No other text.
     """
-    
+
     try:
         response = client.models.generate_content(
             model=MODEL_ID,
@@ -113,8 +117,9 @@ def generate_gap_questions(missing_keywords: List[str], job_description: str) ->
         import json
         return json.loads(text)
     except Exception as e:
-        print(f"Question Gen Error: {e}")
-        return [f"Tell me about your experience with {kw}." for kw in keystrings[:5]]
+        print(f"Deep Gap Gen Error: {e}")
+        return [f"How have you applied {kw} in your professional career?" for kw in missing_keywords[:5]]
+
 
 def optimize_with_context(resume_markdown: str, job_description: str, user_answers: str) -> str:
     """Aggressive 90%+ optimization pass integrating user answers."""

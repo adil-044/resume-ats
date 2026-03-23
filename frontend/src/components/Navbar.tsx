@@ -37,7 +37,7 @@ export default function Navbar() {
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-black text-slate-900 tracking-tighter leading-none">
-                RESU<span className="text-indigo-600">BOOST</span>
+                HIRE<span className="text-indigo-600">READY</span>
               </span>
               <span className="text-[8px] font-black text-slate-400 uppercase tracking-[0.3em] mt-1">Executive Systems</span>
             </div>

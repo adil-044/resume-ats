@@ -92,7 +92,8 @@ async def upload_resume(
                 "format": "markdown",
                 "raw_text": optimized_markdown
             },
-            "job_description": job_description
+            "job_description": job_description,
+            "original_text": cleaned_text
         }
 
         analysis_store[task_id] = analysis_result
@@ -123,7 +124,12 @@ async def get_bridge_questions(task_id: str = Form(...)):
         raise HTTPException(status_code=404, detail="Analysis not found")
     
     result = analysis_store[task_id]
-    questions = generate_gap_questions(result["missing_keywords"], result["job_description"])
+    # Pass original_text to the LLM so it can actually see what is missing
+    questions = generate_gap_questions(
+        result["missing_keywords"], 
+        result["job_description"],
+        result.get("original_text", "")
+    )
     return {"questions": questions}
 
 @app.post("/api/v1/bridge-gap/optimize")

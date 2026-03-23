@@ -52,16 +52,16 @@ export default function Home() {
           >
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-[10px] font-black uppercase tracking-[0.3em] mb-10 shadow-sm">
               <BrainCircuit className="h-3.5 w-3.5" />
-              <span>Semantic Architecture V8.0</span>
+              <span>Semantic Architecture V10.0</span>
             </div>
             
             <h1 className="text-7xl xl:text-9xl font-black text-slate-900 leading-[0.9] tracking-tighter mb-10">
               Win the <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-[length:200%_auto] animate-gradient">Algorithm.</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-[length:200%_auto] animate-gradient uppercase">HIREREADY.</span>
             </h1>
             
             <p className="text-xl text-slate-500 font-medium max-w-lg leading-relaxed mb-12">
-              Bypass legacy Applicant Tracking Systems with a high-signal, machine-readable resume engineered for <span className="text-slate-900 font-bold underline decoration-indigo-500 underline-offset-8 decoration-4">90%+ match rates.</span>
+              Bypass legacy Applicant Tracking Systems with a high-signal, machine-readable resume engineered for <span className="text-slate-900 font-bold underline decoration-indigo-500 underline-offset-8 decoration-4 text-2xl">90%+ match rates.</span>
             </p>
 
             <div className="flex flex-wrap gap-8 items-center">
@@ -76,7 +76,7 @@ export default function Home() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-slate-900 font-black text-xs uppercase tracking-widest">
                   <ShieldCheck className="h-4 w-4 text-green-500" />
-                  Safe Export
+                  Executive Logic
                 </div>
                 <p className="text-[11px] text-slate-400 font-bold leading-relaxed uppercase tracking-tighter">Single-column logic for all ATS.</p>
               </div>
@@ -106,7 +106,7 @@ export default function Home() {
                 </div>
 
                 <div className="space-y-6">
-                  <div className="relative border-2 border-dashed border-slate-200 rounded-[2.5rem] p-16 text-center group hover:border-indigo-400 transition-all duration-500 bg-slate-50/50 hover:bg-white">
+                  <div className="relative border-2 border-dashed border-slate-200 rounded-[2.5rem] p-16 text-center group hover:border-indigo-400 transition-all duration-500 bg-slate-50/50 hover:bg-white shadow-inner">
                     <input 
                       type="file" 
                       onChange={(e) => setResumeFileName(e.target.files?.[0]?.name || null)}
@@ -122,21 +122,21 @@ export default function Home() {
                       </div>
                     ) : (
                       <div className="flex flex-col items-center">
-                        <div className="bg-white p-5 rounded-3xl mb-4 shadow-xl group-hover:scale-110 transition-transform duration-500 border border-slate-100">
-                          <Upload className="h-10 w-10 text-slate-400" />
+                        <div className="bg-white p-5 rounded-3xl mb-4 shadow-xl group-hover:scale-110 transition-transform duration-500 border border-slate-100 text-slate-400">
+                          <Upload className="h-10 w-10" />
                         </div>
-                        <p className="text-slate-900 font-black text-lg tracking-tight">Drop Executive Resume</p>
+                        <p className="text-slate-900 font-black text-lg tracking-tight uppercase">Drop Executive Resume</p>
                         <p className="text-slate-400 text-[10px] mt-2 font-black uppercase tracking-[0.2em]">PDF / DOCX (Inc. Headers)</p>
                       </div>
                     )}
                   </div>
 
-                  <div className="relative">
+                  <div className="relative group">
                     <textarea 
                       placeholder="Paste Target Job Description Requirements..."
                       className="w-full h-40 bg-white border border-slate-200 rounded-[2.5rem] p-8 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all text-sm font-medium resize-none shadow-sm"
                     />
-                    <div className="absolute top-6 right-8 opacity-20 pointer-events-none">
+                    <div className="absolute top-6 right-8 opacity-20 pointer-events-none group-focus-within:opacity-100 transition-opacity">
                       <LayoutGrid className="h-5 w-5 text-indigo-600" />
                     </div>
                   </div>
@@ -178,12 +178,12 @@ export default function Home() {
                 },
                 {
                   icon: <ShieldCheck className="h-8 w-8 text-green-600" />,
-                  title: "Single-Pass PDF",
+                  title: "Executive Styling",
                   desc: "Horizontal rules and executive spacing designed specifically for machine-readability."
                 }
               ].map((f, i) => (
                 <div key={i} className="bg-white p-12 rounded-[3rem] border border-slate-100 shadow-sm hover:shadow-2xl hover:border-transparent transition-all duration-700 group">
-                  <div className="bg-slate-50 w-16 h-16 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-500">
+                  <div className="bg-slate-50 w-16 h-16 rounded-2xl flex items-center justify-center mb-8 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-500 shadow-sm">
                     {f.icon}
                   </div>
                   <h3 className="text-xl font-black text-slate-900 mb-4 uppercase tracking-tighter leading-tight">{f.title}</h3>
@@ -203,7 +203,7 @@ export default function Home() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-slate-900/90 backdrop-blur-xl"
+              className="absolute inset-0 bg-slate-900/95 backdrop-blur-2xl"
               onClick={() => setShowUpsell(false)}
             />
             <motion.div
@@ -228,13 +228,13 @@ export default function Home() {
                 <div className="space-y-4">
                   <Link 
                     href="/auth/login"
-                    className="w-full bg-indigo-600 text-white py-6 rounded-[2rem] font-black text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-slate-900 transition-all shadow-2xl shadow-indigo-300"
+                    className="w-full bg-indigo-600 text-white py-6 rounded-[2.5rem] font-black text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-slate-900 transition-all shadow-2xl shadow-indigo-300"
                   >
                     Unlock Executive Vault <Lock className="h-4 w-4 text-indigo-300" />
                   </Link>
                   <button 
                     onClick={() => setShowUpsell(false)}
-                    className="w-full py-6 rounded-[2rem] font-black text-slate-400 hover:text-slate-600 transition-all text-[10px] uppercase tracking-[0.3em]"
+                    className="w-full py-6 rounded-[2.5rem] font-black text-slate-400 hover:text-slate-600 transition-all text-[10px] uppercase tracking-[0.3em]"
                   >
                     Discard Analysis & Continue
                   </button>

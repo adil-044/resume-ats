@@ -19,7 +19,7 @@ export default function Footer() {
               <div className="bg-indigo-600 p-2 rounded-xl group-hover:rotate-12 transition-transform shadow-xl shadow-indigo-900/40">
                 <FileText className="h-6 w-6 text-white" />
               </div>
-              <span className="text-2xl font-black tracking-tighter">RESUBOOST</span>
+              <span className="text-2xl font-black tracking-tighter uppercase text-white">HIREREADY</span>
             </Link>
             <p className="text-slate-400 font-medium leading-relaxed max-w-xs">
               The world's most advanced AI-driven resume engine. Engineered for executives, built for machine readability.
@@ -39,8 +39,8 @@ export default function Footer() {
             <ul className="space-y-4">
               <li><Link href="/" className="text-slate-400 hover:text-white transition-colors font-bold text-sm">Semantic Engine</Link></li>
               <li><Link href="/dashboard" className="text-slate-400 hover:text-white transition-colors font-bold text-sm">Executive Vault</Link></li>
-              <li><a href="#" className="text-slate-400 hover:text-white transition-colors font-bold text-sm">ATS Logic API</a></li>
-              <li><a href="#" className="text-slate-400 hover:text-white transition-colors font-bold text-sm">Pricing Strategy</a></li>
+              <li><Link href="/docs" className="text-slate-400 hover:text-white transition-colors font-bold text-sm">ATS Logic API</Link></li>
+              <li><Link href="/pricing" className="text-slate-400 hover:text-white transition-colors font-bold text-sm">Pricing Strategy</Link></li>
             </ul>
           </div>
 
@@ -48,7 +48,7 @@ export default function Footer() {
           <div>
             <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400 mb-8">Intelligence</h4>
             <ul className="space-y-4">
-              <li><a href="#" className="text-slate-400 hover:text-white transition-colors font-bold text-sm">Documentation</a></li>
+              <li><Link href="/docs" className="text-slate-400 hover:text-white transition-colors font-bold text-sm">Documentation</Link></li>
               <li><a href="#" className="text-slate-400 hover:text-white transition-colors font-bold text-sm">ATS Whitepaper</a></li>
               <li><a href="#" className="text-slate-400 hover:text-white transition-colors font-bold text-sm">Success Stories</a></li>
               <li><a href="#" className="text-slate-400 hover:text-white transition-colors font-bold text-sm">Hiring Trends 2026</a></li>
@@ -65,7 +65,7 @@ export default function Footer() {
                 placeholder="email@vault.com" 
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl py-3 pl-4 pr-12 outline-none focus:border-indigo-500 transition-all text-xs font-bold"
               />
-              <button className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-indigo-600 rounded-lg hover:bg-indigo-500 transition-colors">
+              <button className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-indigo-600 rounded-lg hover:bg-indigo-50 transition-colors">
                 <ArrowRight className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -75,11 +75,11 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="pt-12 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-6 text-[10px] font-black text-slate-500 uppercase tracking-widest">
-            <span>© 2026 Resuboost Systems</span>
+            <span>© 2026 HireReady Systems</span>
             <span className="h-1 w-1 bg-slate-700 rounded-full" />
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
+            <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
             <span className="h-1 w-1 bg-slate-700 rounded-full" />
-            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+            <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
           </div>
           <div className="flex items-center gap-3 px-4 py-2 bg-slate-800/50 rounded-xl border border-slate-700/50">
             <ShieldCheck className="h-4 w-4 text-green-500" />
