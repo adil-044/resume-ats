@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, Github, Linkedin, Twitter, Mail, Globe, ShieldCheck } from 'lucide-react';
+import { FileText, Github, Linkedin, Twitter, Mail, Globe, ShieldCheck, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Footer() {
