@@ -18,6 +18,7 @@ export interface AnalysisResult {
   };
   original_text?: string;
   job_title?: string;
+  job_description?: string;
 }
 
 interface ResumeState {

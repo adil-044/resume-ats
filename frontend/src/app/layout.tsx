@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ResumeATS | Elite AI Resume Architect & ATS-Killer",
+  title: "HireReady | Elite AI Resume Architect & ATS-Killer",
   description: "Bypass Applicant Tracking Systems with machine-readable executive resumes. Next-Gen AI optimization for the modern job seeker.",
 };
 

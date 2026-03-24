@@ -8,7 +8,7 @@ import {
   Upload, FileText, ArrowRight, Loader2, Sparkles, 
   History, LogOut, LayoutDashboard, Plus, Search,
   TrendingUp, Clock, CheckCircle2, ShieldCheck, Briefcase,
-  Zap, AlertTriangle
+  Zap, AlertTriangle, FileUp, Cpu
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -35,6 +35,7 @@ export default function Dashboard() {
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isGapModalOpen, setIsGapModalOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [analysisStep, setAnalysisStep] = useState<string>('Initializing...');
 
   useEffect(() => {
     const getUser = async () => {
@@ -93,7 +94,7 @@ export default function Dashboard() {
           raw_text: item.optimized_text || item.original_text
         },
         job_title: item.job_title,
-        job_description: item.job_description // Store the JD so we can re-optimize
+        job_description: item.job_description
       })));
     }
     setIsLoadingHistory(false);
@@ -128,10 +129,17 @@ export default function Dashboard() {
   const handleAnalyze = async () => {
     if (!resumeFile || !jobDescription) return;
     setIsAnalyzing(true);
+    setAnalysisStep('Extracting Raw Text...');
+    
     try {
+      setTimeout(() => setAnalysisStep('Semantic Mapping...'), 2000);
+      setTimeout(() => setAnalysisStep('Gap Analysis...'), 4000);
+      setTimeout(() => setAnalysisStep('Structuring Executive Markdown...'), 6000);
+
       const result = await analyzeResume(resumeFile, jobDescription);
       
-      // Save to Supabase History
+      setAnalysisStep('Securing Vault Record...');
+      
       const { data, error } = await supabase
         .from('resumes')
         .insert({
@@ -175,7 +183,7 @@ export default function Dashboard() {
             isOpen={isGapModalOpen} 
             onClose={() => {
               setIsGapModalOpen(false);
-              fetchHistory(user.id); // Refresh history after optimization
+              fetchHistory(user.id);
             }} 
             taskId={selectedTaskId} 
             onComplete={() => {}} 
@@ -185,106 +193,103 @@ export default function Dashboard() {
 
       <div className="flex-1 flex overflow-hidden">
         {/* Executive Sidebar */}
-        <aside className="w-72 bg-slate-50 border-r border-slate-200 hidden lg:flex flex-col p-8">
+        <aside className="w-72 bg-slate-50 border-r border-slate-200/60 hidden lg:flex flex-col p-8">
           <div className="flex-1 space-y-1">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4 px-4">Management</p>
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em] mb-6 px-4">Core Management</p>
             <button 
               onClick={() => setActiveTab('scan')}
-              className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'scan' ? 'bg-white text-indigo-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:bg-slate-100'}`}
+              className={`w-full flex items-center gap-3 px-5 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${activeTab === 'scan' ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-900/20' : 'text-slate-500 hover:bg-white hover:shadow-sm hover:text-slate-900'}`}
             >
               <Plus className="h-4 w-4" />
-              New Executive Scan
+              New Scan
             </button>
             <button 
               onClick={() => setActiveTab('history')}
-              className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'history' ? 'bg-white text-indigo-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:bg-slate-100'}`}
+              className={`w-full flex items-center gap-3 px-5 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all ${activeTab === 'history' ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-900/20' : 'text-slate-500 hover:bg-white hover:shadow-sm hover:text-slate-900'}`}
             >
               <History className="h-4 w-4" />
-              Scan History
+              The Vault
             </button>
           </div>
 
-          <div className="pt-8 border-t border-slate-200">
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm mb-6">
+          <div className="pt-8 border-t border-slate-200/60">
+            <div className="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm mb-6">
               <div className="flex items-center gap-3 mb-1">
-                <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white text-xs font-black">
+                <div className="h-9 w-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white text-xs font-black shadow-lg shadow-indigo-200">
                   {user?.email?.[0].toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-black text-slate-900 truncate uppercase tracking-tighter">{user?.email?.split('@')[0]}</p>
-                  <div className="flex items-center gap-1">
-                    <ShieldCheck className="h-3 w-3 text-green-500" />
-                    <span className="text-[10px] font-bold text-slate-400">Verified Professional</span>
+                  <p className="text-[10px] font-black text-slate-900 truncate uppercase tracking-tighter">{user?.email?.split('@')[0]}</p>
+                  <div className="flex items-center gap-1.5">
+                    <div className="h-1.5 w-1.5 bg-green-500 rounded-full animate-pulse" />
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Active</span>
                   </div>
                 </div>
               </div>
             </div>
             <button 
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs text-red-500 hover:bg-red-50 transition-all uppercase tracking-widest"
+              className="w-full flex items-center gap-3 px-5 py-4 rounded-2xl font-black text-[10px] text-red-500 hover:bg-red-50 transition-all uppercase tracking-[0.2em]"
             >
               <LogOut className="h-4 w-4" />
-              Sign Out
+              Exit System
             </button>
           </div>
         </aside>
 
-        {/* Main Executive Content */}
-        <main className="flex-1 overflow-y-auto bg-white p-12 intelligence-scrollbar">
+        {/* Main Content */}
+        <main className="flex-1 overflow-y-auto bg-white p-12 lg:p-20 intelligence-scrollbar relative">
           <AnimatePresence mode="wait">
             {activeTab === 'scan' ? (
               <motion.div
                 key="scan"
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="max-w-5xl mx-auto"
               >
-                <div className="mb-12 border-b border-slate-100 pb-8 flex justify-between items-end">
+                <div className="mb-16 pb-10 border-b border-slate-100 flex justify-between items-end">
                   <div>
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Executive Optimization Hub</h1>
-                    <p className="text-slate-500 font-medium text-lg">Achieve a 90%+ ATS match score with semantic restructuring.</p>
-                  </div>
-                  <div className="hidden md:flex items-center gap-6">
-                    <div className="text-right">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">System Status</p>
-                      <div className="flex items-center gap-2 text-green-600 font-bold text-sm">
-                        <span className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
-                        NLP Engine Active
-                      </div>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-[9px] font-black uppercase tracking-[0.2em] mb-4">
+                      <Cpu className="h-3 w-3" />
+                      <span>AI Model: Gemini 2.0 Flash</span>
                     </div>
+                    <h1 className="text-5xl font-black text-slate-900 tracking-tight mb-3 uppercase">Optimization Hub</h1>
+                    <p className="text-slate-500 font-medium text-xl">Upload your source documents to initialize semantic mapping.</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  <div className="lg:col-span-2 space-y-8">
-                    <div className="bg-slate-50 p-10 rounded-[2.5rem] border border-slate-200/60 shadow-sm relative overflow-hidden group">
-                      <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform duration-500">
-                        <FileText className="h-24 w-24 text-indigo-600" />
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                  {/* Left: Input Areas */}
+                  <div className="lg:col-span-8 space-y-10">
+                    {/* Resume Upload */}
+                    <div className="bg-slate-50/50 p-10 rounded-[3rem] border border-slate-200/60 shadow-sm relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:scale-110 transition-transform duration-700">
+                        <FileUp className="h-32 w-32 text-indigo-600" />
                       </div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-6">
-                        01. Source Document Extraction
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-8">
+                        01. Executive Document Input
                       </label>
                       <div 
                         onDragEnter={handleDrag}
                         onDragOver={handleDrag}
                         onDragLeave={handleDrag}
                         onDrop={handleDrop}
-                        className={`relative border-2 border-dashed rounded-[2rem] p-12 transition-all duration-300 text-center flex flex-col items-center bg-white ${
-                          dragActive ? 'border-indigo-600 bg-indigo-50/20' : 'border-slate-200 hover:border-indigo-400 shadow-sm hover:shadow-md'
+                        className={`relative border-2 border-dashed rounded-[2.5rem] p-16 transition-all duration-500 text-center flex flex-col items-center bg-white shadow-inner ${
+                          dragActive ? 'border-indigo-600 bg-indigo-50/30' : 'border-slate-200 hover:border-indigo-400'
                         }`}
                       >
                         <input type="file" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".pdf,.docx" />
                         {resumeFile ? (
                           <>
-                            <div className="bg-indigo-600 p-4 rounded-2xl mb-4 shadow-lg shadow-indigo-200"><FileText className="h-8 w-8 text-white" /></div>
-                            <p className="text-slate-900 font-black text-xl mb-1 truncate max-w-full px-4">{resumeFile.name}</p>
-                            <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">Document Secured & Parsed</p>
+                            <div className="bg-indigo-600 p-5 rounded-3xl mb-6 shadow-2xl shadow-indigo-300 animate-in zoom-in-95"><FileText className="h-10 w-10 text-white" /></div>
+                            <p className="text-slate-900 font-black text-2xl mb-2 truncate max-w-full px-6">{resumeFile.name}</p>
+                            <p className="text-indigo-600 font-black text-[10px] uppercase tracking-[0.2em] bg-indigo-50 px-4 py-1.5 rounded-full">System Ready</p>
                           </>
                         ) : (
                           <>
-                            <div className="bg-slate-100 p-4 rounded-2xl mb-4"><Plus className="h-8 w-8 text-slate-400" /></div>
-                            <p className="text-slate-900 font-black text-xl mb-1">Select Resume</p>
-                            <p className="text-slate-400 font-medium">Supports Executive PDF & DOCX (Inc. Headers)</p>
+                            <div className="bg-slate-50 p-5 rounded-3xl mb-6 border border-slate-100 group-hover:scale-110 transition-all duration-500 shadow-sm"><Plus className="h-10 w-10 text-slate-300" /></div>
+                            <p className="text-slate-900 font-black text-xl mb-2 uppercase tracking-tight">Select Executive Resume</p>
+                            <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">PDF or DOCX (Inc. Headers)</p>
                           </>
                         )}
                       </div>
@@ -293,34 +298,47 @@ export default function Dashboard() {
                     <button 
                       onClick={handleAnalyze}
                       disabled={!resumeFile || !jobDescription || isAnalyzing}
-                      className={`w-full py-6 rounded-[2rem] font-black text-xl flex items-center justify-center gap-4 transition-all duration-500 shadow-2xl ${
+                      className={`w-full py-8 rounded-[2.5rem] font-black text-2xl flex items-center justify-center gap-5 transition-all duration-500 shadow-2xl relative overflow-hidden group ${
                         !resumeFile || !jobDescription || isAnalyzing
                         ? 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none'
-                        : 'bg-slate-900 text-white hover:bg-black shadow-slate-200 hover:-translate-y-1'
+                        : 'bg-slate-900 text-white hover:bg-indigo-600 hover:-translate-y-1 active:scale-[0.98]'
                       }`}
                     >
                       {isAnalyzing ? (
-                        <><Loader2 className="h-6 w-6 animate-spin" /> EXECUTING SEMANTIC ANALYSIS...</>
+                        <>
+                          <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
+                          <div className="flex flex-col items-start leading-none">
+                            <span className="text-lg">EXECUTING...</span>
+                            <span className="text-[10px] opacity-60 uppercase tracking-widest mt-1">{analysisStep}</span>
+                          </div>
+                        </>
                       ) : (
-                        <><Sparkles className="h-6 w-6" /> BEGIN EXECUTIVE OPTIMIZATION <ArrowRight className="h-6 w-6" /></>
+                        <>
+                          <Sparkles className="h-8 w-8 text-indigo-400 group-hover:rotate-12 transition-transform" />
+                          <span className="tracking-tight uppercase">Start Intelligence Scan</span>
+                          <ArrowRight className="h-8 w-8 text-white/30 group-hover:translate-x-2 transition-transform" />
+                        </>
                       )}
                     </button>
                   </div>
 
-                  <div className="lg:col-span-1">
-                    <div className="bg-slate-900 p-8 rounded-[2.5rem] shadow-2xl h-full flex flex-col">
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-6">
-                        02. Target Requirements
+                  {/* Right: JD Area */}
+                  <div className="lg:col-span-4 h-full">
+                    <div className="bg-slate-900 p-10 rounded-[3rem] shadow-2xl h-full flex flex-col relative overflow-hidden group">
+                      <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl" />
+                      <label className="block text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-10">
+                        02. Requirements Pool
                       </label>
-                      <div className="flex-1 flex flex-col relative">
+                      <div className="flex-1 flex flex-col relative z-10">
                         <textarea 
                           value={jobDescription}
                           onChange={(e) => setJobDescription(e.target.value)}
-                          placeholder="Paste Job Description Requirements..."
-                          className="flex-1 w-full bg-slate-800 border-none rounded-2xl p-6 text-white text-sm leading-relaxed outline-none focus:ring-2 focus:ring-indigo-500/50 resize-none placeholder:text-slate-500"
+                          placeholder="Paste the target JD here..."
+                          className="flex-1 w-full bg-slate-800/50 border-2 border-slate-800 rounded-3xl p-8 text-white text-base leading-relaxed outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 transition-all resize-none placeholder:text-slate-600 shadow-inner"
                         />
-                        <div className="absolute bottom-4 right-4 bg-indigo-600/20 p-2 rounded-lg backdrop-blur-sm">
-                          <Briefcase className="h-4 w-4 text-indigo-400" />
+                        <div className="mt-6 flex items-center justify-between text-slate-500">
+                          <span className="text-[9px] font-black uppercase tracking-widest">Context Input</span>
+                          <Briefcase className="h-4 w-4 opacity-30" />
                         </div>
                       </div>
                     </div>
@@ -330,73 +348,83 @@ export default function Dashboard() {
             ) : (
               <motion.div
                 key="history"
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="max-w-6xl mx-auto"
+                className="max-w-6xl mx-auto pb-32"
               >
-                <div className="flex justify-between items-center mb-12 border-b border-slate-100 pb-8">
-                  <h1 className="text-4xl font-black text-slate-900 tracking-tight">Executive Vault</h1>
-                  <button onClick={() => setActiveTab('scan')} className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-black transition-all flex items-center gap-2 shadow-lg shadow-slate-200">
+                <div className="flex justify-between items-center mb-16 pb-10 border-b border-slate-100">
+                  <div>
+                    <h1 className="text-5xl font-black text-slate-900 tracking-tight uppercase">Executive Vault</h1>
+                    <p className="text-slate-500 font-medium text-lg mt-2">Archived high-signal resume architectures.</p>
+                  </div>
+                  <button onClick={() => setActiveTab('scan')} className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-indigo-600 transition-all flex items-center gap-3 shadow-xl shadow-indigo-900/10 active:scale-95">
                     <Plus className="h-4 w-4" /> New Optimization
                   </button>
                 </div>
 
                 {isLoadingHistory ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {[1,2,3].map(i => (
-                      <div key={i} className="h-64 bg-slate-50 rounded-[2rem] animate-pulse border border-slate-100" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                    {[1,2,3,4,5,6].map(i => (
+                      <div key={i} className="h-80 bg-slate-50 rounded-[3rem] animate-pulse border border-slate-100" />
                     ))}
                   </div>
                 ) : history.length === 0 ? (
-                  <div className="bg-slate-50 rounded-[3rem] p-32 border border-dashed border-slate-200 text-center space-y-6">
-                    <div className="h-20 w-20 bg-white rounded-3xl mx-auto flex items-center justify-center shadow-sm">
-                      <Search className="h-8 w-8 text-slate-300" />
+                  <div className="bg-slate-50/50 rounded-[4rem] p-40 border border-dashed border-slate-200 text-center space-y-8">
+                    <div className="h-24 w-24 bg-white rounded-[2rem] mx-auto flex items-center justify-center shadow-xl shadow-slate-200/50">
+                      <Search className="h-10 w-10 text-slate-200" />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-black text-slate-900">Vault is empty</h3>
-                      <p className="text-slate-500 font-medium mt-2">Your high-signal optimizations will be archived here.</p>
+                      <h3 className="text-3xl font-black text-slate-900 uppercase">The Vault is empty</h3>
+                      <p className="text-slate-500 font-medium mt-3 text-lg max-w-sm mx-auto">Your high-signal optimizations will be archived here for future retrieval.</p>
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-20">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                     {history.map((item) => (
                       <motion.div 
                         key={item.id}
-                        whileHover={{ y: -5 }}
-                        className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-xl shadow-slate-200/50 group cursor-pointer flex flex-col"
+                        whileHover={{ y: -8 }}
+                        className="bg-white p-10 rounded-[3rem] border border-slate-100 shadow-xl shadow-slate-200/40 group cursor-pointer flex flex-col relative overflow-hidden"
                         onClick={() => {
                           setAnalysisResult(item);
                           router.push(`/workspace/${item.id}`);
                         }}
                       >
-                        <div className="flex justify-between items-start mb-6">
-                          <div className="bg-indigo-50 p-3 rounded-2xl text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                            <Briefcase className="h-6 w-6" />
-                          </div>
-                          <div className="text-right">
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Match Score</p>
-                            <p className="text-2xl font-black text-indigo-600">{item.overall_score}%</p>
-                          </div>
-                        </div>
-                        <h3 className="text-lg font-black text-slate-900 mb-2 truncate uppercase tracking-tight">
-                          {item.job_title || 'Untitled Optimization'}
-                        </h3>
-                        <div className="flex items-center gap-4 text-slate-400 font-bold text-[10px] uppercase tracking-widest mb-6">
-                          <div className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> Recent</div>
-                          <div className="flex items-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-green-500" /> Verified</div>
+                        <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform duration-700">
+                          <ShieldCheck className="h-32 w-32 text-indigo-600" />
                         </div>
                         
-                        <div className="mt-auto space-y-3 pt-6 border-t border-slate-50">
-                          <div className="flex items-center justify-between text-[10px] font-bold">
-                            <span className="text-slate-300">Initial: {item.initial_score}%</span>
-                            <span className="text-indigo-600 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                              Workspace <ArrowRight className="h-3 w-3" />
+                        <div className="flex justify-between items-start mb-8 relative z-10">
+                          <div className="bg-slate-50 p-4 rounded-2xl text-slate-400 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500 shadow-sm group-hover:shadow-lg group-hover:shadow-indigo-200">
+                            <Briefcase className="h-7 w-7" />
+                          </div>
+                          <div className="text-right">
+                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Match Score</p>
+                            <p className="text-3xl font-black text-indigo-600 tracking-tighter">{item.overall_score}%</p>
+                          </div>
+                        </div>
+
+                        <h3 className="text-xl font-black text-slate-900 mb-3 truncate uppercase tracking-tight group-hover:text-indigo-600 transition-colors relative z-10">
+                          {item.job_title || 'Untitled Optimization'}
+                        </h3>
+                        
+                        <div className="flex items-center gap-4 text-slate-400 font-bold text-[9px] uppercase tracking-widest mb-10 relative z-10">
+                          <div className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5 opacity-50" /> {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
+                          <div className="h-1 w-1 bg-slate-200 rounded-full" />
+                          <div className="flex items-center gap-1.5 text-green-600"><ShieldCheck className="h-3.5 w-3.5" /> Secured</div>
+                        </div>
+                        
+                        <div className="mt-auto space-y-4 pt-8 border-t border-slate-50 relative z-10">
+                          <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
+                            <span className="text-slate-300 group-hover:text-slate-400">Initial: {item.initial_score}%</span>
+                            <span className="text-indigo-600 flex items-center gap-2 group-hover:translate-x-2 transition-transform">
+                              Workspace <ArrowRight className="h-3.5 w-3.5 opacity-50" />
                             </span>
                           </div>
                           {item.overall_score < 90 && (
                             <button 
                               onClick={(e) => openBridgeGap(e, item.id)}
-                              className="w-full py-3 bg-indigo-50 text-indigo-600 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-indigo-600 hover:text-white transition-all border border-indigo-100"
+                              className="w-full py-4 bg-indigo-50 text-indigo-600 rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-indigo-600 hover:text-white transition-all border border-indigo-100/50 shadow-sm"
                             >
                               <Zap className="h-3 w-3" /> Bridge the Gap
                             </button>
