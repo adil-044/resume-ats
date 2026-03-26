@@ -19,7 +19,7 @@ export default function BridgeGapModal({ isOpen, onClose, taskId, onComplete }: 
   const [answers, setAnswers] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { setAnalysisResult } = useResumeStore();
+  const { analysisResult, setAnalysisResult } = useResumeStore();
 
   useEffect(() => {
     if (isOpen) {
