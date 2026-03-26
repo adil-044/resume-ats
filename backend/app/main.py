@@ -119,44 +119,38 @@ async def optimize(
     return {"optimized_text": optimized_text}
 
 @app.post("/api/v1/bridge-gap/questions")
-async def get_bridge_questions(task_id: str = Form(...)):
-    if task_id not in analysis_store:
-        raise HTTPException(status_code=404, detail="Analysis not found")
+async def get_bridge_questions(
+    task_id: str = Form(...),
+    resume_text: Optional[str] = Form(None),
+    job_description: Optional[str] = Form(None)
+):
+    # Try memory store first
+    result = analysis_store.get(task_id)
     
-    result = analysis_store[task_id]
-    # Pass original_text to the LLM so it can actually see what is missing
-    questions = generate_gap_questions(
-        result["missing_keywords"], 
-        result["job_description"],
-        result.get("original_text", "")
-    )
+    # If not in memory, use the provided text (Stateless Fallback)
+    final_resume = resume_text or (result["original_text"] if result else None)
+    final_jd = job_description or (result["job_description"] if result else None)
+    final_keywords = result["missing_keywords"] if result else []
+
+    if not final_resume or not final_jd:
+        raise HTTPException(status_code=404, detail="Analysis context not found. Please provide resume_text and job_description.")
+    
+    questions = generate_gap_questions(final_keywords, final_jd, final_resume)
     return {"questions": questions}
 
 @app.post("/api/v1/bridge-gap/optimize")
 async def bridge_gap_optimize(request: BridgeGapRequest):
-    if request.task_id not in analysis_store:
-        print(f"Error: Task {request.task_id} not found in store")
-        raise HTTPException(status_code=404, detail="Analysis not found")
+    # Try memory store first
+    result = analysis_store.get(request.task_id)
+    
+    # Fallback context if provided in request (would need model update, but let's stick to memory/db logic)
+    if not result:
+        # For now, if it's not in memory, we'll return a clear error
+        # In a future update we could fetch from Supabase here
+        raise HTTPException(status_code=404, detail="Task session expired. Please re-upload or refresh.")
     
     try:
-        result = analysis_store[request.task_id]
-        print(f"Starting bridge-gap optimization for task: {request.task_id}")
-        
-        optimized_text = optimize_with_context(
-            result["optimized_content"]["raw_text"],
-            result["job_description"],
-            request.answers
-        )
-        
-        # Update score after re-optimization
-        new_analysis = get_match_score(optimized_text, result["job_description"])
-        
-        analysis_store[request.task_id]["optimized_content"]["raw_text"] = optimized_text
-        analysis_store[request.task_id]["overall_score"] = new_analysis["overall_score"]
-        analysis_store[request.task_id]["breakdown"] = new_analysis["breakdown"]
-        analysis_store[request.task_id]["missing_keywords"] = new_analysis["missing_keywords"]
-        analysis_store[request.task_id]["matched_keywords"] = new_analysis.get("matched_keywords", [])
-        
+...
         print(f"Re-optimization complete. New score: {new_analysis['overall_score']}%")
         return analysis_store[request.task_id]
     except Exception as e:

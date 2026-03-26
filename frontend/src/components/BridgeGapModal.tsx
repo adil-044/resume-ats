@@ -27,7 +27,11 @@ export default function BridgeGapModal({ isOpen, onClose, taskId, onComplete }: 
         setIsLoading(true);
         setCurrentStep(0);
         try {
-          const res = await getGapQuestions(taskId);
+          const res = await getGapQuestions(
+            taskId, 
+            analysisResult?.original_text, 
+            analysisResult?.job_description
+          );
           // Ensure we have an array
           const qList = Array.isArray(res.questions) ? res.questions : [res.questions];
           setQuestions(qList);

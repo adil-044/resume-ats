@@ -52,9 +52,11 @@ export async function optimizeResume(resumeText: string, jobDescription: string)
   return response.json();
 }
 
-export async function getGapQuestions(taskId: string) {
+export async function getGapQuestions(taskId: string, resumeText?: string, jobDescription?: string) {
   const formData = new FormData();
   formData.append('task_id', taskId);
+  if (resumeText) formData.append('resume_text', resumeText);
+  if (jobDescription) formData.append('job_description', jobDescription);
 
   const response = await fetch(`${API_BASE_URL}/bridge-gap/questions`, {
     method: 'POST',
