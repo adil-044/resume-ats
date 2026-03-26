@@ -93,17 +93,18 @@ def generate_gap_questions(missing_keywords: List[str], job_description: str, re
     prompt = f"""
     ROLE: Expert Technical Recruiter & ATS Analyst.
     TASK: Analyze the 'GAP' between the Candidate's Resume and the Job Description.
-
+    
     CANDIDATE DATA: {resume_content[:2000]}
     JOB REQUIREMENTS: {job_description[:2000]}
     IDENTIFIED MISSING KEYWORDS: {', '.join(missing_keywords[:15])}
-
+    
     INSTRUCTIONS:
     1. Identify the 5 most critical missing technical or leadership skills that are in the JD but NOT in the resume.
-    2. Generate 5 targeted, short interview questions that ask for SPECIFIC evidence of these skills.
-    3. Ensure questions are professional and executive-level.
-
-    OUTPUT: A raw JSON list of 5 strings. No other text.
+    2. Generate EXACTLY 5 targeted, distinct interview questions (one per skill).
+    3. Each question MUST ask for SPECIFIC evidence, metrics, or tools used.
+    4. Format the output as a clean JSON list of 5 strings. No preamble.
+    
+    OUTPUT FORMAT: ["Question 1", "Question 2", "Question 3", "Question 4", "Question 5"]
     """
 
     try:

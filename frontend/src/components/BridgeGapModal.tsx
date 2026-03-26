@@ -25,12 +25,17 @@ export default function BridgeGapModal({ isOpen, onClose, taskId, onComplete }: 
     if (isOpen) {
       const fetchQuestions = async () => {
         setIsLoading(true);
+        setCurrentStep(0);
         try {
           const res = await getGapQuestions(taskId);
-          setQuestions(res.questions);
-          setAnswers(new Array(res.questions.length).fill(''));
+          // Ensure we have an array
+          const qList = Array.isArray(res.questions) ? res.questions : [res.questions];
+          setQuestions(qList);
+          setAnswers(new Array(qList.length).fill(''));
         } catch (error) {
           console.error(error);
+          setQuestions(["Tell us more about your technical experience relevant to this role."]);
+          setAnswers(['']);
         } finally {
           setIsLoading(false);
         }
@@ -57,7 +62,7 @@ export default function BridgeGapModal({ isOpen, onClose, taskId, onComplete }: 
       onClose();
     } catch (error) {
       console.error(error);
-      alert('Optimization failed');
+      alert('Optimization failed. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -66,60 +71,66 @@ export default function BridgeGapModal({ isOpen, onClose, taskId, onComplete }: 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/90 backdrop-blur-xl">
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden relative"
+        className="w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden relative border border-white/20"
       >
-        <button onClick={onClose} className="absolute top-6 right-6 p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-400">
+        <button onClick={onClose} className="absolute top-8 right-8 p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-400 z-10">
           <X className="h-5 w-5" />
         </button>
 
-        <div className="p-10">
+        <div className="p-12">
           {isLoading ? (
-            <div className="h-[400px] flex flex-col items-center justify-center gap-4">
-              <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
-              <p className="text-slate-500 font-bold animate-pulse text-sm">CRAFTING CUSTOM QUESTIONS...</p>
+            <div className="h-[400px] flex flex-col items-center justify-center gap-6">
+              <div className="relative">
+                <Loader2 className="h-12 w-12 animate-spin text-indigo-600" />
+                <Sparkles className="h-5 w-5 text-indigo-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+              </div>
+              <p className="text-slate-900 font-black tracking-[0.3em] uppercase text-[10px] animate-pulse">Mapping Semantic Delta...</p>
             </div>
           ) : (
-            <div className="space-y-8">
+            <div className="space-y-10">
               {/* Header */}
-              <div className="flex items-center gap-3">
-                <div className="bg-indigo-100 p-2 rounded-xl">
-                  <Sparkles className="h-5 w-5 text-indigo-600" />
+              <div className="flex items-center gap-4">
+                <div className="bg-indigo-600 p-3 rounded-2xl shadow-lg shadow-indigo-200">
+                  <Sparkles className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-black text-slate-900">Bridge the Gap</h2>
-                  <p className="text-slate-500 text-sm font-medium">Answering these helps us reach that 90%+ match score.</p>
+                  <h2 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Bridge the Gap</h2>
+                  <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Target: 95% Match Score</p>
                 </div>
               </div>
 
               {/* Progress */}
-              <div className="space-y-2">
-                <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                  <span>Step {currentStep + 1} of {questions.length}</span>
-                  <span>{Math.round(((currentStep + 1) / questions.length) * 100)}% Complete</span>
+              <div className="space-y-3">
+                <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
+                  <span>Module {currentStep + 1} of {questions.length}</span>
+                  <span>{Math.round(((currentStep + 1) / questions.length) * 100)}% Synchronized</span>
                 </div>
-                <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden p-0.5 border border-white">
                   <motion.div 
-                    className="h-full bg-indigo-600"
+                    className="h-full bg-indigo-600 rounded-full"
                     animate={{ width: `${((currentStep + 1) / questions.length) * 100}%` }}
+                    transition={{ type: "spring", stiffness: 50 }}
                   />
                 </div>
               </div>
 
               {/* Question Content */}
-              <div className="min-h-[200px]">
+              <div className="min-h-[220px] relative">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentStep}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="space-y-4"
+                    className="space-y-6"
                   >
-                    <h3 className="text-lg font-bold text-slate-800 leading-snug">{questions[currentStep]}</h3>
+                    <h3 className="text-xl font-black text-slate-800 leading-tight tracking-tight uppercase border-l-4 border-indigo-600 pl-6">
+                      {questions[currentStep]}
+                    </h3>
                     <textarea 
                       autoFocus
                       value={answers[currentStep]}
@@ -128,31 +139,31 @@ export default function BridgeGapModal({ isOpen, onClose, taskId, onComplete }: 
                         newAnswers[currentStep] = e.target.value;
                         setAnswers(newAnswers);
                       }}
-                      placeholder="Share specific details, metrics, or tools you used..."
-                      className="w-full h-32 p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-600 outline-none resize-none text-slate-700 text-sm"
+                      placeholder="Input specific achievements, metrics, or technologies..."
+                      className="w-full h-36 p-6 bg-slate-50 border-2 border-slate-100 rounded-[2rem] focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none resize-none text-slate-700 text-sm font-medium transition-all"
                     />
                   </motion.div>
                 </AnimatePresence>
               </div>
 
               {/* Footer */}
-              <div className="flex justify-between pt-4 border-t border-slate-100">
+              <div className="flex justify-between items-center pt-6 border-t border-slate-50">
                 <button 
                   onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
                   disabled={currentStep === 0}
-                  className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-slate-500 hover:bg-slate-50 disabled:opacity-0 transition-all"
+                  className="flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest text-slate-400 hover:bg-slate-50 disabled:opacity-0 transition-all"
                 >
                   <ChevronLeft className="h-4 w-4" /> Previous
                 </button>
                 <button 
                   onClick={handleNext}
-                  disabled={!answers[currentStep] || isSubmitting}
-                  className="flex items-center gap-2 px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 shadow-lg shadow-indigo-200 disabled:opacity-50 transition-all"
+                  disabled={!answers[currentStep]?.trim() || isSubmitting}
+                  className="flex items-center gap-3 px-10 py-4 bg-slate-900 text-white rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] hover:bg-indigo-600 shadow-2xl shadow-indigo-900/10 disabled:opacity-50 transition-all active:scale-95"
                 >
                   {isSubmitting ? (
-                    <><Loader2 className="h-4 w-4 animate-spin" /> Optimizing...</>
+                    <><Loader2 className="h-4 w-4 animate-spin" /> Finalizing Architecture...</>
                   ) : (
-                    <>{currentStep === questions.length - 1 ? 'Finish Scan' : 'Next Question'} <ChevronRight className="h-4 w-4" /></>
+                    <>{currentStep === questions.length - 1 ? 'Execute Scan' : 'Next Module'} <ChevronRight className="h-4 w-4" /></>
                   )}
                 </button>
               </div>
