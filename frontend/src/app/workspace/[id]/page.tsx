@@ -27,7 +27,32 @@ export default function Workspace({ params }: { params: Promise<{ id: string }> 
     const fetchAnalysis = async () => {
       if (!analysisResult || analysisResult.id !== id) {
         try {
-          const result = await getAnalysis(id);
+          // Fetch from Supabase directly
+          const { data, error } = await supabase
+            .from('resumes')
+            .select('*')
+            .eq('id', id)
+            .single();
+
+          if (error) throw error;
+
+          const result = {
+            id: data.id,
+            overall_score: data.after_score || data.before_score,
+            initial_score: data.before_score,
+            breakdown: data.breakdown || { keyword_match: 0, semantic_alignment: 0, section_integrity: 0 },
+            missing_keywords: data.missing_keywords || [],
+            matched_keywords: data.matched_keywords || [],
+            formatting_issues: data.formatting_issues || [],
+            optimized_content: {
+              format: 'markdown',
+              raw_text: data.optimized_text || data.original_text
+            },
+            job_title: data.job_title,
+            job_description: data.job_description,
+            original_text: data.original_text
+          };
+
           setAnalysisResult(result);
           setMarkdown(result.optimized_content.raw_text);
         } catch (error) {

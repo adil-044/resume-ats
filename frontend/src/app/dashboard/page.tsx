@@ -139,7 +139,7 @@ export default function Dashboard() {
       const result = await analyzeResume(resumeFile, jobDescription);
       
       setAnalysisStep('Securing Vault Record...');
-      
+      // Save FULL analysis to Supabase History
       const { data, error } = await supabase
         .from('resumes')
         .insert({
@@ -149,10 +149,15 @@ export default function Dashboard() {
           optimized_text: result.optimized_content.raw_text,
           before_score: result.initial_score,
           after_score: result.overall_score,
-          job_description: jobDescription
+          job_description: jobDescription,
+          missing_keywords: result.missing_keywords,
+          matched_keywords: result.matched_keywords,
+          breakdown: result.breakdown,
+          formatting_issues: result.formatting_issues
         })
         .select()
         .single();
+
 
       if (error) throw error;
 
