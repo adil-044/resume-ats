@@ -8,7 +8,7 @@ import {
   AlertTriangle, CheckCircle, Download, Loader2, Sparkles, 
   FileText, ChevronLeft, Save, Eye, Edit3, SplitSquareVertical,
   CheckCircle2, XCircle, Info, Search, LayoutGrid, Zap, ShieldCheck, Plus,
-  Activity, Terminal, Command, Lock, ChevronRight, Fingerprint, XCircle
+  Activity, Terminal, Command, Lock, ChevronRight, Fingerprint
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
