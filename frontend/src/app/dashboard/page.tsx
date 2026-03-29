@@ -8,7 +8,8 @@ import {
   Upload, FileText, ArrowRight, Loader2, Sparkles, 
   History, LogOut, LayoutDashboard, Plus, Search,
   TrendingUp, Clock, CheckCircle2, ShieldCheck, Briefcase,
-  Zap, AlertTriangle, FileUp, Cpu, Terminal, Command, LayoutGrid
+  Zap, AlertTriangle, FileUp, Cpu, Terminal, Command, LayoutGrid,
+  Rocket, Activity
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
