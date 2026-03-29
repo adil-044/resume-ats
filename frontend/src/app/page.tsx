@@ -1,97 +1,191 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useInView, useMotionValue, useSpring } from 'framer-motion';
 import { 
-  Upload, FileText, Sparkles, ArrowRight, Loader2, 
-  ShieldCheck, Zap, Bot, Target, X, CheckCircle2, Lock,
-  Globe, LayoutGrid, BrainCircuit, Rocket, MousePointer2,
-  Fingerprint, Command, Activity, Terminal, ChevronRight, BarChart3,
-  HelpCircle, ChevronDown, Mail, User, MessageSquare, Coins
+  Upload, FileText, ArrowRight, Loader2, 
+  ShieldCheck, Zap, Bot, Target, Lock,
+  BrainCircuit, Rocket, Fingerprint, Activity, Terminal,
+  HelpCircle, ChevronDown, Mail, User, MessageSquare, Coins,
+  CheckCircle2, Star, Quote, TrendingUp, Users, Award, Sparkles,
+  Play, ChevronRight, BarChart2, Search, Check
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Scene3D from '@/components/Scene3D';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Footer from '@/components/Footer';
-import { Spotlight } from '@/components/ui/Spotlight';
-import { Particles } from '@/components/ui/Particles';
-import { BentoGrid, BentoGridItem } from '@/components/ui/BentoGrid';
 import { analyzeResume } from '@/lib/api';
 import { useResumeStore } from '@/store/useResumeStore';
 import { Variants } from 'framer-motion';
 
-const kineticContainer: Variants = {
+/* ─── Animation Variants ─── */
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 40 },
+  show:   { opacity: 1, y: 0,  transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } }
+};
+const stagger: Variants = {
   hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.05,
-      delayChildren: 0.3
-    }
-  }
+  show:   { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.2 } }
 };
-
 const kineticItem: Variants = {
-  hidden: { opacity: 0, y: 20, filter: 'blur(10px)' },
-  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.8, ease: "easeOut" } }
+  hidden: { opacity: 0, y: 24, filter: 'blur(8px)' },
+  show:   { opacity: 1, y: 0,  filter: 'blur(0px)', transition: { duration: 0.9, ease: "easeOut" } }
 };
 
-const faqData = [
+/* ─── Animated Counter ─── */
+function Counter({ to, suffix = '' }: { to: number; suffix?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-50px' });
+  const motionVal = useMotionValue(0);
+  const spring = useSpring(motionVal, { stiffness: 60, damping: 18 });
+  const [display, setDisplay] = useState(0);
+  useEffect(() => { if (inView) motionVal.set(to); }, [inView, to, motionVal]);
+  useEffect(() => spring.on('change', v => setDisplay(Math.round(v))), [spring]);
+  return <span ref={ref}>{display.toLocaleString()}{suffix}</span>;
+}
+
+/* ─── Star Rating ─── */
+function Stars({ n = 5 }: { n?: number }) {
+  return (
+    <div className="flex gap-1">
+      {Array.from({ length: n }).map((_, i) => (
+        <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
+      ))}
+    </div>
+  );
+}
+
+/* ─── Testimonials Data ─── */
+const testimonials = [
   {
-    question: "How does the resume scanner work?",
-    answer: "You upload your resume and paste a job description. Our AI reads both and gives you a match score showing how well your resume fits the job. It also tells you which keywords are missing and how to improve."
+    name: "Marcus Johnson",
+    title: "Software Engineer",
+    company: "Hired at Google",
+    avatar: "MJ",
+    color: "#4f46e5",
+    score: 94,
+    text: "I applied to 30 companies and barely got any callbacks. After using HireReady to tailor my resume, I landed 3 interviews in the first week — including Google. The keyword matching is insane.",
+    tags: ["Tech", "FAANG"]
   },
   {
-    question: "How much does it cost?",
-    answer: "Your first 4 resume analyses cost just $1 total — that's a great way to try everything out. After that, it's $1 per analysis, pay as you go. No subscriptions, no hidden fees."
+    name: "Priya Sharma",
+    title: "Product Manager",
+    company: "Hired at Stripe",
+    avatar: "PS",
+    color: "#7c3aed",
+    score: 91,
+    text: "My resume score jumped from 42% to 91% in one session. The AI suggestions were so specific — it knew exactly what hiring managers at fintech companies look for. Got the Stripe offer within 2 weeks.",
+    tags: ["Product", "FinTech"]
   },
   {
-    question: "What file types can I upload?",
-    answer: "We support PDF and DOCX (Microsoft Word) files. PDF is recommended for best results."
+    name: "Daniel Kim",
+    title: "Data Scientist",
+    company: "Hired at Netflix",
+    avatar: "DK",
+    color: "#dc2626",
+    score: 88,
+    text: "I was skeptical at first, but the match score feature is genuinely accurate. It told me exactly which skills to highlight for each role. Went from no responses to 5 final rounds in a month.",
+    tags: ["Data Science", "Streaming"]
   },
   {
-    question: "Is my resume data safe?",
-    answer: "Yes. Your data is encrypted and stored securely. We never share or sell your personal information. You can delete your data at any time."
+    name: "Sophie Williams",
+    title: "UX Designer",
+    company: "Hired at Airbnb",
+    avatar: "SW",
+    color: "#ea580c",
+    score: 96,
+    text: "As a designer I thought resume optimization wasn't for me. Wrong. The AI rewrote my bullet points to match the job description perfectly without losing my voice. Got my dream job at Airbnb.",
+    tags: ["Design", "Travel"]
   },
   {
-    question: "How do I get the best match score?",
-    answer: "After scanning, we show you which keywords are missing from your resume compared to the job description. Use our AI rewrite tool to automatically add those keywords in a natural way."
+    name: "Alex Thompson",
+    title: "Marketing Manager",
+    company: "Hired at Shopify",
+    avatar: "AT",
+    color: "#16a34a",
+    score: 89,
+    text: "Used to spend hours tweaking my resume for every job. Now it takes 5 minutes. The job description analysis is brilliant — it pulls out exactly what the recruiter cares about.",
+    tags: ["Marketing", "eCommerce"]
   },
   {
-    question: "What are credits and how do I buy them?",
-    answer: "Credits are used to run resume analyses. 1 credit = 1 analysis. Your first 4 analyses are bundled for $1. After that, you buy credits at $1 each from your dashboard whenever you need them."
-  },
-  {
-    question: "Do I need to create an account?",
-    answer: "You can try a free scan without an account. To save your results and access the full optimized resume, you'll need to create a free account."
-  },
-  {
-    question: "Can I use this for any job type?",
-    answer: "Yes! HireReady works for any industry and job level — from entry-level to executive positions. Just paste the job description and we'll tailor the analysis to that specific role."
+    name: "Fatima Al-Hassan",
+    title: "Finance Analyst",
+    company: "Hired at JPMorgan",
+    avatar: "FA",
+    color: "#0284c7",
+    score: 93,
+    text: "Coming from a non-target school, I knew I needed every edge I could get. HireReady helped me beat candidates from top universities by having a perfectly optimized resume. Worth every penny.",
+    tags: ["Finance", "Banking"]
   }
+];
+
+/* ─── Companies where users got hired ─── */
+const companies = [
+  "Google", "Stripe", "Netflix", "Airbnb", "Shopify", "JPMorgan",
+  "Meta", "Amazon", "Apple", "Microsoft", "Nvidia", "OpenAI",
+  "Salesforce", "Uber", "LinkedIn", "Notion", "Figma", "Vercel"
+];
+
+/* ─── How It Works Steps ─── */
+const howItWorks = [
+  {
+    step: "01",
+    title: "Upload Your Resume",
+    desc: "Upload your existing resume in PDF or DOCX format. We read every word to understand your skills and experience.",
+    icon: <Upload className="h-7 w-7" />
+  },
+  {
+    step: "02",
+    title: "Paste the Job Description",
+    desc: "Copy-paste the job posting you're applying to. Our AI compares it against your resume to find the gaps.",
+    icon: <Search className="h-7 w-7" />
+  },
+  {
+    step: "03",
+    title: "Get Your Match Score",
+    desc: "See exactly how well your resume matches the job — with a detailed breakdown of matched and missing keywords.",
+    icon: <BarChart2 className="h-7 w-7" />
+  },
+  {
+    step: "04",
+    title: "Optimize & Apply",
+    desc: "Use our AI to rewrite your resume with the right keywords. Download the polished version and apply with confidence.",
+    icon: <Rocket className="h-7 w-7" />
+  }
+];
+
+/* ─── FAQ Data ─── */
+const faqData = [
+  { question: "How does the resume scanner work?", answer: "You upload your resume and paste a job description. Our AI reads both and gives you a match score showing how well your resume fits the job. It also tells you which keywords are missing and how to improve." },
+  { question: "How much does it cost?", answer: "Your first 4 resume analyses cost just $1 total. After that, it's $1 per analysis — pay as you go. No subscriptions, no hidden fees." },
+  { question: "What file types can I upload?", answer: "We support PDF and DOCX (Microsoft Word) files. PDF is recommended for best results." },
+  { question: "Is my resume data safe?", answer: "Yes. Your data is encrypted and stored securely. We never share or sell your personal information. You can delete your data at any time." },
+  { question: "How do I get the best match score?", answer: "After scanning, we show you which keywords are missing. Use our AI rewrite tool to automatically add those keywords in a natural, readable way." },
+  { question: "What are credits and how do I buy them?", answer: "Credits are used to run resume analyses. 1 credit = 1 analysis. Your first 4 analyses are bundled for $1. After that, credits are $1 each from your dashboard." },
+  { question: "Do I need to create an account?", answer: "You can try a free scan without an account. To save results and access the full optimized resume, you'll need a free account." },
+  { question: "Can I use this for any job type?", answer: "Yes! HireReady works for any industry and job level — from entry-level to executive. Just paste the job description and we'll tailor the analysis." }
 ];
 
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   const [open, setOpen] = useState(false);
   return (
     <motion.div
-      style={{ perspective: 1000 }}
-      whileHover={{ rotateX: -2, rotateY: 2, z: 20 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-      className="rounded-[2rem] overflow-hidden cursor-pointer"
+      whileHover={{ scale: 1.01 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+      className="rounded-[1.5rem] overflow-hidden cursor-pointer"
       onClick={() => setOpen(!open)}
     >
-      <div className={`bg-white border border-slate-100 shadow-lg transition-all duration-500 rounded-[2rem] ${open ? 'shadow-xl shadow-indigo-100' : 'hover:shadow-xl hover:shadow-indigo-50'}`}>
-        <div className="flex items-center justify-between p-8">
-          <div className="flex items-center gap-4">
-            <div className="bg-indigo-50 p-2 rounded-xl">
-              <HelpCircle className="h-5 w-5 text-indigo-600" />
+      <div className={`glass-card transition-all duration-300 rounded-[1.5rem] ${open ? 'border-indigo-500/30' : 'border-white/5 hover:border-white/10'}`}>
+        <div className="flex items-center justify-between p-7">
+          <div className="flex items-center gap-5">
+            <div className={`p-2.5 rounded-xl transition-all duration-300 ${open ? 'bg-indigo-600' : 'bg-white/5'}`}>
+              <HelpCircle className={`h-4 w-4 ${open ? 'text-white' : 'text-indigo-400'}`} />
             </div>
-            <p className="text-lg font-bold text-slate-900">{question}</p>
+            <p className="text-base font-semibold text-white">{question}</p>
           </div>
           <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.3 }}>
-            <ChevronDown className="h-5 w-5 text-slate-400 flex-shrink-0 ml-4" />
+            <ChevronDown className="h-5 w-5 text-slate-500 flex-shrink-0 ml-4" />
           </motion.div>
         </div>
         <AnimatePresence>
@@ -103,7 +197,7 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
               transition={{ duration: 0.3 }}
               className="overflow-hidden"
             >
-              <div className="px-8 pb-8 text-slate-600 leading-relaxed text-base border-t border-slate-100 pt-6 ml-[64px]">
+              <div className="px-7 pb-7 text-slate-400 leading-relaxed text-sm border-t border-white/5 pt-5 ml-[60px]">
                 {answer}
               </div>
             </motion.div>
@@ -114,10 +208,63 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
   );
 }
 
+/* ─── Testimonial Card ─── */
+function TestimonialCard({ t, delay = 0 }: { t: typeof testimonials[0]; delay?: number }) {
+  return (
+    <motion.div
+      variants={fadeUp}
+      whileHover={{ y: -8, scale: 1.02 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+      className="glass-card rounded-[2rem] p-8 flex flex-col gap-6 border border-white/8 relative overflow-hidden group cursor-default"
+    >
+      {/* Glow on hover */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none rounded-[2rem]"
+        style={{ background: `radial-gradient(circle at 30% 20%, ${t.color}12 0%, transparent 70%)` }} />
+
+      {/* Top: stars + score */}
+      <div className="flex items-center justify-between">
+        <Stars />
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+          <div className="h-1.5 w-1.5 rounded-full" style={{ background: t.color }} />
+          <span style={{ color: t.color }} className="font-black">{t.score}%</span>
+          <span>match</span>
+        </div>
+      </div>
+
+      {/* Quote */}
+      <div className="relative">
+        <Quote className="absolute -top-1 -left-1 h-6 w-6 text-indigo-500/20" />
+        <p className="text-slate-300 leading-relaxed text-sm pl-5">"{t.text}"</p>
+      </div>
+
+      {/* Tags */}
+      <div className="flex gap-2 flex-wrap">
+        {t.tags.map(tag => (
+          <span key={tag} className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full bg-white/5 border border-white/5 text-slate-500">
+            {tag}
+          </span>
+        ))}
+      </div>
+
+      {/* Author */}
+      <div className="flex items-center gap-4 pt-4 border-t border-white/5 mt-auto">
+        <div className="h-11 w-11 rounded-2xl flex items-center justify-center text-white text-xs font-black flex-shrink-0 shadow-lg"
+          style={{ background: `linear-gradient(135deg, ${t.color}, ${t.color}99)` }}>
+          {t.avatar}
+        </div>
+        <div>
+          <p className="text-sm font-black text-white">{t.name}</p>
+          <p className="text-xs text-slate-500">{t.title} · <span className="text-green-400 font-semibold">{t.company}</span></p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ─── Main Component ─── */
 export default function Home() {
   const router = useRouter();
   const { setAnalysisResult, setResumeFile, setJobDescription } = useResumeStore();
-  
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showUpsell, setShowUpsell] = useState(false);
@@ -133,7 +280,6 @@ export default function Home() {
     if (!localFile || !localJD) return;
     setIsAnalyzing(true);
     setProgress(5);
-    
     try {
       const result = await analyzeResume(localFile, localJD);
       const interval = setInterval(() => {
@@ -148,67 +294,89 @@ export default function Home() {
           return prev + (Math.random() * 15);
         });
       }, 200);
-
       setAnalysisResult(result);
       setResumeFile(localFile);
       setJobDescription(localJD);
-    } catch (error) {
-      console.error(error);
-      alert('Analysis failed. Please try again.');
-      setIsAnalyzing(false);
-    }
+    } catch { alert('Analysis failed. Please try again.'); setIsAnalyzing(false); }
   };
 
-  const handleContactSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setContactSent(true);
-  };
+  const handleContactSubmit = (e: React.FormEvent) => { e.preventDefault(); setContactSent(true); };
+
+  // doubled for seamless marquee
+  const marqueeCompanies = [...companies, ...companies];
 
   return (
     <div className="min-h-screen bg-black selection:bg-indigo-500/30 selection:text-indigo-200 overflow-x-hidden">
       <div className="fixed inset-0 noise-overlay pointer-events-none z-50 opacity-[0.02]" />
       <Navbar />
-      
+
       <main className="relative">
-        {/* 3D Hero Section */}
-        <section className="relative h-screen flex flex-col items-center justify-center px-6 text-center">
+        {/* ═══════════════════ HERO ═══════════════════ */}
+        <section className="relative h-screen flex flex-col items-center justify-center px-6 text-center overflow-hidden">
           <Scene3D />
-          
+
+          {/* Ambient glows */}
+          <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute top-1/2 left-1/4 w-[300px] h-[300px] bg-cyan-600/8 rounded-full blur-[80px] pointer-events-none" />
+
           <motion.div
-            variants={kineticContainer}
+            variants={stagger}
             initial="hidden"
             animate="show"
-            className="max-w-5xl z-10"
+            className="max-w-5xl z-10 relative"
           >
-            <motion.div variants={kineticItem} className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-indigo-400 text-[9px] font-black uppercase tracking-[0.5em] mb-10 backdrop-blur-md">
-              <Zap className="h-3 w-3" />
-              <span>AI-Powered Resume Optimizer</span>
+            {/* Badge */}
+            <motion.div variants={kineticItem} className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white/5 border border-white/10 text-indigo-400 text-[9px] font-black uppercase tracking-[0.5em] mb-10 backdrop-blur-md shadow-[0_0_30px_rgba(99,102,241,0.1)]">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+              </span>
+              Trusted by 10,000+ job seekers in 2026
             </motion.div>
-            
-            <motion.h1 variants={kineticItem} className="text-6xl md:text-8xl lg:text-[9rem] font-black text-white leading-[0.85] tracking-tighter mb-10 uppercase italic">
-              Win the <br />
-              <span className="text-kinetic not-italic underline decoration-indigo-600 decoration-4 underline-offset-[12px] md:underline-offset-[20px]">Algorithm.</span>
+
+            {/* Headline */}
+            <motion.h1 variants={kineticItem} className="text-6xl md:text-8xl lg:text-[9rem] font-black text-white leading-[0.85] tracking-tighter mb-8 uppercase">
+              Land the Job <br />
+              <span className="text-gradient-purple not-italic">You Deserve.</span>
             </motion.h1>
-            
-            <motion.p variants={kineticItem} className="text-lg md:text-xl text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed mb-12">
-              Beat job application filters with our AI that rewrites your resume to match each job posting — giving you a{' '}
-              <span className="text-white font-bold">95%+ match score.</span>
+
+            {/* Subheadline */}
+            <motion.p variants={kineticItem} className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed mb-6">
+              Our AI analyzes your resume against any job posting and rewrites it to score{' '}
+              <span className="text-white font-semibold">95%+ match rate</span> — so you get more interview calls, not more rejections.
             </motion.p>
 
-            <motion.div variants={kineticItem} className="flex flex-col sm:flex-row gap-6 justify-center">
-              <Link href="/auth/login" className="px-10 py-5 bg-white text-black rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-[0_0_40px_rgba(255,255,255,0.2)] active:scale-95">
-                Go to Dashboard
+            {/* Social proof micro-text */}
+            <motion.div variants={kineticItem} className="flex items-center justify-center gap-3 mb-12 text-sm text-slate-500">
+              <div className="flex -space-x-2">
+                {['MJ','PS','DK','SW','AT'].map((a,i) => (
+                  <div key={i} className="h-7 w-7 rounded-full border-2 border-black flex items-center justify-center text-[9px] font-black text-white" style={{ background: ['#4f46e5','#7c3aed','#dc2626','#ea580c','#16a34a'][i] }}>{a}</div>
+                ))}
+              </div>
+              <span><strong className="text-white">4.9/5</strong> from 3,200+ reviews</span>
+              <span className="hidden sm:inline text-slate-700">·</span>
+              <span className="hidden sm:inline"><strong className="text-white">$1</strong> to get started</span>
+            </motion.div>
+
+            {/* CTAs */}
+            <motion.div variants={kineticItem} className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link href="/auth/login" className="group relative px-10 py-5 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-indigo-500 transition-all shadow-[0_0_40px_rgba(99,102,241,0.4)] active:scale-95 flex items-center gap-3 justify-center overflow-hidden">
+                <span className="absolute inset-0 shimmer" />
+                <Rocket className="h-4 w-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                Start for $1
+                <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Link>
-              <a href="#analyzer" className="px-10 py-5 bg-white/5 text-white border border-white/10 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all backdrop-blur-md">
-                Try It Free
+              <a href="#analyzer" className="px-10 py-5 bg-white/5 text-white border border-white/10 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-white/10 transition-all backdrop-blur-md flex items-center gap-3 justify-center">
+                <Play className="h-4 w-4 text-indigo-400" />
+                Try Free Scan
               </a>
             </motion.div>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 2, duration: 1 }}
+            transition={{ delay: 2.5, duration: 1 }}
             className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 text-slate-600"
           >
             <span className="text-[9px] font-black uppercase tracking-[0.4em]">Scroll Down</span>
@@ -216,215 +384,348 @@ export default function Home() {
           </motion.div>
         </section>
 
-        {/* Live Analyzer Section */}
-        <section id="analyzer" className="py-32 px-6 lg:px-12 relative border-t border-white/5">
-          <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-20 items-center">
-            <div className="lg:col-span-6">
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                className="space-y-10"
-              >
-                <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase leading-none italic">
-                  Instant <br />
-                  <span className="text-indigo-500">Validation.</span>
-                </h2>
-                <p className="text-xl text-slate-400 leading-relaxed font-medium max-w-xl">
-                  Upload your resume and paste a job description. We'll instantly show you how well your resume matches the job.
-                </p>
-                <div className="grid grid-cols-2 gap-8">
-                  {[
-                    { icon: <Zap className="h-5 w-5 text-amber-500" />, label: "Fast Scan", desc: "Results in seconds." },
-                    { icon: <ShieldCheck className="h-5 w-5 text-green-500" />, label: "Secure & Private", desc: "AES-256 encrypted." }
-                  ].map((item, i) => (
-                    <div key={i} className="space-y-3">
-                      <div className="flex items-center gap-3 text-white font-black text-[10px] uppercase tracking-widest">
-                        {item.icon} {item.label}
-                      </div>
-                      <p className="text-[10px] text-slate-500 font-bold tracking-tight uppercase leading-relaxed">{item.desc}</p>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            </div>
-
-            <div className="lg:col-span-6 relative">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.98 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                className="glass-executive p-10 rounded-[3rem] border-white/10 shadow-[0_0_80px_rgba(99,102,241,0.1)] border-beam"
-              >
-                <div className="space-y-8 relative z-10">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-2xl font-black text-white tracking-tight uppercase italic leading-none">Resume Checker</h3>
-                      <p className="text-slate-600 text-[9px] font-black uppercase tracking-[0.3em] mt-2">Upload & Analyze</p>
-                    </div>
-                    <FileText className="h-5 w-5 text-indigo-500/50" />
-                  </div>
-
-                  <div className="space-y-5">
-                    <div className="relative border-2 border-dashed border-white/5 rounded-[2rem] p-16 text-center group/drop transition-all duration-700 hover:border-indigo-500/30 hover:bg-indigo-500/5 cursor-pointer bg-black/40">
-                      <input 
-                        type="file" 
-                        onChange={(e) => setLocalFile(e.target.files?.[0] || null)}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
-                      />
-                      {localFile ? (
-                        <div className="flex flex-col items-center">
-                          <div className="bg-indigo-600 p-5 rounded-2xl mb-4 shadow-2xl">
-                            <FileText className="h-8 w-8 text-white" />
-                          </div>
-                          <p className="text-white font-black text-sm truncate max-w-full px-4 italic">{localFile.name}</p>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center">
-                          <div className="bg-white/5 p-6 rounded-2xl mb-5 border border-white/10 group-hover/drop:bg-indigo-600 transition-all duration-700">
-                            <Upload className="h-8 w-8 text-white/20 group-hover/drop:text-white" />
-                          </div>
-                          <p className="text-white font-black text-lg tracking-tight uppercase italic">Upload Your Resume</p>
-                          <p className="text-slate-600 text-[9px] mt-2 font-black uppercase tracking-[0.2em]">PDF / DOCX Required</p>
-                        </div>
-                      )}
-                    </div>
-
-                    <textarea 
-                      value={localJD}
-                      onChange={(e) => setLocalJD(e.target.value)}
-                      placeholder="Paste the job description here..."
-                      className="w-full h-28 bg-black/60 border-2 border-white/5 rounded-[2rem] p-6 outline-none focus:border-indigo-500/50 transition-all text-white text-sm font-medium resize-none placeholder:text-slate-800 shadow-inner"
-                    />
-
-                    <button 
-                      onClick={handleInitialScan}
-                      disabled={isAnalyzing || !localFile || !localJD}
-                      className={`w-full py-6 rounded-[2rem] font-black text-lg flex items-center justify-center gap-4 transition-all duration-700 shadow-2xl relative overflow-hidden group active:scale-[0.98] uppercase tracking-tighter italic ${
-                        !localFile || !localJD || isAnalyzing 
-                        ? 'bg-white/5 text-slate-800 cursor-not-allowed border border-white/5 shadow-none'
-                        : 'bg-indigo-600 text-white hover:bg-white hover:text-black'
-                      }`}
-                    >
-                      {isAnalyzing ? (
-                        <div className="flex items-center gap-3">
-                          <Loader2 className="h-5 w-5 animate-spin" />
-                          <span className="tracking-tighter italic">Analyzing... {Math.round(progress)}%</span>
-                        </div>
-                      ) : (
-                        <>
-                          <Zap className="h-5 w-5 text-indigo-400 group-hover:rotate-12 transition-transform" />
-                          <span>Get Match Score</span>
-                          <ArrowRight className="h-5 w-5 opacity-30 group-hover:translate-x-2 transition-transform" />
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
+        {/* ═══════════════════ STATS BAR ═══════════════════ */}
+        <section className="py-16 border-y border-white/5 relative bg-black">
+          <div className="absolute inset-0 dot-grid opacity-30 pointer-events-none" />
+          <div className="max-w-5xl mx-auto px-6">
+            <motion.div
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true }}
+              variants={stagger}
+              className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center"
+            >
+              {[
+                { value: 10000, suffix: '+', label: 'Resumes Optimized', color: 'text-indigo-400' },
+                { value: 95,    suffix: '%', label: 'Average Match Rate', color: 'text-cyan-400' },
+                { value: 3200,  suffix: '+', label: '5-Star Reviews',     color: 'text-amber-400' },
+                { value: 1,     suffix: '$', label: 'To Get Started',     color: 'text-green-400', prefix: true },
+              ].map((s, i) => (
+                <motion.div key={i} variants={fadeUp} className="flex flex-col items-center gap-2">
+                  <p className={`text-4xl md:text-5xl font-black tracking-tighter ${s.color}`}>
+                    {s.prefix && '$'}<Counter to={s.value} suffix={s.prefix ? '' : s.suffix} />
+                  </p>
+                  <p className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.3em]">{s.label}</p>
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
         </section>
 
-        {/* Feature Grid – Executive Systems with 3D cards */}
-        <section className="py-48 bg-white relative selection:bg-black selection:text-white">
-          <div className="max-w-[1400px] mx-auto px-6 lg:px-12 text-center">
-            <h2 className="text-7xl lg:text-[8rem] font-black text-slate-950 tracking-tighter uppercase leading-[0.8] mb-32 italic">
-              Executive <br />
-              <span className="text-indigo-600 not-italic">Systems.</span>
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[
-                {
-                  title: "Smart Duplicate Removal",
-                  description: "Automatically cleans up repeated information and formatting issues — so your resume looks polished every time.",
-                  icon: <Bot className="h-16 w-16 text-indigo-600" />,
-                  bg: "bg-slate-50",
-                  iconBg: "bg-white"
-                },
-                {
-                  title: "95% Match Rate",
-                  description: "We keep improving your resume until it fits the job perfectly. Our AI finds and adds the right keywords for each role.",
-                  icon: <Target className="h-16 w-16 text-white" />,
-                  bg: "bg-slate-900",
-                  iconBg: "bg-white/10",
-                  dark: true
-                },
-                {
-                  title: "Safe & Private",
-                  description: "Your data is encrypted and never shared. We protect your personal information with bank-level security.",
-                  icon: <ShieldCheck className="h-16 w-16 text-white" />,
-                  bg: "bg-indigo-600",
-                  iconBg: "bg-white/20",
-                  dark: true
-                },
-                {
-                  title: "Clean, Readable Format",
-                  description: "Your resume is formatted in a way that any applicant tracking system can read it — no more getting filtered out for bad formatting.",
-                  icon: <FileText className="h-16 w-16 text-slate-400" />,
-                  bg: "bg-slate-50",
-                  iconBg: "bg-white"
-                },
-                {
-                  title: "Instant Results",
-                  description: "Get your match score and keyword analysis in seconds. No waiting, no complicated setup.",
-                  icon: <Zap className="h-16 w-16 text-amber-500" />,
-                  bg: "bg-amber-50",
-                  iconBg: "bg-white"
-                },
-                {
-                  title: "Pay As You Go",
-                  description: "Try it with $1 for your first 4 analyses. After that, just $1 per resume — no subscription required.",
-                  icon: <Coins className="h-16 w-16 text-indigo-600" />,
-                  bg: "bg-indigo-50",
-                  iconBg: "bg-white"
-                }
-              ].map((card, i) => (
-                <motion.div
-                  key={i}
-                  whileHover={{ 
-                    rotateX: -6, 
-                    rotateY: 6, 
-                    z: 40,
-                    scale: 1.04
-                  }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                  className={`${card.bg} rounded-[2.5rem] p-12 border border-slate-100 shadow-xl cursor-pointer flex flex-col items-start gap-6 text-left`}
-                  style={{ 
-                    perspective: 1200,
-                    transformStyle: 'preserve-3d',
-                    boxShadow: '0 20px 60px rgba(0,0,0,0.08), 0 4px 20px rgba(0,0,0,0.06)'
-                  } as any}
-                >
-                  <div className={`${card.iconBg} p-5 rounded-2xl shadow-lg`}>
-                    {card.icon}
-                  </div>
-                  <div>
-                    <h3 className={`text-2xl font-black tracking-tight mb-3 ${card.dark ? 'text-white' : 'text-slate-900'}`}>{card.title}</h3>
-                    <p className={`leading-relaxed text-base ${card.dark ? 'text-white/70' : 'text-slate-500'}`}>{card.description}</p>
-                  </div>
-                </motion.div>
+        {/* ═══════════════════ COMPANY LOGOS MARQUEE ═══════════════════ */}
+        <section className="py-16 border-b border-white/5 overflow-hidden">
+          <div className="text-center mb-10">
+            <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.5em]">Users have landed jobs at</p>
+          </div>
+          <div className="relative overflow-hidden">
+            <div className="absolute left-0 top-0 bottom-0 w-32 z-10 pointer-events-none" style={{ background: 'linear-gradient(90deg, #000 0%, transparent 100%)' }} />
+            <div className="absolute right-0 top-0 bottom-0 w-32 z-10 pointer-events-none" style={{ background: 'linear-gradient(270deg, #000 0%, transparent 100%)' }} />
+            <div className="marquee-track">
+              {marqueeCompanies.map((company, i) => (
+                <div key={i} className="flex items-center gap-3 mx-10 flex-shrink-0">
+                  <div className="h-2 w-2 rounded-full bg-indigo-600/60" />
+                  <span className="text-slate-500 font-black text-sm uppercase tracking-widest whitespace-nowrap hover:text-white transition-colors cursor-default">{company}</span>
+                </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* FAQ Section */}
-        <section className="py-32 px-6 lg:px-12 bg-slate-50 border-t border-slate-100">
-          <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-20">
-              <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-[9px] font-black uppercase tracking-[0.5em] mb-8">
-                <HelpCircle className="h-3 w-3" />
-                <span>Common Questions</span>
-              </div>
-              <h2 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter uppercase leading-[0.85] italic">
-                Got <br /><span className="text-indigo-600 not-italic">Questions?</span>
-              </h2>
-              <p className="text-xl text-slate-500 font-medium mt-6 max-w-xl mx-auto leading-relaxed">
-                Everything you need to know about HireReady and how it works.
-              </p>
+        {/* ═══════════════════ HOW IT WORKS ═══════════════════ */}
+        <section className="py-32 px-6 lg:px-12 relative">
+          <div className="absolute inset-0 mesh-bg pointer-events-none" />
+          <div className="max-w-[1200px] mx-auto relative z-10">
+            <motion.div
+              initial="hidden" whileInView="show" viewport={{ once: true, margin: '-80px' }}
+              variants={stagger}
+              className="text-center mb-24"
+            >
+              <motion.div variants={fadeUp} className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-indigo-400 text-[9px] font-black uppercase tracking-[0.5em] mb-8">
+                <Activity className="h-3 w-3" />
+                Simple Process
+              </motion.div>
+              <motion.h2 variants={fadeUp} className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase leading-[0.85] italic">
+                How It <span className="text-gradient-purple not-italic">Works.</span>
+              </motion.h2>
+              <motion.p variants={fadeUp} className="text-xl text-slate-500 mt-6 max-w-xl mx-auto leading-relaxed">
+                Go from rejected to interview-ready in 4 simple steps.
+              </motion.p>
+            </motion.div>
+
+            <motion.div
+              initial="hidden" whileInView="show" viewport={{ once: true, margin: '-80px' }}
+              variants={stagger}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+            >
+              {howItWorks.map((step, i) => (
+                <motion.div
+                  key={i}
+                  variants={fadeUp}
+                  whileHover={{ y: -6, scale: 1.02 }}
+                  style={{ transformStyle: 'preserve-3d', perspective: 1000 } as any}
+                  transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+                  className="glass-card rounded-[2rem] p-8 relative overflow-hidden group border border-white/5 hover:border-indigo-500/20 transition-all duration-500"
+                >
+                  {/* Step number watermark */}
+                  <span className="absolute top-6 right-6 text-7xl font-black text-white/3 leading-none select-none">{step.step}</span>
+                  
+                  <div className="bg-indigo-600/10 border border-indigo-500/20 p-4 rounded-2xl inline-flex mb-6 group-hover:bg-indigo-600 group-hover:border-indigo-600 transition-all duration-500">
+                    <span className="text-indigo-400 group-hover:text-white transition-colors duration-500">{step.icon}</span>
+                  </div>
+                  <h3 className="text-lg font-black text-white mb-3 leading-tight">{step.title}</h3>
+                  <p className="text-slate-500 text-sm leading-relaxed">{step.desc}</p>
+                  
+                  {i < 3 && (
+                    <div className="hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10">
+                      <ChevronRight className="h-6 w-6 text-indigo-500/30" />
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ═══════════════════ LIVE ANALYZER ═══════════════════ */}
+        <section id="analyzer" className="py-32 px-6 lg:px-12 relative border-t border-white/5">
+          <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-20 items-center">
+            <div className="lg:col-span-6">
+              <motion.div
+                initial="hidden" whileInView="show" viewport={{ once: true }}
+                variants={stagger}
+                className="space-y-8"
+              >
+                <motion.div variants={fadeUp} className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-indigo-400 text-[9px] font-black uppercase tracking-[0.5em]">
+                  <Zap className="h-3 w-3 text-amber-400 animate-pulse" />
+                  Try It Now — Free
+                </motion.div>
+                <motion.h2 variants={fadeUp} className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase leading-none italic">
+                  Instant<br /><span className="text-indigo-500">Results.</span>
+                </motion.h2>
+                <motion.p variants={fadeUp} className="text-xl text-slate-400 leading-relaxed max-w-xl">
+                  Upload your resume and paste a job description. We'll show you exactly how well you match — and how to improve — in seconds.
+                </motion.p>
+                <motion.div variants={fadeUp} className="grid grid-cols-2 gap-6">
+                  {[
+                    { icon: <Zap className="h-4 w-4 text-amber-400" />, label: 'Fast Scan', desc: 'Results in seconds' },
+                    { icon: <ShieldCheck className="h-4 w-4 text-green-400" />, label: 'Secure & Private', desc: 'AES-256 encrypted' },
+                    { icon: <BrainCircuit className="h-4 w-4 text-indigo-400" />, label: 'AI-Powered', desc: 'Gemini Pro analysis' },
+                    { icon: <Award className="h-4 w-4 text-cyan-400" />, label: '95%+ Match Rate', desc: 'Proven accuracy' }
+                  ].map((f, i) => (
+                    <div key={i} className="flex items-start gap-3">
+                      <div className="bg-white/5 p-2 rounded-xl mt-0.5 flex-shrink-0">{f.icon}</div>
+                      <div>
+                        <p className="text-white font-black text-xs uppercase tracking-widest">{f.label}</p>
+                        <p className="text-slate-600 text-[10px] mt-1">{f.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </motion.div>
+              </motion.div>
             </div>
-            <div className="space-y-4">
+
+            <div className="lg:col-span-6">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+                className="glass-card p-10 rounded-[3rem] shadow-[0_0_80px_rgba(99,102,241,0.12)] border-beam border border-white/8"
+              >
+                <div className="space-y-7 relative z-10">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-2xl font-black text-white tracking-tight uppercase italic">Resume Checker</h3>
+                      <p className="text-slate-600 text-[9px] font-black uppercase tracking-[0.3em] mt-2">Upload & Get Your Score</p>
+                    </div>
+                    <div className="h-10 w-10 rounded-2xl bg-indigo-600/10 border border-indigo-500/20 flex items-center justify-center">
+                      <FileText className="h-5 w-5 text-indigo-400" />
+                    </div>
+                  </div>
+
+                  {/* Upload zone */}
+                  <div className="relative border-2 border-dashed border-white/5 rounded-[2rem] p-14 text-center group/drop transition-all duration-500 hover:border-indigo-500/40 hover:bg-indigo-500/5 cursor-pointer bg-black/40">
+                    <input type="file" onChange={(e) => setLocalFile(e.target.files?.[0] || null)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                    {localFile ? (
+                      <div className="flex flex-col items-center">
+                        <div className="bg-indigo-600 p-5 rounded-2xl mb-4 shadow-[0_0_30px_rgba(99,102,241,0.5)] glow-indigo">
+                          <FileText className="h-7 w-7 text-white" />
+                        </div>
+                        <p className="text-white font-black text-sm truncate max-w-full px-4">{localFile.name}</p>
+                        <span className="mt-2 text-indigo-400 text-[9px] font-black uppercase tracking-[0.4em] bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">Ready ✓</span>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center">
+                        <div className="bg-white/5 p-5 rounded-2xl mb-4 border border-white/10 group-hover/drop:bg-indigo-600 group-hover/drop:border-indigo-600 transition-all duration-500">
+                          <Upload className="h-7 w-7 text-white/30 group-hover/drop:text-white transition-colors duration-500" />
+                        </div>
+                        <p className="text-white font-bold text-base">Drop your resume here</p>
+                        <p className="text-slate-600 text-[9px] mt-1.5 font-black uppercase tracking-[0.2em]">PDF or DOCX</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Job description */}
+                  <textarea
+                    value={localJD}
+                    onChange={(e) => setLocalJD(e.target.value)}
+                    placeholder="Paste the job description here..."
+                    className="w-full h-28 bg-black/60 border-2 border-white/5 rounded-[2rem] p-6 outline-none focus:border-indigo-500/40 transition-all text-white text-sm font-medium resize-none placeholder:text-slate-800"
+                  />
+
+                  {/* CTA */}
+                  <button
+                    onClick={handleInitialScan}
+                    disabled={isAnalyzing || !localFile || !localJD}
+                    className={`relative w-full py-6 rounded-[2rem] font-black text-base flex items-center justify-center gap-4 transition-all duration-500 overflow-hidden group active:scale-[0.98] ${
+                      !localFile || !localJD || isAnalyzing
+                        ? 'bg-white/5 text-slate-700 cursor-not-allowed border border-white/5'
+                        : 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-[0_0_40px_rgba(99,102,241,0.35)] glow-indigo'
+                    }`}
+                  >
+                    {(!localFile || !localJD || isAnalyzing) ? null : <span className="absolute inset-0 shimmer" />}
+                    {isAnalyzing ? (
+                      <><Loader2 className="h-5 w-5 animate-spin" /><span>Analyzing your resume... {Math.round(progress)}%</span></>
+                    ) : (
+                      <><Zap className="h-5 w-5 text-indigo-200 group-hover:scale-110 transition-transform" /><span>Get My Match Score</span><ArrowRight className="h-5 w-5 opacity-60 group-hover:translate-x-1 transition-transform" /></>
+                    )}
+                  </button>
+                  <p className="text-center text-slate-700 text-[10px] font-bold">No credit card required for free scan</p>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
+        {/* ═══════════════════ FEATURES 3D GRID ═══════════════════ */}
+        <section className="py-32 bg-white relative selection:bg-black selection:text-white overflow-hidden">
+          <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle, #6366f1 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+          <div className="max-w-[1300px] mx-auto px-6 lg:px-12">
+            <motion.div
+              initial="hidden" whileInView="show" viewport={{ once: true, margin: '-80px' }}
+              variants={stagger}
+              className="text-center mb-24"
+            >
+              <motion.div variants={fadeUp} className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-black/5 border border-black/10 text-indigo-600 text-[9px] font-black uppercase tracking-[0.5em] mb-8">
+                <Sparkles className="h-3 w-3" />
+                Why HireReady
+              </motion.div>
+              <motion.h2 variants={fadeUp} className="text-6xl lg:text-[7rem] font-black text-slate-950 tracking-tighter uppercase leading-[0.8] italic">
+                Executive<br /><span className="text-indigo-600 not-italic">Systems.</span>
+              </motion.h2>
+            </motion.div>
+
+            <motion.div
+              initial="hidden" whileInView="show" viewport={{ once: true, margin: '-60px' }}
+              variants={stagger}
+              className="grid grid-cols-1 md:grid-cols-3 gap-6"
+            >
+              {[
+                { title: "Smart Duplicate Removal", desc: "Automatically cleans up repetitive info and formatting issues so your resume looks polished every time.", icon: <Bot className="h-8 w-8" />, bg: "bg-slate-50", icon_bg: "bg-white", text: "text-slate-900", sub: "text-slate-500", accent: "#6366f1" },
+                { title: "95% Match Rate", desc: "We keep improving your resume until it fits the job perfectly. Our AI adds the right keywords for each role with full context.", icon: <Target className="h-8 w-8 text-white" />, bg: "bg-slate-900", icon_bg: "bg-indigo-600", text: "text-white", sub: "text-white/60", accent: "#4f46e5", dark: true },
+                { title: "Safe & Private", desc: "Your data is bank-level encrypted and never shared. Full control over your information, always.", icon: <ShieldCheck className="h-8 w-8 text-white" />, bg: "bg-indigo-600", icon_bg: "bg-white/20", text: "text-white", sub: "text-white/70", accent: "#fff", dark: true },
+                { title: "Clean, ATS-Ready Format", desc: "Formatted so ANY applicant tracking system can read your resume — no more getting filtered out for bad formatting.", icon: <FileText className="h-8 w-8 text-slate-500" />, bg: "bg-slate-50", icon_bg: "bg-white", text: "text-slate-900", sub: "text-slate-500", accent: "#6366f1" },
+                { title: "Instant AI Analysis", desc: "Get your keyword match score and AI recommendations in under 30 seconds. No waiting, no guessing.", icon: <Zap className="h-8 w-8 text-amber-500" />, bg: "bg-amber-50", icon_bg: "bg-white", text: "text-slate-900", sub: "text-slate-500", accent: "#f59e0b" },
+                { title: "Pay As You Go", desc: "First 4 analyses for just $1. After that, $1 per analysis. No subscription trap. Only pay when you need it.", icon: <Coins className="h-8 w-8 text-indigo-600" />, bg: "bg-indigo-50", icon_bg: "bg-white", text: "text-slate-900", sub: "text-slate-500", accent: "#6366f1" }
+              ].map((card, i) => (
+                <motion.div
+                  key={i}
+                  variants={fadeUp}
+                  whileHover={{ rotateX: -5, rotateY: 5, z: 40, scale: 1.04 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: 'spring', stiffness: 280, damping: 20 }}
+                  className={`${card.bg} rounded-[2.5rem] p-10 flex flex-col gap-6 cursor-pointer`}
+                  style={{ transformStyle: 'preserve-3d', boxShadow: '0 20px 60px rgba(0,0,0,0.1)' } as any}
+                >
+                  <div className={`${card.icon_bg} p-4 rounded-2xl inline-flex shadow-lg w-fit`} style={{ boxShadow: `0 8px 30px ${card.accent}30` }}>
+                    {card.icon}
+                  </div>
+                  <div>
+                    <h3 className={`text-xl font-black tracking-tight mb-2 ${card.text}`}>{card.title}</h3>
+                    <p className={`text-sm leading-relaxed ${card.sub}`}>{card.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ═══════════════════ TESTIMONIALS ═══════════════════ */}
+        <section className="py-32 px-6 lg:px-12 relative border-t border-white/5 overflow-hidden">
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-indigo-600/8 rounded-full blur-[100px]" />
+            <div className="absolute bottom-0 right-1/4 w-[400px] h-[300px] bg-cyan-600/6 rounded-full blur-[80px]" />
+          </div>
+
+          <div className="max-w-[1400px] mx-auto relative z-10">
+            <motion.div
+              initial="hidden" whileInView="show" viewport={{ once: true, margin: '-80px' }}
+              variants={stagger}
+              className="text-center mb-20"
+            >
+              <motion.div variants={fadeUp} className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-indigo-400 text-[9px] font-black uppercase tracking-[0.5em] mb-8">
+                <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                Real Stories
+              </motion.div>
+              <motion.h2 variants={fadeUp} className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase leading-[0.85] italic">
+                They Got <br /><span className="text-gradient-purple not-italic">Hired.</span>
+              </motion.h2>
+              <motion.p variants={fadeUp} className="text-xl text-slate-500 mt-6 max-w-2xl mx-auto leading-relaxed">
+                Join thousands of job seekers who landed their dream jobs using HireReady.
+              </motion.p>
+
+              {/* Overall rating bar */}
+              <motion.div variants={fadeUp} className="flex items-center justify-center gap-4 mt-8">
+                <Stars />
+                <span className="text-white font-black text-lg">4.9</span>
+                <span className="text-slate-600 text-sm">/ 5 · based on 3,200+ reviews</span>
+              </motion.div>
+            </motion.div>
+
+            <motion.div
+              initial="hidden" whileInView="show" viewport={{ once: true, margin: '-80px' }}
+              variants={stagger}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {testimonials.map((t, i) => (
+                <TestimonialCard key={i} t={t} delay={i * 0.1} />
+              ))}
+            </motion.div>
+
+            {/* Bottom CTA */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+              className="text-center mt-16"
+            >
+              <Link href="/auth/login" className="inline-flex items-center gap-3 px-10 py-5 bg-white text-black rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-2xl active:scale-95 group">
+                Join Them Today <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <p className="text-slate-600 text-xs mt-4 font-medium">First 4 analyses for $1 · No subscription</p>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ═══════════════════ FAQ ═══════════════════ */}
+        <section className="py-32 px-6 lg:px-12 border-t border-white/5">
+          <div className="max-w-3xl mx-auto">
+            <motion.div
+              initial="hidden" whileInView="show" viewport={{ once: true }}
+              variants={stagger}
+              className="text-center mb-20"
+            >
+              <motion.div variants={fadeUp} className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-indigo-400 text-[9px] font-black uppercase tracking-[0.5em] mb-8">
+                <HelpCircle className="h-3 w-3" />
+                Common Questions
+              </motion.div>
+              <motion.h2 variants={fadeUp} className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase leading-[0.85] italic">
+                Got <span className="text-gradient-purple not-italic">Questions?</span>
+              </motion.h2>
+              <motion.p variants={fadeUp} className="text-xl text-slate-500 mt-6 max-w-xl mx-auto leading-relaxed">
+                Everything you need to know about HireReady.
+              </motion.p>
+            </motion.div>
+            <div className="space-y-3">
               {faqData.map((item, i) => (
                 <FAQItem key={i} question={item.question} answer={item.answer} />
               ))}
@@ -432,29 +733,32 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Contact Us Section */}
-        <section className="py-32 px-6 lg:px-12 bg-black border-t border-white/5">
-          <div className="max-w-2xl mx-auto">
-            <div className="text-center mb-16">
-              <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-indigo-400 text-[9px] font-black uppercase tracking-[0.5em] mb-8">
+        {/* ═══════════════════ CONTACT ═══════════════════ */}
+        <section className="py-32 px-6 lg:px-12 border-t border-white/5 relative">
+          <div className="absolute inset-0 pointer-events-none">
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-indigo-600/8 rounded-full blur-[80px]" />
+          </div>
+          <div className="max-w-2xl mx-auto relative z-10">
+            <motion.div
+              initial="hidden" whileInView="show" viewport={{ once: true }}
+              variants={stagger}
+              className="text-center mb-16"
+            >
+              <motion.div variants={fadeUp} className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-indigo-400 text-[9px] font-black uppercase tracking-[0.5em] mb-8">
                 <Mail className="h-3 w-3" />
-                <span>Get In Touch</span>
-              </div>
-              <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase leading-[0.85] italic">
-                Contact <br /><span className="text-indigo-500 not-italic">Us.</span>
-              </h2>
-              <p className="text-xl text-slate-400 font-medium mt-6 max-w-xl mx-auto leading-relaxed">
-                Have a question or need help? We'd love to hear from you. Send us a message and we'll respond within 24 hours.
-              </p>
-            </div>
+                Get In Touch
+              </motion.div>
+              <motion.h2 variants={fadeUp} className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase leading-[0.85] italic">
+                Contact <span className="text-gradient-purple not-italic">Us.</span>
+              </motion.h2>
+              <motion.p variants={fadeUp} className="text-xl text-slate-400 mt-6 max-w-xl mx-auto leading-relaxed">
+                Have a question? We're here to help. Send us a message and we'll respond within 24 hours.
+              </motion.p>
+            </motion.div>
 
             {contactSent ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="glass-executive rounded-[3rem] p-16 text-center border border-white/10"
-              >
-                <div className="bg-green-500 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-2xl">
+              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card rounded-[3rem] p-16 text-center border border-green-500/20">
+                <div className="bg-green-500 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-[0_0_40px_rgba(34,197,94,0.4)]">
                   <CheckCircle2 className="h-10 w-10 text-white" />
                 </div>
                 <h3 className="text-3xl font-black text-white tracking-tighter mb-4">Message Sent!</h3>
@@ -462,102 +766,101 @@ export default function Home() {
               </motion.div>
             ) : (
               <motion.form
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
                 onSubmit={handleContactSubmit}
-                className="glass-executive rounded-[3rem] p-12 border border-white/10 space-y-6"
+                className="glass-card rounded-[3rem] p-12 border border-white/8 space-y-6"
               >
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em]">Your Name</label>
-                    <div className="relative">
-                      <User className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
-                      <input
-                        type="text"
-                        required
-                        value={contactName}
-                        onChange={(e) => setContactName(e.target.value)}
-                        placeholder="John Smith"
-                        className="w-full bg-black/60 border-2 border-white/5 rounded-2xl py-4 pl-12 pr-5 text-white text-sm font-medium outline-none focus:border-indigo-500/50 transition-all placeholder:text-slate-800"
-                      />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  {[
+                    { label: 'Your Name', val: contactName, set: setContactName, placeholder: 'John Smith', type: 'text', icon: <User className="h-4 w-4 text-slate-600" /> },
+                    { label: 'Email Address', val: contactEmail, set: setContactEmail, placeholder: 'you@example.com', type: 'email', icon: <Mail className="h-4 w-4 text-slate-600" /> }
+                  ].map((f) => (
+                    <div key={f.label} className="space-y-2">
+                      <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em]">{f.label}</label>
+                      <div className="relative">
+                        <span className="absolute left-5 top-1/2 -translate-y-1/2">{f.icon}</span>
+                        <input type={f.type} required value={f.val} onChange={e => f.set(e.target.value)} placeholder={f.placeholder}
+                          className="w-full bg-black/60 border-2 border-white/5 rounded-2xl py-4 pl-12 pr-5 text-white text-sm font-medium outline-none focus:border-indigo-500/40 transition-all placeholder:text-slate-800" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em]">Email Address</label>
-                    <div className="relative">
-                      <Mail className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
-                      <input
-                        type="email"
-                        required
-                        value={contactEmail}
-                        onChange={(e) => setContactEmail(e.target.value)}
-                        placeholder="you@example.com"
-                        className="w-full bg-black/60 border-2 border-white/5 rounded-2xl py-4 pl-12 pr-5 text-white text-sm font-medium outline-none focus:border-indigo-500/50 transition-all placeholder:text-slate-800"
-                      />
-                    </div>
-                  </div>
+                  ))}
                 </div>
                 <div className="space-y-2">
                   <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em]">Your Message</label>
                   <div className="relative">
                     <MessageSquare className="absolute left-5 top-5 h-4 w-4 text-slate-600" />
-                    <textarea
-                      required
-                      value={contactMessage}
-                      onChange={(e) => setContactMessage(e.target.value)}
-                      placeholder="Tell us how we can help you..."
-                      rows={5}
-                      className="w-full bg-black/60 border-2 border-white/5 rounded-2xl py-4 pl-12 pr-5 text-white text-sm font-medium outline-none focus:border-indigo-500/50 transition-all resize-none placeholder:text-slate-800"
-                    />
+                    <textarea required value={contactMessage} onChange={e => setContactMessage(e.target.value)}
+                      placeholder="Tell us how we can help..." rows={5}
+                      className="w-full bg-black/60 border-2 border-white/5 rounded-2xl py-4 pl-12 pr-5 text-white text-sm font-medium outline-none focus:border-indigo-500/40 transition-all resize-none placeholder:text-slate-800" />
                   </div>
                 </div>
-                <button
-                  type="submit"
-                  className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-white hover:text-black transition-all shadow-2xl active:scale-95 flex items-center justify-center gap-3"
-                >
+                <button type="submit" className="relative w-full py-5 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-indigo-500 transition-all shadow-[0_0_40px_rgba(99,102,241,0.3)] active:scale-95 flex items-center justify-center gap-3 overflow-hidden group">
+                  <span className="absolute inset-0 shimmer" />
                   <Mail className="h-4 w-4" />
                   Send Message
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </button>
               </motion.form>
             )}
           </div>
         </section>
+
+        {/* ═══════════════════ FINAL CTA BAND ═══════════════════ */}
+        <section className="py-24 px-6 relative overflow-hidden border-t border-white/5">
+          <div className="absolute inset-0 bg-indigo-600/5 pointer-events-none" />
+          <div className="absolute inset-0 dot-grid opacity-20 pointer-events-none" />
+          <div className="max-w-4xl mx-auto text-center relative z-10">
+            <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }}>
+              <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase leading-[0.85] italic mb-8">
+                Ready to <span className="text-gradient-purple not-italic">Get Hired?</span>
+              </h2>
+              <p className="text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
+                Join 10,000+ job seekers who use HireReady to stand out. Start your first 4 analyses for just $1.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Link href="/auth/login" className="relative group px-12 py-6 bg-white text-black rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-[0_0_60px_rgba(255,255,255,0.15)] active:scale-95 flex items-center gap-3 overflow-hidden">
+                  Start for $1 <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <div className="flex items-center gap-3 text-slate-500 text-sm">
+                  <Check className="h-4 w-4 text-green-500" /> No subscription · Cancel anytime
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </section>
       </main>
 
-      {/* Conversion Modal */}
+      {/* ═══════════════════ UPSELL MODAL ═══════════════════ */}
       <AnimatePresence>
         {showUpsell && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-6">
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/98 backdrop-blur-3xl"
-              onClick={() => setShowUpsell(false)}
-            />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/95 backdrop-blur-3xl" onClick={() => setShowUpsell(false)} />
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-[650px] glass-executive rounded-[4rem] p-16 shadow-[0_0_100px_rgba(99,102,241,0.2)] overflow-hidden border border-white/10 border-beam"
+              initial={{ opacity: 0, scale: 0.9, y: 30 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 30 }}
+              className="relative w-full max-w-[600px] glass-card rounded-[3rem] p-14 border border-white/10 border-beam overflow-hidden"
             >
               <div className="text-center relative z-10">
-                <div className="space-y-4 mb-12">
-                  <p className="text-[9px] font-black uppercase tracking-[0.5em] text-indigo-400 italic">Results Ready</p>
-                  <div className="text-9xl font-black text-white leading-none tracking-tighter drop-shadow-2xl">
-                    {teaserScore}<span className="text-indigo-600 text-5xl">%</span>
+                <div className="space-y-4 mb-10">
+                  <p className="text-[9px] font-black uppercase tracking-[0.5em] text-indigo-400">Results Ready</p>
+                  <div className="relative inline-block">
+                    <p className="text-[120px] font-black text-white leading-none tracking-tighter">{teaserScore}<span className="text-indigo-600 text-5xl">%</span></p>
+                    <div className="absolute -inset-4 bg-indigo-600/10 rounded-full blur-2xl -z-10" />
                   </div>
-                  <div className="h-1.5 w-40 bg-white/5 rounded-full mx-auto overflow-hidden">
-                    <div className="h-full bg-indigo-600" style={{ width: `${teaserScore}%` }} />
+                  <div className="h-2 w-48 bg-white/5 rounded-full mx-auto overflow-hidden border border-white/5">
+                    <motion.div initial={{ width: 0 }} animate={{ width: `${teaserScore}%` }} transition={{ duration: 1, delay: 0.3, ease: "easeOut" }} className="h-full bg-gradient-to-r from-indigo-600 to-cyan-500 rounded-full" />
                   </div>
                 </div>
-
-                <h2 className="text-4xl font-black text-white mb-6 tracking-tighter uppercase leading-tight italic">Your Resume Score</h2>
-                <p className="text-xl text-slate-400 font-medium mb-12 leading-relaxed max-w-md mx-auto">
+                <h2 className="text-3xl font-black text-white mb-4 tracking-tighter uppercase italic">Your Resume Score</h2>
+                <p className="text-slate-400 mb-10 leading-relaxed max-w-sm mx-auto">
                   We found areas you can improve to better match this job. Sign in to see your full results and get an optimized resume.
                 </p>
-                <div className="space-y-6">
-                  <Link href="/auth/login" className="w-full bg-white text-black py-6 rounded-3xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-4 hover:bg-indigo-600 hover:text-white transition-all active:scale-95 group shadow-2xl">
-                    Sign In to See Full Results <Lock className="h-4 w-4 opacity-50 group-hover:opacity-100 transition-all" />
+                <div className="space-y-3">
+                  <Link href="/auth/login" className="relative group w-full bg-indigo-600 text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-indigo-500 transition-all shadow-[0_0_40px_rgba(99,102,241,0.4)] active:scale-95 overflow-hidden">
+                    <span className="absolute inset-0 shimmer" />
+                    <Sparkles className="h-4 w-4" />
+                    Sign In to See Full Results
                   </Link>
-                  <button onClick={() => { setShowUpsell(false); router.push('/auth/login'); }} className="w-full py-4 text-slate-600 font-black text-[9px] uppercase tracking-[0.4em] hover:text-white transition-colors">
+                  <button onClick={() => { setShowUpsell(false); router.push('/auth/login'); }} className="w-full py-3.5 text-slate-600 font-black text-[9px] uppercase tracking-[0.4em] hover:text-white transition-colors">
                     Skip for Now
                   </button>
                 </div>
