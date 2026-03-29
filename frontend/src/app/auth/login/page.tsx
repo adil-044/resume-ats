@@ -7,8 +7,9 @@ import Navbar from '@/components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Mail, Lock, User, MapPin, ArrowRight, 
-  Github, Chrome, Loader2, ChevronRight, AlertCircle 
+  Github, Chrome, Loader2, ChevronRight, AlertCircle, ShieldCheck, Fingerprint
 } from 'lucide-react';
+import { Particles } from '@/components/ui/Particles';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -78,69 +79,71 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col font-sans">
+    <div className="min-h-screen bg-[#020617] flex flex-col font-sans selection:bg-indigo-500/30 overflow-hidden">
+      <div className="fixed inset-0 noise-overlay pointer-events-none z-50 opacity-5" />
       <Navbar />
+      <Particles className="absolute inset-0 opacity-20" />
       
-      <main className="flex-1 flex items-center justify-center p-6">
+      <main className="flex-1 flex items-center justify-center p-6 relative z-10">
         <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-[480px] bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200 border border-slate-100 overflow-hidden"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-full max-w-[520px] glass-executive rounded-[4rem] border-white/10 overflow-hidden shadow-[0_0_100px_rgba(99,102,241,0.1)] border-beam"
         >
           {/* Header */}
-          <div className="bg-slate-900 p-10 text-white text-center relative overflow-hidden">
-            <div className="relative z-10">
-              <h1 className="text-3xl font-black tracking-tight mb-2 uppercase">
-                {mode === 'login' ? 'System Access' : 'Initialize Vault'}
-              </h1>
-              <p className="text-slate-400 font-medium">
-                {mode === 'login' ? 'Enter your executive credentials' : 'Build your high-signal identity'}
-              </p>
+          <div className="p-12 text-center relative border-b border-white/5">
+            <div className="bg-indigo-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-indigo-900/40">
+              <Fingerprint className="h-8 w-8 text-white" />
             </div>
-            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-600/20 blur-3xl rounded-full -mr-16 -mt-16" />
+            <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none mb-4">
+              {mode === 'login' ? 'System Access' : 'Initialize Vault'}
+            </h1>
+            <p className="text-slate-500 font-bold text-[10px] uppercase tracking-[0.4em]">
+              {mode === 'login' ? 'Authorize Executive Session' : 'Create High-Signal Identity'}
+            </p>
           </div>
 
-          <div className="p-10 space-y-8">
+          <div className="p-12 space-y-10">
             {error && (
               <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-red-50 border border-red-100 p-4 rounded-2xl flex gap-3 text-red-600 text-sm font-bold"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-red-500/10 border border-red-500/20 p-5 rounded-2xl flex gap-4 text-red-400 text-sm font-bold shadow-inner"
               >
                 <AlertCircle className="h-5 w-5 shrink-0" />
                 {error}
               </motion.div>
             )}
 
-            <form onSubmit={handleEmailAuth} className="space-y-4">
+            <form onSubmit={handleEmailAuth} className="space-y-6">
               <AnimatePresence mode="wait">
                 {mode === 'signup' && (
                   <motion.div 
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="space-y-4 overflow-hidden"
+                    className="space-y-6 overflow-hidden"
                   >
                     <div className="relative group">
-                      <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
+                      <User className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-600 group-focus-within:text-indigo-500 transition-colors" />
                       <input 
                         type="text"
                         placeholder="Full Name"
                         required={mode === 'signup'}
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 outline-none focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 transition-all font-medium text-slate-900"
+                        className="w-full bg-black/40 border-2 border-white/5 rounded-3xl py-5 pl-14 pr-6 outline-none focus:border-indigo-500/50 transition-all font-medium text-white shadow-inner"
                       />
                     </div>
                     <div className="relative group">
-                      <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
+                      <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-600 group-focus-within:text-indigo-500 transition-colors" />
                       <input 
                         type="text"
-                        placeholder="Location (e.g. London, UK)"
+                        placeholder="Location"
                         required={mode === 'signup'}
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 outline-none focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 transition-all font-medium text-slate-900"
+                        className="w-full bg-black/40 border-2 border-white/5 rounded-3xl py-5 pl-14 pr-6 outline-none focus:border-indigo-500/50 transition-all font-medium text-white shadow-inner"
                       />
                     </div>
                   </motion.div>
@@ -148,40 +151,40 @@ export default function LoginPage() {
               </AnimatePresence>
 
               <div className="relative group">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
+                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-600 group-focus-within:text-indigo-500 transition-colors" />
                 <input 
                   type="email"
                   placeholder="Professional Email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 outline-none focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 transition-all font-medium text-slate-900"
+                  className="w-full bg-black/40 border-2 border-white/5 rounded-3xl py-5 pl-14 pr-6 outline-none focus:border-indigo-500/50 transition-all font-medium text-white shadow-inner"
                 />
               </div>
 
               <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
+                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-600 group-focus-within:text-indigo-500 transition-colors" />
                 <input 
                   type="password"
                   placeholder="Security Password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-4 outline-none focus:ring-2 focus:ring-indigo-600/20 focus:border-indigo-600 transition-all font-medium text-slate-900"
+                  className="w-full bg-black/40 border-2 border-white/5 rounded-3xl py-5 pl-14 pr-6 outline-none focus:border-indigo-500/50 transition-all font-medium text-white shadow-inner"
                 />
               </div>
 
               {mode === 'signup' && (
-                <div className="flex items-center gap-3 px-2 py-2">
+                <div className="flex items-center gap-4 px-2 py-2">
                   <input 
                     type="checkbox"
                     id="subscribe"
                     checked={subscribed}
                     onChange={(e) => setSubscribed(e.target.checked)}
-                    className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600 cursor-pointer"
+                    className="h-5 w-5 rounded-lg border-white/10 bg-black/40 text-indigo-600 focus:ring-indigo-600 cursor-pointer transition-all"
                   />
-                  <label htmlFor="subscribe" className="text-[10px] font-black uppercase tracking-widest text-slate-400 cursor-pointer">
-                    Subscribe to Executive Career Insights
+                  <label htmlFor="subscribe" className="text-[10px] font-black uppercase tracking-widest text-slate-500 cursor-pointer hover:text-indigo-400 transition-colors">
+                    Subscribe to Executive Insights
                   </label>
                 </div>
               )}
@@ -189,42 +192,42 @@ export default function LoginPage() {
               <button 
                 type="submit"
                 disabled={loading}
-                className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 flex items-center justify-center gap-2"
+                className="w-full bg-white text-black py-5 rounded-3xl font-black text-xs uppercase tracking-[0.3em] hover:bg-indigo-600 hover:text-white transition-all shadow-2xl active:scale-95 flex items-center justify-center gap-3 group"
               >
                 {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (
                   <>
                     {mode === 'login' ? 'Authorize Session' : 'Create Identity'}
-                    <ChevronRight className="h-5 w-5 opacity-50" />
+                    <ChevronRight className="h-5 w-5 opacity-30 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
               </button>
             </form>
 
             <div className="relative py-4">
-              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-100"></div></div>
-              <div className="relative flex justify-center text-[10px] uppercase font-black text-slate-400 tracking-[0.3em]"><span className="bg-white px-4">Social Gateway</span></div>
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/5"></div></div>
+              <div className="relative flex justify-center text-[9px] uppercase font-black text-slate-600 tracking-[0.5em]"><span className="bg-[#020617] px-6">Quantum Gateway</span></div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-6">
               <button 
                 onClick={() => handleOAuth('google')}
-                className="flex items-center justify-center gap-3 px-4 py-4 bg-white border border-slate-200 rounded-2xl font-bold text-xs text-slate-700 hover:bg-slate-50 transition-all shadow-sm uppercase tracking-widest"
+                className="flex items-center justify-center gap-4 px-6 py-5 bg-white/5 border border-white/5 rounded-3xl font-black text-[10px] text-white hover:bg-white hover:text-black transition-all shadow-sm uppercase tracking-widest"
               >
                 <Chrome className="h-4 w-4 text-red-500" /> Google
               </button>
               <button 
                 onClick={() => handleOAuth('github')}
-                className="flex items-center justify-center gap-3 px-4 py-4 bg-white border border-slate-200 rounded-2xl font-bold text-xs text-slate-700 hover:bg-slate-50 transition-all shadow-sm uppercase tracking-widest"
+                className="flex items-center justify-center gap-4 px-6 py-5 bg-white/5 border border-white/5 rounded-3xl font-black text-[10px] text-white hover:bg-white hover:text-black transition-all shadow-sm uppercase tracking-widest"
               >
-                <Github className="h-4 w-4 text-slate-900" /> GitHub
+                <Github className="h-4 w-4 text-indigo-400" /> GitHub
               </button>
             </div>
 
-            <p className="text-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+            <p className="text-center text-[10px] font-black uppercase tracking-[0.3em] text-slate-600">
               {mode === 'login' ? "Identity missing?" : "Known subject?"}
               <button 
                 onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
-                className="ml-2 text-indigo-600 hover:underline"
+                className="ml-3 text-indigo-500 hover:text-white transition-colors underline underline-offset-8 decoration-indigo-500/30"
               >
                 {mode === 'login' ? 'Initialize Here' : 'Sign In'}
               </button>

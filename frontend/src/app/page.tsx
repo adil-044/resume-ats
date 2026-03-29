@@ -251,32 +251,32 @@ export default function Home() {
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-[750px] bg-white rounded-[4rem] p-24 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden border border-white/20"
+              className="relative w-full max-w-[750px] glass-executive rounded-[4rem] p-24 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden border border-white/10 border-beam"
             >
-              <div className="absolute top-0 right-0 p-8 opacity-5 text-indigo-600">
+              <div className="absolute top-0 right-0 p-8 opacity-5 text-indigo-500">
                 <ShieldCheck className="h-96 w-96" />
               </div>
               
               <div className="text-center relative z-10">
                 <div className="space-y-4 mb-16">
-                  <p className="text-[10px] font-black uppercase tracking-[0.5em] text-indigo-600 italic">Extraction Successful</p>
-                  <div className="text-[10rem] font-black text-slate-900 leading-none tracking-tighter drop-shadow-2xl">
-                    {teaserScore}<span className="text-indigo-600 text-6xl">%</span>
+                  <p className="text-[10px] font-black uppercase tracking-[0.5em] text-indigo-400 italic">Extraction Successful</p>
+                  <div className="text-[10rem] font-black text-white leading-none tracking-tighter drop-shadow-[0_0_50px_rgba(99,102,241,0.3)]">
+                    {teaserScore}<span className="text-indigo-500 text-6xl">%</span>
                   </div>
-                  <div className="h-2 w-40 bg-slate-100 rounded-full mx-auto overflow-hidden">
-                    <div className="h-full bg-indigo-600" style={{ width: `${teaserScore}%` }} />
+                  <div className="h-2 w-48 bg-white/5 rounded-full mx-auto overflow-hidden p-0.5 border border-white/5">
+                    <div className="h-full bg-indigo-600 rounded-full shadow-[0_0_15px_rgba(79,70,229,1)]" style={{ width: `${teaserScore}%` }} />
                   </div>
                 </div>
 
-                <h2 className="text-5xl font-black text-slate-900 mb-8 tracking-tighter uppercase leading-tight italic">Identity Mapped.</h2>
-                <p className="text-2xl text-slate-500 font-medium mb-16 leading-relaxed max-w-md mx-auto uppercase tracking-tighter">
-                  We've identified <span className="text-indigo-600 font-black underline underline-offset-[16px] decoration-8 decoration-indigo-500/20 text-4xl tracking-tighter italic">12 Critical Gaps</span> in your resume architecture.
+                <h2 className="text-5xl font-black text-white mb-8 tracking-tighter uppercase leading-tight italic">Identity Mapped.</h2>
+                <p className="text-2xl text-slate-400 font-medium mb-16 leading-relaxed max-w-md mx-auto uppercase tracking-tighter">
+                  We've identified <span className="text-indigo-500 font-black underline underline-offset-[16px] decoration-8 decoration-indigo-500/20 text-4xl tracking-tighter italic">12 Critical Gaps</span> in your resume architecture.
                 </p>
                 <div className="space-y-8">
-                  <Link href="/auth/login" className="w-full bg-slate-950 text-white py-10 rounded-[3rem] font-black text-xl uppercase tracking-widest flex items-center justify-center gap-6 hover:bg-indigo-600 transition-all active:scale-95 group shadow-2xl">
+                  <Link href="/auth/login" className="w-full bg-white text-black py-10 rounded-[3rem] font-black text-xl uppercase tracking-widest flex items-center justify-center gap-6 hover:bg-indigo-600 hover:text-white transition-all active:scale-95 group shadow-2xl">
                     Unlock Executive Strategy <Lock className="h-8 w-8 text-indigo-400 opacity-50 group-hover:opacity-100 transition-all" />
                   </Link>
-                  <button onClick={() => { setShowUpsell(false); router.push('/auth/login'); }} className="w-full py-8 rounded-[2.5rem] font-black text-slate-400 hover:text-slate-600 transition-all text-xs uppercase tracking-[0.5em]">
+                  <button onClick={() => { setShowUpsell(false); router.push('/auth/login'); }} className="w-full py-8 rounded-[2.5rem] font-black text-slate-500 hover:text-white transition-all text-xs uppercase tracking-[0.5em]">
                     Bypass Scan & Continue
                   </button>
                 </div>

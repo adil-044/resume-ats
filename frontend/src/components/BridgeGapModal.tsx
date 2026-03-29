@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronRight, ChevronLeft, Sparkles, Loader2, CheckCircle2 } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft, Sparkles, Loader2, CheckCircle2, BrainCircuit, Terminal, Activity } from 'lucide-react';
 import { getGapQuestions, bridgeGapOptimize } from '@/lib/api';
 import { useResumeStore } from '@/store/useResumeStore';
 
@@ -32,7 +32,6 @@ export default function BridgeGapModal({ isOpen, onClose, taskId, onComplete }: 
             analysisResult?.original_text, 
             analysisResult?.job_description
           );
-          // Ensure we have an array
           const qList = Array.isArray(res.questions) ? res.questions : [res.questions];
           setQuestions(qList);
           setAnswers(new Array(qList.length).fill(''));
@@ -75,47 +74,47 @@ export default function BridgeGapModal({ isOpen, onClose, taskId, onComplete }: 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/90 backdrop-blur-xl">
+    <div className="fixed inset-0 z-[250] flex items-center justify-center p-6 bg-[#020617]/95 backdrop-blur-3xl">
       <motion.div 
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="w-full max-w-2xl bg-white rounded-[3rem] shadow-2xl overflow-hidden relative border border-white/20"
+        className="w-full max-w-2xl glass-executive rounded-[4rem] border-white/10 overflow-hidden relative shadow-[0_0_100px_rgba(99,102,241,0.2)] border-beam"
       >
-        <button onClick={onClose} className="absolute top-8 right-8 p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-400 z-10">
-          <X className="h-5 w-5" />
+        <button onClick={onClose} className="absolute top-10 right-10 p-3 hover:bg-white/5 rounded-2xl transition-all text-slate-500 hover:text-white border border-transparent hover:border-white/10 z-20">
+          <X className="h-6 w-6" />
         </button>
 
-        <div className="p-12">
+        <div className="p-16">
           {isLoading ? (
-            <div className="h-[400px] flex flex-col items-center justify-center gap-6">
+            <div className="h-[450px] flex flex-col items-center justify-center gap-10">
               <div className="relative">
-                <Loader2 className="h-12 w-12 animate-spin text-indigo-600" />
-                <Sparkles className="h-5 w-5 text-indigo-400 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                <Loader2 className="h-20 w-24 animate-spin text-indigo-500 opacity-20" />
+                <BrainCircuit className="h-8 w-8 text-indigo-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
               </div>
-              <p className="text-slate-900 font-black tracking-[0.3em] uppercase text-[10px] animate-pulse">Mapping Semantic Delta...</p>
+              <p className="text-white font-black tracking-[0.5em] uppercase text-[10px] animate-pulse italic">Mapping Semantic Delta...</p>
             </div>
           ) : (
-            <div className="space-y-10">
+            <div className="space-y-12">
               {/* Header */}
-              <div className="flex items-center gap-4">
-                <div className="bg-indigo-600 p-3 rounded-2xl shadow-lg shadow-indigo-200">
-                  <Sparkles className="h-6 w-6 text-white" />
+              <div className="flex items-center gap-6">
+                <div className="bg-indigo-600 p-4 rounded-[1.5rem] shadow-2xl shadow-indigo-900/40">
+                  <Sparkles className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-black text-slate-900 tracking-tight uppercase">Bridge the Gap</h2>
-                  <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">Target: 95% Match Score</p>
+                  <h2 className="text-4xl font-black text-white tracking-tighter uppercase italic leading-none">Bridge Protocol</h2>
+                  <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.4em] mt-3">Objective: 95% Match Floor</p>
                 </div>
               </div>
 
               {/* Progress */}
-              <div className="space-y-3">
-                <div className="flex justify-between text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
-                  <span>Module {currentStep + 1} of {questions.length}</span>
+              <div className="space-y-4">
+                <div className="flex justify-between text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">
+                  <span className="text-indigo-400 italic">Module {currentStep + 1} / {questions.length}</span>
                   <span>{Math.round(((currentStep + 1) / questions.length) * 100)}% Synchronized</span>
                 </div>
-                <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden p-0.5 border border-white">
+                <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden p-0.5 border border-white/5">
                   <motion.div 
-                    className="h-full bg-indigo-600 rounded-full"
+                    className="h-full bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-full shadow-[0_0_15px_rgba(79,70,229,0.6)]"
                     animate={{ width: `${((currentStep + 1) / questions.length) * 100}%` }}
                     transition={{ type: "spring", stiffness: 50 }}
                   />
@@ -123,51 +122,54 @@ export default function BridgeGapModal({ isOpen, onClose, taskId, onComplete }: 
               </div>
 
               {/* Question Content */}
-              <div className="min-h-[220px] relative">
+              <div className="min-h-[250px] relative">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentStep}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    className="space-y-6"
+                    className="space-y-8"
                   >
-                    <h3 className="text-xl font-black text-slate-800 leading-tight tracking-tight uppercase border-l-4 border-indigo-600 pl-6">
+                    <h3 className="text-2xl font-black text-white leading-[1.2] tracking-tighter uppercase italic border-l-4 border-indigo-600 pl-8">
                       {questions[currentStep]}
                     </h3>
-                    <textarea 
-                      autoFocus
-                      value={answers[currentStep]}
-                      onChange={(e) => {
-                        const newAnswers = [...answers];
-                        newAnswers[currentStep] = e.target.value;
-                        setAnswers(newAnswers);
-                      }}
-                      placeholder="Input specific achievements, metrics, or technologies..."
-                      className="w-full h-36 p-6 bg-slate-50 border-2 border-slate-100 rounded-[2rem] focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none resize-none text-slate-700 text-sm font-medium transition-all"
-                    />
+                    <div className="relative group">
+                      <Terminal className="absolute left-6 top-6 h-5 w-5 text-slate-700 group-focus-within:text-indigo-500 transition-colors" />
+                      <textarea 
+                        autoFocus
+                        value={answers[currentStep]}
+                        onChange={(e) => {
+                          const newAnswers = [...answers];
+                          newAnswers[currentStep] = e.target.value;
+                          setAnswers(newAnswers);
+                        }}
+                        placeholder="Input career signals, metrics, or technologies..."
+                        className="w-full h-44 p-8 pl-16 bg-black/40 border-2 border-white/5 rounded-[2.5rem] focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 outline-none resize-none text-white text-lg font-medium transition-all shadow-inner placeholder:text-slate-800"
+                      />
+                    </div>
                   </motion.div>
                 </AnimatePresence>
               </div>
 
               {/* Footer */}
-              <div className="flex justify-between items-center pt-6 border-t border-slate-50">
+              <div className="flex justify-between items-center pt-8 border-t border-white/5">
                 <button 
                   onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
                   disabled={currentStep === 0}
-                  className="flex items-center gap-2 px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest text-slate-400 hover:bg-slate-50 disabled:opacity-0 transition-all"
+                  className="flex items-center gap-3 px-8 py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] text-slate-600 hover:text-white hover:bg-white/5 disabled:opacity-0 transition-all italic"
                 >
-                  <ChevronLeft className="h-4 w-4" /> Previous
+                  <ChevronLeft className="h-5 w-5" /> Previous_Module
                 </button>
                 <button 
                   onClick={handleNext}
                   disabled={!answers[currentStep]?.trim() || isSubmitting}
-                  className="flex items-center gap-3 px-10 py-4 bg-slate-900 text-white rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] hover:bg-indigo-600 shadow-2xl shadow-indigo-900/10 disabled:opacity-50 transition-all active:scale-95"
+                  className="flex items-center gap-4 px-12 py-5 bg-white text-black rounded-[2rem] font-black text-[11px] uppercase tracking-[0.3em] hover:bg-indigo-600 hover:text-white shadow-2xl disabled:opacity-50 transition-all active:scale-95 group"
                 >
                   {isSubmitting ? (
-                    <><Loader2 className="h-4 w-4 animate-spin" /> Finalizing Architecture...</>
+                    <><Loader2 className="h-5 w-5 animate-spin" /> Finalizing Architecture...</>
                   ) : (
-                    <>{currentStep === questions.length - 1 ? 'Execute Scan' : 'Next Module'} <ChevronRight className="h-4 w-4" /></>
+                    <>{currentStep === questions.length - 1 ? 'Execute Scan' : 'Next Module'} <ChevronRight className="h-5 w-5 opacity-30 group-hover:translate-x-1 transition-all" /></>
                   )}
                 </button>
               </div>
