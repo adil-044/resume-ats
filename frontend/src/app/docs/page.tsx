@@ -3,7 +3,7 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
-import { Book, Cpu, Search, FileText, Zap, ShieldCheck, Target, BrainCircuit } from 'lucide-react';
+import { Book, Cpu, Search, FileText, Zap, ShieldCheck, Target, BrainCircuit, Terminal, Activity } from 'lucide-react';
 
 export default function DocsPage() {
   return (
