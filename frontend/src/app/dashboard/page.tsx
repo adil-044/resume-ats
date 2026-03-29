@@ -9,7 +9,7 @@ import {
   History, LogOut, LayoutDashboard, Plus, Search,
   TrendingUp, Clock, CheckCircle2, ShieldCheck, Briefcase,
   Zap, AlertTriangle, FileUp, Cpu, Terminal, Command, LayoutGrid,
-  Rocket, Activity, Fingerprint, Globe, Shield
+  Rocket, Activity, Fingerprint, Globe, Shield, Menu, X
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -38,6 +38,7 @@ export default function Dashboard() {
   const [isGapModalOpen, setIsGapModalOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [analysisStep, setAnalysisStep] = useState<string>('Initializing...');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const getUser = async () => {
@@ -46,22 +47,6 @@ export default function Dashboard() {
         router.push('/auth/login');
       } else {
         setUser(user);
-        
-        // Sync profile data if it doesn't exist
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-          
-        if (!profile) {
-          await supabase.from('profiles').insert({
-            id: user.id,
-            full_name: user.user_metadata.full_name || user.email?.split('@')[0],
-            location: user.user_metadata.location || 'Unknown'
-          });
-        }
-        
         fetchHistory(user.id);
       }
     };
@@ -76,9 +61,7 @@ export default function Dashboard() {
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('History fetch error:', error);
-    } else {
+    if (!error) {
       setHistory(data.map((item: any) => ({
         id: item.id,
         overall_score: item.after_score || item.before_score,
@@ -93,7 +76,8 @@ export default function Dashboard() {
         },
         job_title: item.job_title,
         job_description: item.job_description,
-        original_text: item.original_text
+        original_text: item.original_text,
+        created_at: item.created_at
       })));
     }
     setIsLoadingHistory(false);
@@ -110,38 +94,18 @@ export default function Dashboard() {
     }
   };
 
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(e.type === "dragenter" || e.type === "dragover");
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setResumeFile(e.dataTransfer.files[0]);
-    }
-  };
-
   const handleAnalyze = async () => {
     if (!resumeFile || !jobDescription) return;
     setIsAnalyzing(true);
-    setAnalysisStep('Protocol Extraction...');
+    setAnalysisStep('Quantum Extraction...');
     
     try {
-      setTimeout(() => setAnalysisStep('Mapping Semantic Delta...'), 2000);
-      setTimeout(() => setAnalysisStep('Analyzing Match Floor...'), 4000);
-      setTimeout(() => setAnalysisStep('Generating Executive Strategy...'), 6000);
-
       const result = await analyzeResume(resumeFile, jobDescription);
-      
       const { data, error } = await supabase
         .from('resumes')
         .insert({
           user_id: user.id,
-          job_title: result.optimized_content.raw_text.split('\n')[0].replace('# ', '') || 'Untitled Strategy',
+          job_title: result.optimized_content.raw_text.split('\n')[0].replace('# ', '').slice(0, 50) || 'Untitled Strategy',
           original_text: result.original_text || '',
           optimized_text: result.optimized_content.raw_text,
           before_score: result.initial_score,
@@ -156,36 +120,25 @@ export default function Dashboard() {
         .single();
 
       if (error) throw error;
-
-      result.id = data.id;
       setAnalysisResult(result);
       router.push(`/workspace/${data.id}`);
     } catch (error) {
       console.error(error);
-      alert('Analysis system offline. Check secure connection.');
+      alert('Strategic link error.');
     } finally {
       setIsAnalyzing(false);
     }
   };
 
-  const openBridgeGap = (e: React.MouseEvent, taskId: string) => {
-    e.stopPropagation();
-    setSelectedTaskId(taskId);
-    setIsGapModalOpen(true);
-  };
-
   return (
-    <div className="min-h-screen bg-[#020617] flex flex-col font-sans selection:bg-indigo-500/30">
+    <div className="min-h-screen bg-black flex flex-col font-sans selection:bg-indigo-500/30">
       <Navbar />
       
       <AnimatePresence>
         {isGapModalOpen && selectedTaskId && (
           <BridgeGapModal 
             isOpen={isGapModalOpen} 
-            onClose={() => {
-              setIsGapModalOpen(false);
-              fetchHistory(user.id);
-            }} 
+            onClose={() => { setIsGapModalOpen(false); fetchHistory(user.id); }} 
             taskId={selectedTaskId} 
             onComplete={() => {}} 
           />
@@ -193,244 +146,173 @@ export default function Dashboard() {
       </AnimatePresence>
 
       <div className="flex-1 flex overflow-hidden relative">
-        {/* Elite Sidebar */}
-        <aside className="w-80 bg-slate-900/40 border-r border-white/5 hidden lg:flex flex-col p-8 backdrop-blur-3xl z-20">
-          <div className="flex-1 space-y-2">
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.5em] mb-10 px-4">Management</p>
-            <button 
-              onClick={() => setActiveTab('scan')}
-              className={`w-full flex items-center gap-4 px-6 py-5 rounded-[2rem] font-black text-[11px] uppercase tracking-widest transition-all duration-700 ${activeTab === 'scan' ? 'bg-white text-black shadow-[0_0_40px_rgba(255,255,255,0.1)]' : 'text-slate-500 hover:bg-white/5 hover:text-white'}`}
-            >
-              <LayoutGrid className="h-4 w-4" />
-              Intelligence Hub
-            </button>
-            <button 
-              onClick={() => setActiveTab('history')}
-              className={`w-full flex items-center gap-4 px-6 py-5 rounded-[2rem] font-black text-[11px] uppercase tracking-widest transition-all duration-700 ${activeTab === 'history' ? 'bg-white text-black shadow-[0_0_40px_rgba(255,255,255,0.1)]' : 'text-slate-500 hover:bg-white/5 hover:text-white'}`}
-            >
-              <Terminal className="h-4 w-4" />
-              Strategic Vault
-            </button>
+        {/* Responsive Mobile Toggle */}
+        <button 
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="lg:hidden fixed bottom-8 right-8 z-[100] bg-white text-black p-5 rounded-full shadow-2xl active:scale-90 transition-transform"
+        >
+          {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
+
+        {/* Elite Sidebar (Responsive) */}
+        <aside className={`
+          fixed lg:relative inset-y-0 left-0 w-72 bg-black border-r border-white/5 z-[90] 
+          flex flex-col p-6 backdrop-blur-3xl transition-transform duration-500
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}>
+          <div className="flex-1 space-y-2 pt-10 lg:pt-0">
+            <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.5em] mb-8 px-4 italic">Command_Chain</p>
+            {[
+              { id: 'scan', label: 'Intelligence hub', icon: <LayoutGrid className="h-4 w-4" /> },
+              { id: 'history', label: 'Strategic vault', icon: <Terminal className="h-4 w-4" /> }
+            ].map(tab => (
+              <button 
+                key={tab.id}
+                onClick={() => { setActiveTab(tab.id as any); setSidebarOpen(false); }}
+                className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all duration-500 ${activeTab === tab.id ? 'bg-white text-black shadow-2xl' : 'text-slate-500 hover:bg-white/5 hover:text-white'}`}
+              >
+                {tab.icon}
+                {tab.label}
+              </button>
+            ))}
           </div>
 
           <div className="pt-8 border-t border-white/5">
-            <div className="bg-white/5 p-6 rounded-[2.5rem] border border-white/5 mb-8">
+            <div className="bg-white/5 p-5 rounded-3xl border border-white/5 mb-6">
               <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-2xl bg-indigo-600 flex items-center justify-center text-white text-sm font-black shadow-2xl">
+                <div className="h-10 w-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white text-xs font-black">
                   {user?.email?.[0].toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[11px] font-black text-white truncate uppercase tracking-tighter">{user?.email?.split('@')[0]}</p>
+                  <p className="text-[10px] font-black text-white truncate uppercase italic">{user?.email?.split('@')[0]}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <div className="h-1 w-1 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,197,94,1)]" />
-                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Active Node</span>
+                    <span className="text-[8px] font-bold text-slate-600 uppercase tracking-widest">Quantum_Node</span>
                   </div>
                 </div>
               </div>
             </div>
-            <button 
-              onClick={handleLogout}
-              className="w-full flex items-center gap-4 px-6 py-5 rounded-[2rem] font-black text-[10px] text-red-400 hover:bg-red-500/10 transition-all uppercase tracking-[0.4em]"
-            >
+            <button onClick={handleLogout} className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-black text-[9px] text-red-500/60 hover:text-red-400 hover:bg-red-500/5 transition-all uppercase tracking-[0.4em]">
               <LogOut className="h-4 w-4" />
-              Exit System
+              Terminate_Session
             </button>
           </div>
         </aside>
 
         {/* Command Center Content */}
-        <main className="flex-1 overflow-y-auto bg-[#020617] p-12 lg:p-24 intelligence-scrollbar relative z-10">
-          {/* Background Elements */}
-          <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
+        <main className="flex-1 overflow-y-auto bg-black p-6 lg:p-16 intelligence-scrollbar relative">
+          <div className="absolute inset-0 z-0 opacity-10 pointer-events-none scale-75">
             <NexusCore />
           </div>
 
           <AnimatePresence mode="wait">
             {activeTab === 'scan' ? (
-              <motion.div
-                key="scan"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="max-w-6xl mx-auto relative z-10"
-              >
-                <div className="mb-20 pb-12 border-b border-white/5 flex justify-between items-end">
-                  <div>
-                    <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-indigo-400 text-[10px] font-black uppercase tracking-[0.4em] mb-8 backdrop-blur-md">
-                      <Fingerprint className="h-4 w-4" />
-                      <span>Protocol: Executive Mapping 14.0</span>
-                    </div>
-                    <h1 className="text-7xl font-black text-white tracking-tighter uppercase leading-none italic mb-4">Command Center</h1>
-                    <p className="text-slate-500 font-medium text-2xl uppercase tracking-tighter">Initialize document extraction to reveal match delta.</p>
+              <motion.div key="scan" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-5xl mx-auto relative z-10">
+                <div className="mb-16 pb-8 border-b border-white/5">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[8px] font-black uppercase tracking-[0.4em] mb-6">
+                    <Cpu className="h-3 w-3 animate-pulse" /> Protocol_15.0
                   </div>
+                  <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter uppercase leading-none italic mb-4">Command Center</h1>
+                  <p className="text-slate-600 font-medium text-lg uppercase tracking-tighter italic">Initialize extraction to map match delta.</p>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-                  {/* Left: Input Areas */}
-                  <div className="lg:col-span-8 space-y-12">
-                    <div className="glass-executive p-16 rounded-[4rem] relative overflow-hidden group border-white/10 shadow-2xl">
-                      <label className="block text-[10px] font-black text-slate-500 uppercase tracking-[0.5em] mb-12 italic">
-                        01. Source Identity Input
-                      </label>
-                      <div 
-                        onDragEnter={handleDrag}
-                        onDragOver={handleDrag}
-                        onDragLeave={handleDrag}
-                        onDrop={handleDrop}
-                        className={`relative border-2 border-dashed rounded-[3rem] p-24 transition-all duration-700 text-center flex flex-col items-center bg-black/60 shadow-inner ${
-                          dragActive ? 'border-indigo-500 bg-indigo-500/10' : 'border-white/5 hover:border-white/20'
-                        }`}
-                      >
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                  <div className="lg:col-span-8 space-y-8">
+                    <div className="glass-executive p-10 rounded-[2.5rem] border-white/10 shadow-2xl relative overflow-hidden group">
+                      <label className="block text-[9px] font-black text-slate-600 uppercase tracking-[0.5em] mb-8 italic">01. Source_Input</label>
+                      <div className={`relative border-2 border-dashed rounded-[2rem] p-16 text-center transition-all duration-700 bg-black/40 ${dragActive ? 'border-indigo-500 bg-indigo-500/10' : 'border-white/5 hover:border-white/10'}`}>
                         <input type="file" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" accept=".pdf,.docx" />
                         {resumeFile ? (
-                          <>
-                            <div className="bg-indigo-600 p-10 rounded-[3rem] mb-8 shadow-2xl shadow-indigo-900/40 animate-in zoom-in-95"><FileText className="h-16 w-16 text-white" /></div>
-                            <p className="text-white font-black text-4xl mb-4 truncate max-w-full px-8 tracking-tighter uppercase italic">{resumeFile.name}</p>
-                            <p className="text-indigo-400 font-black text-[11px] uppercase tracking-[0.4em] bg-indigo-500/10 px-8 py-3 rounded-full border border-indigo-500/20">Extraction Ready</p>
-                          </>
+                          <div className="flex flex-col items-center">
+                            <div className="bg-indigo-600 p-6 rounded-2xl mb-6 shadow-2xl"><FileText className="h-10 w-10 text-white" /></div>
+                            <p className="text-white font-black text-2xl mb-2 tracking-tighter uppercase italic truncate max-w-full px-4">{resumeFile.name}</p>
+                            <span className="text-indigo-400 text-[9px] font-black uppercase tracking-[0.4em] bg-indigo-500/10 px-4 py-1.5 rounded-full border border-indigo-500/20">Data_Locked</span>
+                          </div>
                         ) : (
-                          <>
-                            <div className="bg-white/5 p-10 rounded-[3rem] mb-8 border border-white/10 group-hover:scale-110 transition-all duration-700 shadow-2xl text-white/20 group-hover:bg-indigo-600 group-hover:text-white group-hover:border-indigo-500"><Plus className="h-16 w-16" /></div>
-                            <p className="text-white font-black text-3xl mb-4 uppercase tracking-tighter italic">Upload Identity Source</p>
-                            <p className="text-slate-500 font-bold text-xs uppercase tracking-[0.4em]">PDF / DOCX Required</p>
-                          </>
+                          <div className="flex flex-col items-center opacity-40 group-hover:opacity-100 transition-opacity">
+                            <Upload className="h-12 w-12 text-white mb-6" />
+                            <p className="text-white font-black text-xl uppercase italic tracking-tighter">Upload Identity Source</p>
+                            <p className="text-slate-600 text-[8px] font-black uppercase mt-2">PDF / DOCX Required</p>
+                          </div>
                         )}
                       </div>
                     </div>
 
                     <button 
-                      onClick={handleAnalyze}
+                      onClick={handleAnalyze} 
                       disabled={!resumeFile || !jobDescription || isAnalyzing}
-                      className={`w-full py-12 rounded-[4rem] font-black text-4xl flex items-center justify-center gap-10 transition-all duration-700 shadow-[0_0_100px_-20px_rgba(99,102,241,0.5)] relative overflow-hidden group active:scale-[0.98] border border-white/10 uppercase tracking-tighter italic ${
-                        !resumeFile || !jobDescription || isAnalyzing
-                        ? 'bg-white/5 text-slate-800 cursor-not-allowed border border-white/5 shadow-none'
-                        : 'bg-indigo-600 text-white hover:bg-white hover:text-black'
-                      }`}
+                      className={`w-full py-10 rounded-[2.5rem] font-black text-2xl flex items-center justify-center gap-6 transition-all duration-700 shadow-2xl uppercase tracking-tighter italic border border-white/10 ${!resumeFile || !jobDescription || isAnalyzing ? 'bg-white/5 text-slate-800 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-white hover:text-black'}`}
                     >
                       {isAnalyzing ? (
-                        <div className="flex items-center gap-8">
-                          <Loader2 className="h-12 w-12 animate-spin text-indigo-400" />
-                          <div className="flex flex-col items-start leading-none text-left">
-                            <span className="text-2xl">EXECUTING...</span>
-                            <span className="text-[11px] opacity-60 uppercase tracking-[0.5em] mt-3 italic font-black text-indigo-200">{analysisStep}</span>
-                          </div>
+                        <div className="flex items-center gap-4">
+                          <Loader2 className="h-8 w-8 animate-spin" />
+                          <div className="flex flex-col items-start leading-none"><span className="text-xl">Executing...</span><span className="text-[9px] opacity-60 uppercase tracking-[0.4em] mt-1">{analysisStep}</span></div>
                         </div>
                       ) : (
-                        <>
-                          <Rocket className="h-12 w-12 text-indigo-400 group-hover:rotate-12 transition-transform duration-700" />
-                          <span>Initialize Analysis</span>
-                          <ArrowRight className="h-12 w-12 opacity-30 group-hover:translate-x-6 transition-transform duration-700" />
-                        </>
+                        <><Rocket className="h-8 w-8 text-indigo-400 group-hover:rotate-12 transition-transform" /><span>Initialize Analysis</span><ArrowRight className="h-8 w-8 opacity-30 group-hover:translate-x-4 transition-transform" /></>
                       )}
                     </button>
                   </div>
 
-                  {/* Right: JD Area */}
-                  <div className="lg:col-span-4 h-full">
-                    <div className="bg-slate-900/80 p-12 rounded-[4rem] shadow-2xl h-full flex flex-col relative overflow-hidden group border border-white/5 backdrop-blur-3xl">
-                      <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-[100px]" />
-                      <label className="block text-[10px] font-black text-indigo-500 uppercase tracking-[0.5em] mb-12 italic">
-                        02. Requirements Pool
-                      </label>
-                      <div className="flex-1 flex flex-col relative z-10">
-                        <textarea 
-                          value={jobDescription}
-                          onChange={(e) => setJobDescription(e.target.value)}
-                          placeholder="Paste the target requirements architecture..."
-                          className="flex-1 w-full bg-black/60 border-2 border-white/5 rounded-[3rem] p-12 text-white text-2xl font-medium leading-relaxed outline-none focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500/50 transition-all resize-none placeholder:text-slate-900 shadow-inner"
-                        />
-                        <div className="mt-10 flex items-center justify-between text-slate-700 px-4">
-                          <span className="text-[10px] font-black uppercase tracking-[0.5em]">Input Context</span>
-                          <Shield className="h-6 w-6 opacity-20" />
-                        </div>
-                      </div>
+                  <div className="lg:col-span-4">
+                    <div className="bg-slate-900/40 p-10 rounded-[2.5rem] border border-white/5 h-full backdrop-blur-3xl flex flex-col">
+                      <label className="block text-[9px] font-black text-indigo-500/60 uppercase tracking-[0.5em] mb-8 italic">02. Requirements_Pool</label>
+                      <textarea 
+                        value={jobDescription} 
+                        onChange={(e) => setJobDescription(e.target.value)}
+                        placeholder="Paste target requirements..."
+                        className="flex-1 w-full bg-black/60 border-2 border-white/5 rounded-3xl p-8 text-white text-lg font-medium outline-none focus:border-indigo-500/50 transition-all resize-none placeholder:text-slate-900 shadow-inner"
+                      />
                     </div>
                   </div>
                 </div>
               </motion.div>
             ) : (
-              <motion.div
-                key="history"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="max-w-[1600px] mx-auto pb-48 relative z-10"
-              >
-                <div className="flex justify-between items-center mb-24 pb-12 border-b border-white/5">
+              <motion.div key="history" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-[1400px] mx-auto pb-32 relative z-10">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8 pb-8 border-b border-white/5">
                   <div>
-                    <h1 className="text-8xl font-black text-white tracking-[0.1em] uppercase leading-none italic">The Vault</h1>
-                    <p className="text-slate-500 font-medium text-3xl mt-6 uppercase tracking-tighter">High-signal career architectures, secured.</p>
+                    <h1 className="text-6xl font-black text-white tracking-tighter uppercase italic leading-none">The Vault</h1>
+                    <p className="text-slate-600 font-medium text-xl mt-4 uppercase tracking-tighter italic">High-signal career architectures.</p>
                   </div>
-                  <button onClick={() => setActiveTab('scan')} className="bg-white text-black px-16 py-8 rounded-[2.5rem] font-black text-xs uppercase tracking-[0.4em] hover:bg-indigo-600 hover:text-white transition-all shadow-[0_0_100px_rgba(255,255,255,0.1)] active:scale-95 border border-white/10">
-                    <Plus className="h-6 w-6" /> New Strategy
+                  <button onClick={() => setActiveTab('scan')} className="bg-white text-black px-10 py-5 rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.4em] hover:bg-indigo-600 hover:text-white transition-all shadow-2xl active:scale-95 flex items-center gap-3">
+                    <Plus className="h-4 w-4" /> New_Strategy
                   </button>
                 </div>
 
                 {isLoadingHistory ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
-                    {[1,2,3,4].map(i => (
-                      <div key={i} className="h-[500px] bg-white/5 rounded-[4rem] animate-pulse border border-white/5" />
-                    ))}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {[1,2,3,4].map(i => <div key={i} className="h-80 bg-white/5 rounded-[2.5rem] animate-pulse border border-white/5" />)}
                   </div>
                 ) : history.length === 0 ? (
-                  <div className="glass-executive rounded-[6rem] p-64 border border-dashed border-white/5 text-center space-y-12">
-                    <div className="h-40 w-40 bg-white/5 rounded-[4rem] mx-auto flex items-center justify-center shadow-inner text-white/5">
-                      <Search className="h-20 w-20" />
-                    </div>
-                    <div>
-                      <h3 className="text-5xl font-black text-white uppercase italic tracking-tighter leading-none opacity-20">Vault is Offline</h3>
-                      <p className="text-slate-600 font-medium mt-6 text-2xl max-w-lg mx-auto uppercase tracking-tighter">Initialize your first strategic scan to populate your executive vault.</p>
-                    </div>
+                  <div className="glass-executive rounded-[4rem] p-32 border border-dashed border-white/5 text-center flex flex-col items-center">
+                    <Search className="h-16 w-16 text-white/5 mb-8" />
+                    <h3 className="text-3xl font-black text-white uppercase italic opacity-20 tracking-tighter">Vault_Offline</h3>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-12">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {history.map((item) => (
                       <motion.div 
-                        key={item.id}
-                        whileHover={{ y: -16, scale: 1.03 }}
-                        className="bg-slate-900/40 p-12 rounded-[4rem] border border-white/5 shadow-2xl group cursor-pointer flex flex-col relative overflow-hidden transition-all duration-1000 hover:border-indigo-500/40 hover:bg-black/60 border-beam"
-                        onClick={() => {
-                          setAnalysisResult(item);
-                          router.push(`/workspace/${item.id}`);
-                        }}
+                        key={item.id} 
+                        whileHover={{ y: -8, scale: 1.02 }}
+                        className="bg-slate-900/40 p-8 rounded-[2.5rem] border border-white/5 shadow-xl group cursor-pointer flex flex-col relative overflow-hidden transition-all duration-700 hover:border-indigo-500/30 hover:bg-black/60 border-beam"
+                        onClick={() => { setAnalysisResult(item); router.push(`/workspace/${item.id}`); }}
                       >
-                        <div className="absolute top-0 right-0 p-12 opacity-[0.03] group-hover:scale-150 transition-transform duration-1000 text-white">
-                          <ShieldCheck className="h-64 w-64" />
-                        </div>
-                        
-                        <div className="flex justify-between items-start mb-16 relative z-10">
-                          <div className="bg-white/5 p-6 rounded-[2rem] text-slate-600 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-700 border border-white/5 shadow-inner">
-                            <Briefcase className="h-10 w-10" />
-                          </div>
+                        <div className="flex justify-between items-start mb-10 relative z-10">
+                          <div className="bg-white/5 p-4 rounded-2xl text-slate-600 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-700 border border-white/5"><Briefcase className="h-6 w-6" /></div>
                           <div className="text-right">
-                            <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.5em] mb-3 group-hover:text-indigo-400 italic">Match_Score</p>
-                            <p className="text-5xl font-black text-white tracking-tighter group-hover:text-indigo-500 transition-all duration-700">{item.overall_score}<span className="text-xl opacity-20">%</span></p>
+                            <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.4em] mb-1 italic">Signal</p>
+                            <p className="text-3xl font-black text-white tracking-tighter group-hover:text-indigo-500 transition-colors">{item.overall_score}%</p>
                           </div>
                         </div>
-
-                        <h3 className="text-3xl font-black text-white mb-6 truncate uppercase tracking-tighter group-hover:text-indigo-400 transition-all duration-700 relative z-10 italic leading-none">
-                          {item.job_title || 'Untitled_Node'}
-                        </h3>
-                        
-                        <div className="flex items-center gap-5 text-slate-600 font-bold text-[10px] uppercase tracking-[0.3em] mb-16 relative z-10 italic">
-                          <div className="flex items-center gap-3"><Clock className="h-4 w-4 opacity-30" /> {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
-                          <div className="h-2 w-2 bg-indigo-500/20 rounded-full" />
-                          <div className="flex items-center gap-3 text-indigo-500/40 font-black"><Zap className="h-4 w-4" /> Strategic</div>
+                        <h3 className="text-xl font-black text-white mb-4 truncate uppercase tracking-tighter italic group-hover:text-indigo-400 transition-all">{item.job_title || 'Untitled_Strategy'}</h3>
+                        <div className="flex items-center gap-4 text-slate-600 font-bold text-[8px] uppercase tracking-[0.3em] mb-10 italic">
+                          <div className="flex items-center gap-2"><Clock className="h-3 w-3 opacity-30" /> {new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
+                          <div className="h-1 w-1 bg-indigo-500/20 rounded-full" />
+                          <div className="text-indigo-500/40 font-black">Strategic</div>
                         </div>
-                        
-                        <div className="mt-auto space-y-6 pt-12 border-t border-white/5 relative z-10">
-                          <div className="flex items-center justify-between text-[11px] font-black uppercase tracking-[0.5em]">
-                            <span className="text-slate-700 group-hover:text-slate-500 transition-all italic">Base: {item.initial_score}%</span>
-                            <span className="text-white flex items-center gap-3 group-hover:translate-x-4 transition-all duration-1000 opacity-20 group-hover:opacity-100">
-                              EXEC <ArrowRight className="h-4 w-4" />
-                            </span>
-                          </div>
-                          {item.overall_score < 90 && (
-                            <button 
-                              onClick={(e) => openBridgeGap(e, item.id)}
-                              className="w-full py-6 bg-white/5 text-slate-500 rounded-[2rem] text-[10px] font-black uppercase tracking-[0.4em] flex items-center justify-center gap-4 hover:bg-indigo-600 hover:text-white transition-all border border-white/5 hover:border-indigo-500 shadow-2xl active:scale-95"
-                            >
-                              <Plus className="h-4 w-4" /> Bridge Protocol
-                            </button>
-                          )}
+                        <div className="mt-auto pt-6 border-t border-white/5 flex items-center justify-between text-[9px] font-black uppercase tracking-[0.4em]">
+                          <span className="text-slate-700 group-hover:text-slate-500 transition-all italic">Base: {item.initial_score}%</span>
+                          <span className="text-white opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-2 flex items-center gap-2">EXEC <ArrowRight className="h-3 w-3" /></span>
                         </div>
                       </motion.div>
                     ))}

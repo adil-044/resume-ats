@@ -11,17 +11,17 @@
   --color-brand-primary: #6366f1;
   --color-brand-secondary: #06b6d4;
   --color-executive-slate: #0f172a;
-  --color-onyx: #020617;
+  --color-onyx: #000000;
   --color-quantum-indigo: #4f46e5;
 }
 
 @layer base {
   :root {
-    --background: 222.2 84% 4.9%; /* Deep Onyx */
+    --background: 0 0% 0%; /* Absolute Zero Black */
     --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
+    --card: 0 0% 0%;
     --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
+    --popover: 0 0% 0%;
     --popover-foreground: 210 40% 98%;
     --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 222.2 47.4% 11.2%;
@@ -36,43 +36,40 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
-    --radius: 1.5rem;
+    --radius: 1rem;
   }
 
   * {
     border-color: hsla(var(--border), 0.1);
     outline-color: hsla(var(--ring), 0.5);
   }
+  
+  html {
+    font-size: 14px; /* Scaled down for high-density executive feel */
+  }
+
   body {
-    background-color: #020617;
+    background-color: #000000;
     color: #f8fafc;
     font-feature-settings: "rlig" 1, "calt" 1;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
   }
 }
 
 @layer utilities {
   .noise-overlay {
     background-image: url("https://grainy-gradients.vercel.app/noise.svg");
-    opacity: 0.05;
+    opacity: 0.03;
     filter: contrast(150%) brightness(100%);
+  }
+
+  .vignette {
+    background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%);
   }
 
   .animate-spotlight {
     animation: spotlight 2s ease .75s 1 forwards;
-  }
-
-  .animate-aurora {
-    animation: aurora 20s linear infinite;
-  }
-
-  .animate-gradient {
-    background-size: 300% 300%;
-    animation: gradient 8s ease infinite;
-  }
-
-  .animate-meteor {
-    animation: meteor 5s linear infinite;
   }
 
   @keyframes spotlight {
@@ -80,27 +77,10 @@
     100% { opacity: 1; transform: translate(-50%,-40%) scale(1); }
   }
 
-  @keyframes aurora {
-    from { background-position: 50% 50%, 50% 50%; }
-    to { background-position: 350% 50%, 350% 50%; }
-  }
-
-  @keyframes gradient {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-
-  @keyframes meteor {
-    0% { transform: rotate(215deg) translateX(0); opacity: 1; }
-    70% { opacity: 1; }
-    100% { transform: rotate(215deg) translateX(-500px); opacity: 0; }
-  }
-
   .glass-executive {
-    background: rgba(15, 23, 42, 0.4);
-    backdrop-filter: blur(32px);
-    -webkit-backdrop-filter: blur(32px);
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   }
@@ -129,22 +109,20 @@
     to { background-position: -200% 0; }
   }
 
-  @keyframes grid {
-    0% { background-position: 0 0; }
-    100% { background-position: 0 60px; }
-  }
-
-  .animate-grid {
-    animation: grid 15s linear infinite;
-  }
-
-  .text-glow {
-    text-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
-  }
-
-  .executive-gradient {
-    background: linear-gradient(135deg, #f8fafc 0%, #94a3b8 100%);
+  .text-kinetic {
+    background: linear-gradient(180deg, #fff 0%, #64748b 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+  }
+
+  .intelligence-scrollbar::-webkit-scrollbar {
+    width: 3px;
+  }
+  .intelligence-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .intelligence-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
   }
 }
