@@ -9,32 +9,33 @@
   --font-mono: var(--font-geist-mono);
   
   --color-brand-primary: #6366f1;
-  --color-brand-secondary: #a855f7;
+  --color-brand-secondary: #06b6d4;
   --color-executive-slate: #0f172a;
+  --color-onyx: #020617;
 }
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 240 5.9% 10%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-    --radius: 1rem;
+    --background: 222.2 84% 4.9%; /* Deep Onyx */
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+    --radius: 1.25rem;
   }
 
   * {
@@ -42,8 +43,8 @@
     outline-color: hsla(var(--ring), 0.5);
   }
   body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+    background-color: #020617;
+    color: #f8fafc;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
@@ -60,6 +61,10 @@
   .animate-gradient {
     background-size: 300% 300%;
     animation: gradient 8s ease infinite;
+  }
+
+  .animate-meteor {
+    animation: meteor 5s linear infinite;
   }
 
   @keyframes spotlight {
@@ -84,28 +89,56 @@
     100% { background-position: 0% 50%; }
   }
 
-  .glass-executive {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  @keyframes meteor {
+    0% { transform: rotate(215deg) translateX(0); opacity: 1; }
+    70% { opacity: 1; }
+    100% { transform: rotate(215deg) translateX(-500px); opacity: 0; }
   }
 
-  .border-glow {
-    position: relative;
+  .glass-executive {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   }
-  .border-glow::after {
+
+  .border-beam {
+    position: relative;
+    overflow: hidden;
+  }
+  .border-beam::after {
     content: "";
     position: absolute;
-    inset: -1px;
-    background: linear-gradient(to right, #6366f1, #a855f7);
-    z-index: -1;
-    border-radius: inherit;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    inset: 0;
+    padding: 1px;
+    background: linear-gradient(to right, transparent, #6366f1, #06b6d4, transparent);
+    background-size: 200% 100%;
+    animation: border-beam 4s linear infinite;
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+    pointer-events: none;
   }
-  .border-glow:hover::after {
-    opacity: 0.5;
+
+  @keyframes border-beam {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+  }
+
+  .intelligence-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .intelligence-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  @keyframes grid {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 60px; }
+  }
+
+  .animate-grid {
+    animation: grid 15s linear infinite;
   }
 }

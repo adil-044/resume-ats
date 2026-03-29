@@ -1,7 +1,7 @@
-# Checkpoint: HireReady V10 - Rebrand & Core Pages
+# Checkpoint: HireReady V13 - Onyx & Indigo Overhaul
 
 **Status:** WORKING (Verified on March 14, 2026)
-**Git Commit:** `959d753`
+**Git Commit:** `2a48d93`
 
 ---
 
@@ -11,13 +11,13 @@
 - **Host:** `127.0.0.1`
 - **Port:** `9000`
 - **Model:** `gemini-flash-latest` (Locked via Google GenAI SDK)
-- **New Features:** Pre-cleaning protocol for raw text, DOCX header extraction, Deep Gap Analysis.
+- **Security:** AES-256 Vault Encryption simulation.
 
 ### Frontend (Next.js)
-- **Framework:** Next.js 15+ (App Router)
-- **Brand:** HireReady (Rebranded from RESUBOOST)
-- **Pages:** Home, Dashboard, Workspace, Privacy, Terms, Pricing, Docs.
-- **Auth:** Supabase OAuth + Profile Sync (Name/Location)
+- **Theme:** Elite Dark (Onyx & Indigo)
+- **Motion:** RetroGrid, Meteors, Spotlight, BorderBeam.
+- **Components:** Shadcn + Custom Glassmorphism.
+- **Pages:** Rebranded Home, Dashboard Command Center, Intelligence Workspace.
 
 ---
 
