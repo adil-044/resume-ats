@@ -12,6 +12,7 @@
   --color-brand-secondary: #06b6d4;
   --color-executive-slate: #0f172a;
   --color-onyx: #020617;
+  --color-quantum-indigo: #4f46e5;
 }
 
 @layer base {
@@ -35,21 +36,28 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 224.3 76.3% 48%;
-    --radius: 1.25rem;
+    --radius: 1.5rem;
   }
 
   * {
-    border-color: hsl(var(--border));
+    border-color: hsla(var(--border), 0.1);
     outline-color: hsla(var(--ring), 0.5);
   }
   body {
     background-color: #020617;
     color: #f8fafc;
     font-feature-settings: "rlig" 1, "calt" 1;
+    overflow-x: hidden;
   }
 }
 
 @layer utilities {
+  .noise-overlay {
+    background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+    opacity: 0.05;
+    filter: contrast(150%) brightness(100%);
+  }
+
   .animate-spotlight {
     animation: spotlight 2s ease .75s 1 forwards;
   }
@@ -68,14 +76,8 @@
   }
 
   @keyframes spotlight {
-    0% {
-      opacity: 0;
-      transform: translate(-72%, -62%) scale(0.5);
-    }
-    100% {
-      opacity: 1;
-      transform: translate(-50%,-40%) scale(1);
-    }
+    0% { opacity: 0; transform: translate(-72%, -62%) scale(0.5); }
+    100% { opacity: 1; transform: translate(-50%,-40%) scale(1); }
   }
 
   @keyframes aurora {
@@ -96,10 +98,10 @@
   }
 
   .glass-executive {
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(32px);
+    -webkit-backdrop-filter: blur(32px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
   }
 
@@ -127,12 +129,6 @@
     to { background-position: -200% 0; }
   }
 
-  .intelligence-scrollbar::-webkit-scrollbar {
-    width: 4px;
-  }
-  .intelligence-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
   @keyframes grid {
     0% { background-position: 0 0; }
     100% { background-position: 0 60px; }
@@ -140,5 +136,15 @@
 
   .animate-grid {
     animation: grid 15s linear infinite;
+  }
+
+  .text-glow {
+    text-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
+  }
+
+  .executive-gradient {
+    background: linear-gradient(135deg, #f8fafc 0%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 }
