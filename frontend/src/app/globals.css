@@ -7,6 +7,10 @@
 @theme {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  
+  --color-brand-primary: #6366f1;
+  --color-brand-secondary: #a855f7;
+  --color-executive-slate: #0f172a;
 }
 
 @layer base {
@@ -30,13 +34,25 @@
     --border: 240 5.9% 90%;
     --input: 240 5.9% 90%;
     --ring: 240 5.9% 10%;
-    --radius: 0.75rem;
+    --radius: 1rem;
+  }
+
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
 @layer utilities {
   .animate-spotlight {
     animation: spotlight 2s ease .75s 1 forwards;
+  }
+
+  .animate-aurora {
+    animation: aurora 20s linear infinite;
   }
 
   .animate-gradient {
@@ -55,28 +71,39 @@
     }
   }
 
+  @keyframes aurora {
+    from { background-position: 50% 50%, 50% 50%; }
+    to { background-position: 350% 50%, 350% 50%; }
+  }
+
   @keyframes gradient {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
   }
 
-  .intelligence-scrollbar::-webkit-scrollbar {
-    width: 4px;
+  .glass-executive {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   }
-  .intelligence-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
+
+  .border-glow {
+    position: relative;
   }
-  .intelligence-scrollbar::-webkit-scrollbar-thumb {
-    background: #E2E8F0;
-    border-radius: 10px;
+  .border-glow::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    background: linear-gradient(to right, #6366f1, #a855f7);
+    z-index: -1;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.3s ease;
   }
-  
-  .glass-card {
-    background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  .border-glow:hover::after {
+    opacity: 0.5;
   }
 }
