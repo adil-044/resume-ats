@@ -19,6 +19,7 @@ export interface AnalysisResult {
   original_text?: string;
   job_title?: string;
   job_description?: string;
+  created_at?: string;
 }
 
 interface ResumeState {

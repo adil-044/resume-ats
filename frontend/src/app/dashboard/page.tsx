@@ -306,7 +306,7 @@ export default function Dashboard() {
                         </div>
                         <h3 className="text-xl font-black text-white mb-4 truncate uppercase tracking-tighter italic group-hover:text-indigo-400 transition-all">{item.job_title || 'Untitled_Strategy'}</h3>
                         <div className="flex items-center gap-4 text-slate-600 font-bold text-[8px] uppercase tracking-[0.3em] mb-10 italic">
-                          <div className="flex items-center gap-2"><Clock className="h-3 w-3 opacity-30" /> {new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
+                          <div className="flex items-center gap-2"><Clock className="h-3 w-3 opacity-30" /> {new Date(item.created_at || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
                           <div className="h-1 w-1 bg-indigo-500/20 rounded-full" />
                           <div className="text-indigo-500/40 font-black">Strategic</div>
                         </div>
