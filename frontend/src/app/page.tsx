@@ -6,7 +6,8 @@ import {
   Upload, FileText, Sparkles, ArrowRight, Loader2, 
   ShieldCheck, Zap, Bot, Target, X, CheckCircle2, Lock,
   Globe, LayoutGrid, BrainCircuit, Rocket, MousePointer2,
-  Fingerprint, Command, Activity, Terminal, ChevronRight, BarChart3
+  Fingerprint, Command, Activity, Terminal, ChevronRight, BarChart3,
+  HelpCircle, ChevronDown, Mail, User, MessageSquare, Coins
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Scene3D from '@/components/Scene3D';
@@ -36,6 +37,83 @@ const kineticItem: Variants = {
   show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.8, ease: "easeOut" } }
 };
 
+const faqData = [
+  {
+    question: "How does the resume scanner work?",
+    answer: "You upload your resume and paste a job description. Our AI reads both and gives you a match score showing how well your resume fits the job. It also tells you which keywords are missing and how to improve."
+  },
+  {
+    question: "How much does it cost?",
+    answer: "Your first 4 resume analyses cost just $1 total — that's a great way to try everything out. After that, it's $1 per analysis, pay as you go. No subscriptions, no hidden fees."
+  },
+  {
+    question: "What file types can I upload?",
+    answer: "We support PDF and DOCX (Microsoft Word) files. PDF is recommended for best results."
+  },
+  {
+    question: "Is my resume data safe?",
+    answer: "Yes. Your data is encrypted and stored securely. We never share or sell your personal information. You can delete your data at any time."
+  },
+  {
+    question: "How do I get the best match score?",
+    answer: "After scanning, we show you which keywords are missing from your resume compared to the job description. Use our AI rewrite tool to automatically add those keywords in a natural way."
+  },
+  {
+    question: "What are credits and how do I buy them?",
+    answer: "Credits are used to run resume analyses. 1 credit = 1 analysis. Your first 4 analyses are bundled for $1. After that, you buy credits at $1 each from your dashboard whenever you need them."
+  },
+  {
+    question: "Do I need to create an account?",
+    answer: "You can try a free scan without an account. To save your results and access the full optimized resume, you'll need to create a free account."
+  },
+  {
+    question: "Can I use this for any job type?",
+    answer: "Yes! HireReady works for any industry and job level — from entry-level to executive positions. Just paste the job description and we'll tailor the analysis to that specific role."
+  }
+];
+
+function FAQItem({ question, answer }: { question: string; answer: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <motion.div
+      style={{ perspective: 1000 }}
+      whileHover={{ rotateX: -2, rotateY: 2, z: 20 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+      className="rounded-[2rem] overflow-hidden cursor-pointer"
+      onClick={() => setOpen(!open)}
+    >
+      <div className={`bg-white border border-slate-100 shadow-lg transition-all duration-500 rounded-[2rem] ${open ? 'shadow-xl shadow-indigo-100' : 'hover:shadow-xl hover:shadow-indigo-50'}`}>
+        <div className="flex items-center justify-between p-8">
+          <div className="flex items-center gap-4">
+            <div className="bg-indigo-50 p-2 rounded-xl">
+              <HelpCircle className="h-5 w-5 text-indigo-600" />
+            </div>
+            <p className="text-lg font-bold text-slate-900">{question}</p>
+          </div>
+          <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.3 }}>
+            <ChevronDown className="h-5 w-5 text-slate-400 flex-shrink-0 ml-4" />
+          </motion.div>
+        </div>
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden"
+            >
+              <div className="px-8 pb-8 text-slate-600 leading-relaxed text-base border-t border-slate-100 pt-6 ml-[64px]">
+                {answer}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function Home() {
   const router = useRouter();
   const { setAnalysisResult, setResumeFile, setJobDescription } = useResumeStore();
@@ -46,6 +124,10 @@ export default function Home() {
   const [localFile, setLocalFile] = useState<File | null>(null);
   const [localJD, setLocalJD] = useState('');
   const [teaserScore, setTeaserScore] = useState<number | null>(null);
+  const [contactName, setContactName] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [contactMessage, setContactMessage] = useState('');
+  const [contactSent, setContactSent] = useState(false);
 
   const handleInitialScan = async () => {
     if (!localFile || !localJD) return;
@@ -72,9 +154,14 @@ export default function Home() {
       setJobDescription(localJD);
     } catch (error) {
       console.error(error);
-      alert('Analysis node offline.');
+      alert('Analysis failed. Please try again.');
       setIsAnalyzing(false);
     }
+  };
+
+  const handleContactSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setContactSent(true);
   };
 
   return (
@@ -94,8 +181,8 @@ export default function Home() {
             className="max-w-5xl z-10"
           >
             <motion.div variants={kineticItem} className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-indigo-400 text-[9px] font-black uppercase tracking-[0.5em] mb-10 backdrop-blur-md">
-              <Fingerprint className="h-3 w-3" />
-              <span>Quantum Protocol V15.0</span>
+              <Zap className="h-3 w-3" />
+              <span>AI-Powered Resume Optimizer</span>
             </motion.div>
             
             <motion.h1 variants={kineticItem} className="text-6xl md:text-8xl lg:text-[9rem] font-black text-white leading-[0.85] tracking-tighter mb-10 uppercase italic">
@@ -103,16 +190,17 @@ export default function Home() {
               <span className="text-kinetic not-italic underline decoration-indigo-600 decoration-4 underline-offset-[12px] md:underline-offset-[20px]">Algorithm.</span>
             </motion.h1>
             
-            <motion.p variants={kineticItem} className="text-lg md:text-xl text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed mb-12 uppercase tracking-tighter">
-              Bypass legacy Applicant Tracking Systems with high-fidelity, machine-readable resume architecture engineered for <span className="text-white font-bold">95%+ match rates.</span>
+            <motion.p variants={kineticItem} className="text-lg md:text-xl text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed mb-12">
+              Beat job application filters with our AI that rewrites your resume to match each job posting — giving you a{' '}
+              <span className="text-white font-bold">95%+ match score.</span>
             </motion.p>
 
             <motion.div variants={kineticItem} className="flex flex-col sm:flex-row gap-6 justify-center">
               <Link href="/auth/login" className="px-10 py-5 bg-white text-black rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-[0_0_40px_rgba(255,255,255,0.2)] active:scale-95">
-                Access Identity Vault
+                Go to Dashboard
               </Link>
               <a href="#analyzer" className="px-10 py-5 bg-white/5 text-white border border-white/10 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white/10 transition-all backdrop-blur-md">
-                Initialize Live Scan
+                Try It Free
               </a>
             </motion.div>
           </motion.div>
@@ -123,7 +211,7 @@ export default function Home() {
             transition={{ delay: 2, duration: 1 }}
             className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 text-slate-600"
           >
-            <span className="text-[9px] font-black uppercase tracking-[0.4em]">Scroll to Decode</span>
+            <span className="text-[9px] font-black uppercase tracking-[0.4em]">Scroll Down</span>
             <div className="w-px h-12 bg-gradient-to-b from-indigo-600 to-transparent" />
           </motion.div>
         </section>
@@ -142,12 +230,12 @@ export default function Home() {
                   <span className="text-indigo-500">Validation.</span>
                 </h2>
                 <p className="text-xl text-slate-400 leading-relaxed font-medium max-w-xl">
-                  Upload your raw career signals. Our semantic engine will reveal your "Match Delta" before you ever submit to a human.
+                  Upload your resume and paste a job description. We'll instantly show you how well your resume matches the job.
                 </p>
                 <div className="grid grid-cols-2 gap-8">
                   {[
-                    { icon: <Zap className="h-5 w-5 text-amber-500" />, label: "Quantum Scan", desc: "Real-time mapping." },
-                    { icon: <ShieldCheck className="h-5 w-5 text-green-500" />, label: "Vault Security", desc: "AES-256 encrypted." }
+                    { icon: <Zap className="h-5 w-5 text-amber-500" />, label: "Fast Scan", desc: "Results in seconds." },
+                    { icon: <ShieldCheck className="h-5 w-5 text-green-500" />, label: "Secure & Private", desc: "AES-256 encrypted." }
                   ].map((item, i) => (
                     <div key={i} className="space-y-3">
                       <div className="flex items-center gap-3 text-white font-black text-[10px] uppercase tracking-widest">
@@ -169,10 +257,10 @@ export default function Home() {
                 <div className="space-y-8 relative z-10">
                   <div className="flex justify-between items-start">
                     <div>
-                      <h3 className="text-2xl font-black text-white tracking-tight uppercase italic leading-none">Identity Input</h3>
-                      <p className="text-slate-600 text-[9px] font-black uppercase tracking-[0.3em] mt-2">External Protocol</p>
+                      <h3 className="text-2xl font-black text-white tracking-tight uppercase italic leading-none">Resume Checker</h3>
+                      <p className="text-slate-600 text-[9px] font-black uppercase tracking-[0.3em] mt-2">Upload & Analyze</p>
                     </div>
-                    <Terminal className="h-5 w-5 text-indigo-500/50" />
+                    <FileText className="h-5 w-5 text-indigo-500/50" />
                   </div>
 
                   <div className="space-y-5">
@@ -194,7 +282,7 @@ export default function Home() {
                           <div className="bg-white/5 p-6 rounded-2xl mb-5 border border-white/10 group-hover/drop:bg-indigo-600 transition-all duration-700">
                             <Upload className="h-8 w-8 text-white/20 group-hover/drop:text-white" />
                           </div>
-                          <p className="text-white font-black text-lg tracking-tight uppercase italic">Upload Source</p>
+                          <p className="text-white font-black text-lg tracking-tight uppercase italic">Upload Your Resume</p>
                           <p className="text-slate-600 text-[9px] mt-2 font-black uppercase tracking-[0.2em]">PDF / DOCX Required</p>
                         </div>
                       )}
@@ -203,7 +291,7 @@ export default function Home() {
                     <textarea 
                       value={localJD}
                       onChange={(e) => setLocalJD(e.target.value)}
-                      placeholder="Paste target job requirements architecture..."
+                      placeholder="Paste the job description here..."
                       className="w-full h-28 bg-black/60 border-2 border-white/5 rounded-[2rem] p-6 outline-none focus:border-indigo-500/50 transition-all text-white text-sm font-medium resize-none placeholder:text-slate-800 shadow-inner"
                     />
 
@@ -219,7 +307,7 @@ export default function Home() {
                       {isAnalyzing ? (
                         <div className="flex items-center gap-3">
                           <Loader2 className="h-5 w-5 animate-spin" />
-                          <span className="tracking-tighter italic">Mapping... {Math.round(progress)}%</span>
+                          <span className="tracking-tighter italic">Analyzing... {Math.round(progress)}%</span>
                         </div>
                       ) : (
                         <>
@@ -236,7 +324,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Feature Grid */}
+        {/* Feature Grid – Executive Systems with 3D cards */}
         <section className="py-48 bg-white relative selection:bg-black selection:text-white">
           <div className="max-w-[1400px] mx-auto px-6 lg:px-12 text-center">
             <h2 className="text-7xl lg:text-[8rem] font-black text-slate-950 tracking-tighter uppercase leading-[0.8] mb-32 italic">
@@ -244,36 +332,195 @@ export default function Home() {
               <span className="text-indigo-600 not-italic">Systems.</span>
             </h2>
             
-            <BentoGrid className="lg:grid-rows-3 h-[1200px] gap-8">
-              <BentoGridItem
-                title="Deduplication Engine"
-                description="Automatically strips repetitive headers and contact artifacts."
-                header={<div className="h-full w-full bg-slate-50 rounded-[2.5rem] flex items-center justify-center"><Bot className="h-16 w-16 text-indigo-600" /></div>}
-                icon={<BrainCircuit className="h-5 w-5 text-indigo-500" />}
-                className="md:col-span-2 md:row-span-2 p-12 border-slate-100"
-              />
-              <BentoGridItem
-                title="95% Match Target"
-                description="Iterative optimization until signal-locked."
-                header={<div className="h-full w-full bg-slate-900 rounded-[2.5rem] flex items-center justify-center"><Target className="h-16 w-16 text-white" /></div>}
-                icon={<Rocket className="h-5 w-5 text-indigo-500" />}
-                className="p-12 border-slate-100"
-              />
-              <BentoGridItem
-                title="Secure Vault"
-                description="Encrypted identity storage."
-                header={<div className="h-full w-full bg-indigo-600 rounded-[2.5rem] flex items-center justify-center"><ShieldCheck className="h-16 w-16 text-white" /></div>}
-                icon={<Lock className="h-5 w-5 text-white" />}
-                className="md:col-span-1 md:row-span-2 p-12 border-slate-100"
-              />
-              <BentoGridItem
-                title="Single-Pass Format"
-                description="Machine-readability standard."
-                header={<div className="h-full w-full bg-slate-50 rounded-[2.5rem] flex items-center justify-center"><Terminal className="h-16 w-16 text-slate-400" /></div>}
-                icon={<Activity className="h-5 w-5 text-indigo-500" />}
-                className="md:col-span-2 md:row-span-1 p-12 border-slate-100"
-              />
-            </BentoGrid>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                {
+                  title: "Smart Duplicate Removal",
+                  description: "Automatically cleans up repeated information and formatting issues — so your resume looks polished every time.",
+                  icon: <Bot className="h-16 w-16 text-indigo-600" />,
+                  bg: "bg-slate-50",
+                  iconBg: "bg-white"
+                },
+                {
+                  title: "95% Match Rate",
+                  description: "We keep improving your resume until it fits the job perfectly. Our AI finds and adds the right keywords for each role.",
+                  icon: <Target className="h-16 w-16 text-white" />,
+                  bg: "bg-slate-900",
+                  iconBg: "bg-white/10",
+                  dark: true
+                },
+                {
+                  title: "Safe & Private",
+                  description: "Your data is encrypted and never shared. We protect your personal information with bank-level security.",
+                  icon: <ShieldCheck className="h-16 w-16 text-white" />,
+                  bg: "bg-indigo-600",
+                  iconBg: "bg-white/20",
+                  dark: true
+                },
+                {
+                  title: "Clean, Readable Format",
+                  description: "Your resume is formatted in a way that any applicant tracking system can read it — no more getting filtered out for bad formatting.",
+                  icon: <FileText className="h-16 w-16 text-slate-400" />,
+                  bg: "bg-slate-50",
+                  iconBg: "bg-white"
+                },
+                {
+                  title: "Instant Results",
+                  description: "Get your match score and keyword analysis in seconds. No waiting, no complicated setup.",
+                  icon: <Zap className="h-16 w-16 text-amber-500" />,
+                  bg: "bg-amber-50",
+                  iconBg: "bg-white"
+                },
+                {
+                  title: "Pay As You Go",
+                  description: "Try it with $1 for your first 4 analyses. After that, just $1 per resume — no subscription required.",
+                  icon: <Coins className="h-16 w-16 text-indigo-600" />,
+                  bg: "bg-indigo-50",
+                  iconBg: "bg-white"
+                }
+              ].map((card, i) => (
+                <motion.div
+                  key={i}
+                  whileHover={{ 
+                    rotateX: -6, 
+                    rotateY: 6, 
+                    z: 40,
+                    scale: 1.04
+                  }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                  className={`${card.bg} rounded-[2.5rem] p-12 border border-slate-100 shadow-xl cursor-pointer flex flex-col items-start gap-6 text-left`}
+                  style={{ 
+                    perspective: 1200,
+                    transformStyle: 'preserve-3d',
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.08), 0 4px 20px rgba(0,0,0,0.06)'
+                  } as any}
+                >
+                  <div className={`${card.iconBg} p-5 rounded-2xl shadow-lg`}>
+                    {card.icon}
+                  </div>
+                  <div>
+                    <h3 className={`text-2xl font-black tracking-tight mb-3 ${card.dark ? 'text-white' : 'text-slate-900'}`}>{card.title}</h3>
+                    <p className={`leading-relaxed text-base ${card.dark ? 'text-white/70' : 'text-slate-500'}`}>{card.description}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* FAQ Section */}
+        <section className="py-32 px-6 lg:px-12 bg-slate-50 border-t border-slate-100">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-20">
+              <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-600 text-[9px] font-black uppercase tracking-[0.5em] mb-8">
+                <HelpCircle className="h-3 w-3" />
+                <span>Common Questions</span>
+              </div>
+              <h2 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tighter uppercase leading-[0.85] italic">
+                Got <br /><span className="text-indigo-600 not-italic">Questions?</span>
+              </h2>
+              <p className="text-xl text-slate-500 font-medium mt-6 max-w-xl mx-auto leading-relaxed">
+                Everything you need to know about HireReady and how it works.
+              </p>
+            </div>
+            <div className="space-y-4">
+              {faqData.map((item, i) => (
+                <FAQItem key={i} question={item.question} answer={item.answer} />
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Contact Us Section */}
+        <section className="py-32 px-6 lg:px-12 bg-black border-t border-white/5">
+          <div className="max-w-2xl mx-auto">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-indigo-400 text-[9px] font-black uppercase tracking-[0.5em] mb-8">
+                <Mail className="h-3 w-3" />
+                <span>Get In Touch</span>
+              </div>
+              <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter uppercase leading-[0.85] italic">
+                Contact <br /><span className="text-indigo-500 not-italic">Us.</span>
+              </h2>
+              <p className="text-xl text-slate-400 font-medium mt-6 max-w-xl mx-auto leading-relaxed">
+                Have a question or need help? We'd love to hear from you. Send us a message and we'll respond within 24 hours.
+              </p>
+            </div>
+
+            {contactSent ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="glass-executive rounded-[3rem] p-16 text-center border border-white/10"
+              >
+                <div className="bg-green-500 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-2xl">
+                  <CheckCircle2 className="h-10 w-10 text-white" />
+                </div>
+                <h3 className="text-3xl font-black text-white tracking-tighter mb-4">Message Sent!</h3>
+                <p className="text-slate-400 text-lg">We'll get back to you within 24 hours.</p>
+              </motion.div>
+            ) : (
+              <motion.form
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                onSubmit={handleContactSubmit}
+                className="glass-executive rounded-[3rem] p-12 border border-white/10 space-y-6"
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em]">Your Name</label>
+                    <div className="relative">
+                      <User className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
+                      <input
+                        type="text"
+                        required
+                        value={contactName}
+                        onChange={(e) => setContactName(e.target.value)}
+                        placeholder="John Smith"
+                        className="w-full bg-black/60 border-2 border-white/5 rounded-2xl py-4 pl-12 pr-5 text-white text-sm font-medium outline-none focus:border-indigo-500/50 transition-all placeholder:text-slate-800"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em]">Email Address</label>
+                    <div className="relative">
+                      <Mail className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
+                      <input
+                        type="email"
+                        required
+                        value={contactEmail}
+                        onChange={(e) => setContactEmail(e.target.value)}
+                        placeholder="you@example.com"
+                        className="w-full bg-black/60 border-2 border-white/5 rounded-2xl py-4 pl-12 pr-5 text-white text-sm font-medium outline-none focus:border-indigo-500/50 transition-all placeholder:text-slate-800"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em]">Your Message</label>
+                  <div className="relative">
+                    <MessageSquare className="absolute left-5 top-5 h-4 w-4 text-slate-600" />
+                    <textarea
+                      required
+                      value={contactMessage}
+                      onChange={(e) => setContactMessage(e.target.value)}
+                      placeholder="Tell us how we can help you..."
+                      rows={5}
+                      className="w-full bg-black/60 border-2 border-white/5 rounded-2xl py-4 pl-12 pr-5 text-white text-sm font-medium outline-none focus:border-indigo-500/50 transition-all resize-none placeholder:text-slate-800"
+                    />
+                  </div>
+                </div>
+                <button
+                  type="submit"
+                  className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-white hover:text-black transition-all shadow-2xl active:scale-95 flex items-center justify-center gap-3"
+                >
+                  <Mail className="h-4 w-4" />
+                  Send Message
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </motion.form>
+            )}
           </div>
         </section>
       </main>
@@ -293,7 +540,7 @@ export default function Home() {
             >
               <div className="text-center relative z-10">
                 <div className="space-y-4 mb-12">
-                  <p className="text-[9px] font-black uppercase tracking-[0.5em] text-indigo-400 italic">Extraction Successful</p>
+                  <p className="text-[9px] font-black uppercase tracking-[0.5em] text-indigo-400 italic">Results Ready</p>
                   <div className="text-9xl font-black text-white leading-none tracking-tighter drop-shadow-2xl">
                     {teaserScore}<span className="text-indigo-600 text-5xl">%</span>
                   </div>
@@ -302,16 +549,16 @@ export default function Home() {
                   </div>
                 </div>
 
-                <h2 className="text-4xl font-black text-white mb-6 tracking-tighter uppercase leading-tight italic">Identity Mapped.</h2>
-                <p className="text-xl text-slate-400 font-medium mb-12 leading-relaxed max-w-md mx-auto uppercase tracking-tighter">
-                  We've identified critical signal gaps in your architecture. Authorize vault access to execute bridge protocols.
+                <h2 className="text-4xl font-black text-white mb-6 tracking-tighter uppercase leading-tight italic">Your Resume Score</h2>
+                <p className="text-xl text-slate-400 font-medium mb-12 leading-relaxed max-w-md mx-auto">
+                  We found areas you can improve to better match this job. Sign in to see your full results and get an optimized resume.
                 </p>
                 <div className="space-y-6">
                   <Link href="/auth/login" className="w-full bg-white text-black py-6 rounded-3xl font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-4 hover:bg-indigo-600 hover:text-white transition-all active:scale-95 group shadow-2xl">
-                    Unlock Strategy Protocol <Lock className="h-4 w-4 opacity-50 group-hover:opacity-100 transition-all" />
+                    Sign In to See Full Results <Lock className="h-4 w-4 opacity-50 group-hover:opacity-100 transition-all" />
                   </Link>
                   <button onClick={() => { setShowUpsell(false); router.push('/auth/login'); }} className="w-full py-4 text-slate-600 font-black text-[9px] uppercase tracking-[0.4em] hover:text-white transition-colors">
-                    Discard Scan & Continue
+                    Skip for Now
                   </button>
                 </div>
               </div>

@@ -41,7 +41,7 @@ export default function Navbar() {
               </span>
               <div className="flex items-center gap-2 mt-1.5">
                 <div className="h-1 w-1 bg-indigo-500 rounded-full animate-pulse" />
-                <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em]">Intelligence Systems</span>
+                <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em]">AI Resume Optimizer</span>
               </div>
             </div>
           </Link>
@@ -50,9 +50,11 @@ export default function Navbar() {
             <div className="hidden md:flex items-center gap-12">
               <div className="flex items-center gap-10 text-[11px] font-black uppercase tracking-[0.3em] text-slate-400">
                 <Link href="/" className={`hover:text-white transition-all duration-500 ${pathname === '/' ? 'text-indigo-400 border-b-2 border-indigo-500 pb-1' : ''}`}>Home</Link>
-                <Link href="/pricing" className={`hover:text-white transition-all duration-500 ${pathname === '/pricing' ? 'text-indigo-400 border-b-2 border-indigo-500 pb-1' : ''}`}>Pricing</Link>
-                <Link href="/docs" className={`hover:text-white transition-all duration-500 ${pathname === '/docs' ? 'text-indigo-400 border-b-2 border-indigo-500 pb-1' : ''}`}>Docs</Link>
-                {user && <Link href="/dashboard" className={`hover:text-white transition-all duration-500 ${isDashboard ? 'text-indigo-400 border-b-2 border-indigo-500 pb-1' : ''}`}>Vault</Link>}
+                {!isDashboard && (
+                  <Link href="/pricing" className={`hover:text-white transition-all duration-500 ${pathname === '/pricing' ? 'text-indigo-400 border-b-2 border-indigo-500 pb-1' : ''}`}>Pricing</Link>
+                )}
+                <Link href="/docs" className={`hover:text-white transition-all duration-500 ${pathname === '/docs' ? 'text-indigo-400 border-b-2 border-indigo-500 pb-1' : ''}`}>How It Works</Link>
+                {user && <Link href="/dashboard" className={`hover:text-white transition-all duration-500 ${isDashboard ? 'text-indigo-400 border-b-2 border-indigo-500 pb-1' : ''}`}>Dashboard</Link>}
               </div>
 
               <div className="h-8 w-px bg-white/5" />
@@ -64,7 +66,7 @@ export default function Navbar() {
                       {user.user_metadata?.full_name || user.email?.split('@')[0]}
                     </span>
                     <span className="text-[8px] font-bold text-indigo-400 uppercase tracking-widest flex items-center justify-end gap-1.5">
-                      <Fingerprint className="h-2.5 w-2.5" /> Identity Locked
+                      <Fingerprint className="h-2.5 w-2.5" /> Logged In
                     </span>
                   </div>
                   <div className="h-10 w-10 rounded-xl bg-indigo-600 flex items-center justify-center text-[11px] font-black text-white shadow-xl shadow-indigo-900/40 border border-white/10">
@@ -77,7 +79,7 @@ export default function Navbar() {
                     href="/auth/login" 
                     className="text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-all"
                   >
-                    Auth Access
+                    Log In
                   </Link>
                   <Link 
                     href="/auth/login" 
@@ -108,10 +110,10 @@ export default function Navbar() {
           >
             <div className="p-8 space-y-6">
               <Link href="/" className="block text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors">Home</Link>
-              <Link href="/pricing" className="block text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors">Pricing</Link>
-              <Link href="/docs" className="block text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors">Documentation</Link>
-              {user && <Link href="/dashboard" className="block text-[11px] font-black uppercase tracking-widest text-indigo-400">Executive Vault</Link>}
-              {!user && <Link href="/auth/login" className="block text-[11px] font-black uppercase tracking-widest text-indigo-400">Initialize Identity</Link>}
+              {!isDashboard && <Link href="/pricing" className="block text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors">Pricing</Link>}
+              <Link href="/docs" className="block text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors">How It Works</Link>
+              {user && <Link href="/dashboard" className="block text-[11px] font-black uppercase tracking-widest text-indigo-400">Dashboard</Link>}
+              {!user && <Link href="/auth/login" className="block text-[11px] font-black uppercase tracking-widest text-indigo-400">Log In</Link>}
             </div>
           </motion.div>
         )}

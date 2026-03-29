@@ -22,7 +22,7 @@ export default function Footer() {
               <span className="text-2xl font-black tracking-tighter uppercase italic text-white">HIREREADY</span>
             </Link>
             <p className="text-slate-500 font-medium leading-relaxed max-w-xs text-lg">
-              The intelligence standard for executive resume optimization. Engineered for the 1% match.
+              The smart way to optimize your resume for any job. Get hired faster.
             </p>
             <div className="flex gap-6">
               {[Github, Linkedin, Twitter].map((Icon, i) => (
@@ -35,36 +35,36 @@ export default function Footer() {
 
           {/* Navigation */}
           <div>
-            <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-10">System Map</h4>
+            <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-10">Quick Links</h4>
             <ul className="space-y-5">
-              <li><Link href="/" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Semantic Engine</Link></li>
-              <li><Link href="/dashboard" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Executive Vault</Link></li>
-              <li><Link href="/docs#protocol-api" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Protocol API</Link></li>
-              <li><Link href="/pricing" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Investment</Link></li>
+              <li><Link href="/" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Home</Link></li>
+              <li><Link href="/dashboard" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Dashboard</Link></li>
+              <li><Link href="/docs#protocol-api" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">How It Works</Link></li>
+              <li><Link href="/pricing" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Pricing</Link></li>
             </ul>
           </div>
 
           {/* Resources */}
           <div>
-            <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-10">Intelligence</h4>
+            <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-10">Resources</h4>
             <ul className="space-y-5">
               <li><Link href="/docs" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Documentation</Link></li>
-              <li><Link href="/docs#logic-analysis" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Logic Analysis</Link></li>
-              <li><Link href="/docs#success-log" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Success Log</Link></li>
-              <li><Link href="/docs#trends" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">2026 Trends</Link></li>
+              <li><Link href="/docs#logic-analysis" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Resume Tips</Link></li>
+              <li><Link href="/docs#success-log" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Success Stories</Link></li>
+              <li><Link href="/docs#trends" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">2026 Job Trends</Link></li>
             </ul>
           </div>
 
           {/* Newsletter */}
           <div className="glass-executive p-10 rounded-[2.5rem] border border-white/5">
             <h4 className="text-sm font-black mb-4 uppercase tracking-widest italic text-white flex items-center gap-3">
-              <Zap className="h-4 w-4 text-indigo-500" /> Executive Feed
+              <Zap className="h-4 w-4 text-indigo-500" /> Stay Updated
             </h4>
-            <p className="text-xs text-slate-500 mb-8 font-medium leading-relaxed">Secure weekly intelligence on high-stakes career strategy.</p>
+            <p className="text-xs text-slate-500 mb-8 font-medium leading-relaxed">Get weekly tips to improve your resume and land more interviews.</p>
             <div className="relative">
               <input 
                 type="email" 
-                placeholder="identity@vault.com" 
+                placeholder="your@email.com" 
                 className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 pl-5 pr-14 outline-none focus:border-indigo-500 transition-all text-xs font-bold text-white shadow-inner"
               />
               <button className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-indigo-600 rounded-xl hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-900/40">
@@ -77,7 +77,7 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-10">
           <div className="flex items-center gap-8 text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">
-            <span>© 2026 HireReady Protocol</span>
+            <span>© 2026 HireReady</span>
             <span className="h-1 w-1 bg-slate-800 rounded-full" />
             <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
             <span className="h-1 w-1 bg-slate-800 rounded-full" />
@@ -85,7 +85,7 @@ export default function Footer() {
           </div>
           <div className="flex items-center gap-4 px-6 py-3 bg-white/5 rounded-2xl border border-white/5">
             <ShieldCheck className="h-4 w-4 text-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Military-Grade Data Encryption</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Your data is always encrypted & secure</span>
           </div>
         </div>
       </div>

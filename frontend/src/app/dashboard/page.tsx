@@ -9,7 +9,8 @@ import {
   History, LogOut, LayoutDashboard, Plus, Search,
   TrendingUp, Clock, CheckCircle2, ShieldCheck, Briefcase,
   Zap, AlertTriangle, FileUp, Cpu, Terminal, Command, LayoutGrid,
-  Rocket, Activity, Fingerprint, Globe, Shield, Menu, X
+  Rocket, Activity, Fingerprint, Globe, Shield, Menu, X, Coins,
+  CreditCard, Star, ChevronRight, CheckCircle
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -33,12 +34,13 @@ export default function Dashboard() {
 
   const [dragActive, setDragActive] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'scan' | 'history'>('scan');
+  const [activeTab, setActiveTab] = useState<'scan' | 'history' | 'credits'>('scan');
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isGapModalOpen, setIsGapModalOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-  const [analysisStep, setAnalysisStep] = useState<string>('Initializing...');
+  const [analysisStep, setAnalysisStep] = useState<string>('Getting ready...');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [credits, setCredits] = useState(4); // mock credits balance
 
   useEffect(() => {
     const getUser = async () => {
@@ -97,7 +99,7 @@ export default function Dashboard() {
   const handleAnalyze = async () => {
     if (!resumeFile || !jobDescription) return;
     setIsAnalyzing(true);
-    setAnalysisStep('Quantum Extraction...');
+    setAnalysisStep('Reading your resume...');
     
     try {
       const result = await analyzeResume(resumeFile, jobDescription);
@@ -105,7 +107,7 @@ export default function Dashboard() {
         .from('resumes')
         .insert({
           user_id: user.id,
-          job_title: result.optimized_content.raw_text.split('\n')[0].replace('# ', '').slice(0, 50) || 'Untitled Strategy',
+          job_title: result.optimized_content.raw_text.split('\n')[0].replace('# ', '').slice(0, 50) || 'Untitled',
           original_text: result.original_text || '',
           optimized_text: result.optimized_content.raw_text,
           before_score: result.initial_score,
@@ -124,7 +126,7 @@ export default function Dashboard() {
       router.push(`/workspace/${data.id}`);
     } catch (error) {
       console.error(error);
-      alert('Strategic link error.');
+      alert('Something went wrong. Please try again.');
     } finally {
       setIsAnalyzing(false);
     }
@@ -146,7 +148,7 @@ export default function Dashboard() {
       </AnimatePresence>
 
       <div className="flex-1 flex overflow-hidden relative">
-        {/* Responsive Mobile Toggle */}
+        {/* Mobile Toggle */}
         <button 
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="lg:hidden fixed bottom-8 right-8 z-[100] bg-white text-black p-5 rounded-full shadow-2xl active:scale-90 transition-transform"
@@ -154,17 +156,18 @@ export default function Dashboard() {
           {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
 
-        {/* Elite Sidebar (Responsive) */}
+        {/* Sidebar */}
         <aside className={`
           fixed lg:relative inset-y-0 left-0 w-72 bg-black border-r border-white/5 z-[90] 
           flex flex-col p-6 backdrop-blur-3xl transition-transform duration-500
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}>
           <div className="flex-1 space-y-2 pt-10 lg:pt-0">
-            <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.5em] mb-8 px-4 italic">Command_Chain</p>
+            <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.5em] mb-8 px-4">Navigation</p>
             {[
-              { id: 'scan', label: 'Intelligence hub', icon: <LayoutGrid className="h-4 w-4" /> },
-              { id: 'history', label: 'Strategic vault', icon: <Terminal className="h-4 w-4" /> }
+              { id: 'scan', label: 'New Analysis', icon: <LayoutGrid className="h-4 w-4" /> },
+              { id: 'history', label: 'My Resumes', icon: <FileText className="h-4 w-4" /> },
+              { id: 'credits', label: 'Buy Credits', icon: <Coins className="h-4 w-4" /> }
             ].map(tab => (
               <button 
                 key={tab.id}
@@ -178,60 +181,69 @@ export default function Dashboard() {
           </div>
 
           <div className="pt-8 border-t border-white/5">
+            {/* Credits Badge */}
+            <div className="bg-indigo-600/10 border border-indigo-500/20 p-4 rounded-2xl mb-4 flex items-center gap-3">
+              <Coins className="h-5 w-5 text-indigo-400 flex-shrink-0" />
+              <div>
+                <p className="text-white font-black text-sm">{credits} credits left</p>
+                <p className="text-indigo-400 text-[9px] font-bold uppercase tracking-widest">1 credit = 1 analysis</p>
+              </div>
+            </div>
+
             <div className="bg-white/5 p-5 rounded-3xl border border-white/5 mb-6">
               <div className="flex items-center gap-4">
                 <div className="h-10 w-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white text-xs font-black">
                   {user?.email?.[0].toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-black text-white truncate uppercase italic">{user?.email?.split('@')[0]}</p>
+                  <p className="text-[10px] font-black text-white truncate uppercase">{user?.email?.split('@')[0]}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <div className="h-1 w-1 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,197,94,1)]" />
-                    <span className="text-[8px] font-bold text-slate-600 uppercase tracking-widest">Quantum_Node</span>
+                    <span className="text-[8px] font-bold text-slate-600 uppercase tracking-widest">Active</span>
                   </div>
                 </div>
               </div>
             </div>
             <button onClick={handleLogout} className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-black text-[9px] text-red-500/60 hover:text-red-400 hover:bg-red-500/5 transition-all uppercase tracking-[0.4em]">
               <LogOut className="h-4 w-4" />
-              Terminate_Session
+              Log Out
             </button>
           </div>
         </aside>
 
-        {/* Command Center Content */}
+        {/* Main Content */}
         <main className="flex-1 overflow-y-auto bg-black p-6 lg:p-16 intelligence-scrollbar relative">
           <div className="absolute inset-0 z-0 opacity-10 pointer-events-none scale-75">
             <NexusCore />
           </div>
 
           <AnimatePresence mode="wait">
-            {activeTab === 'scan' ? (
+            {activeTab === 'scan' && (
               <motion.div key="scan" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-5xl mx-auto relative z-10">
                 <div className="mb-16 pb-8 border-b border-white/5">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[8px] font-black uppercase tracking-[0.4em] mb-6">
-                    <Cpu className="h-3 w-3 animate-pulse" /> Protocol_15.0
+                    <Zap className="h-3 w-3 animate-pulse" /> AI Ready
                   </div>
-                  <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter uppercase leading-none italic mb-4">Command Center</h1>
-                  <p className="text-slate-600 font-medium text-lg uppercase tracking-tighter italic">Initialize extraction to map match delta.</p>
+                  <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter uppercase leading-none italic mb-4">Resume Analyzer</h1>
+                  <p className="text-slate-600 font-medium text-lg">Upload your resume and paste a job description to get your match score.</p>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
                   <div className="lg:col-span-8 space-y-8">
                     <div className="glass-executive p-10 rounded-[2.5rem] border-white/10 shadow-2xl relative overflow-hidden group">
-                      <label className="block text-[9px] font-black text-slate-600 uppercase tracking-[0.5em] mb-8 italic">01. Source_Input</label>
+                      <label className="block text-[9px] font-black text-slate-600 uppercase tracking-[0.5em] mb-8">Step 1: Your Resume</label>
                       <div className={`relative border-2 border-dashed rounded-[2rem] p-16 text-center transition-all duration-700 bg-black/40 ${dragActive ? 'border-indigo-500 bg-indigo-500/10' : 'border-white/5 hover:border-white/10'}`}>
                         <input type="file" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" accept=".pdf,.docx" />
                         {resumeFile ? (
                           <div className="flex flex-col items-center">
                             <div className="bg-indigo-600 p-6 rounded-2xl mb-6 shadow-2xl"><FileText className="h-10 w-10 text-white" /></div>
                             <p className="text-white font-black text-2xl mb-2 tracking-tighter uppercase italic truncate max-w-full px-4">{resumeFile.name}</p>
-                            <span className="text-indigo-400 text-[9px] font-black uppercase tracking-[0.4em] bg-indigo-500/10 px-4 py-1.5 rounded-full border border-indigo-500/20">Data_Locked</span>
+                            <span className="text-indigo-400 text-[9px] font-black uppercase tracking-[0.4em] bg-indigo-500/10 px-4 py-1.5 rounded-full border border-indigo-500/20">File Ready</span>
                           </div>
                         ) : (
                           <div className="flex flex-col items-center opacity-40 group-hover:opacity-100 transition-opacity">
                             <Upload className="h-12 w-12 text-white mb-6" />
-                            <p className="text-white font-black text-xl uppercase italic tracking-tighter">Upload Identity Source</p>
+                            <p className="text-white font-black text-xl uppercase italic tracking-tighter">Upload Your Resume</p>
                             <p className="text-slate-600 text-[8px] font-black uppercase mt-2">PDF / DOCX Required</p>
                           </div>
                         )}
@@ -246,36 +258,41 @@ export default function Dashboard() {
                       {isAnalyzing ? (
                         <div className="flex items-center gap-4">
                           <Loader2 className="h-8 w-8 animate-spin" />
-                          <div className="flex flex-col items-start leading-none"><span className="text-xl">Executing...</span><span className="text-[9px] opacity-60 uppercase tracking-[0.4em] mt-1">{analysisStep}</span></div>
+                          <div className="flex flex-col items-start leading-none">
+                            <span className="text-xl">Analyzing...</span>
+                            <span className="text-[9px] opacity-60 uppercase tracking-[0.4em] mt-1">{analysisStep}</span>
+                          </div>
                         </div>
                       ) : (
-                        <><Rocket className="h-8 w-8 text-indigo-400 group-hover:rotate-12 transition-transform" /><span>Initialize Analysis</span><ArrowRight className="h-8 w-8 opacity-30 group-hover:translate-x-4 transition-transform" /></>
+                        <><Rocket className="h-8 w-8 text-indigo-400 group-hover:rotate-12 transition-transform" /><span>Analyze My Resume</span><ArrowRight className="h-8 w-8 opacity-30 group-hover:translate-x-4 transition-transform" /></>
                       )}
                     </button>
                   </div>
 
                   <div className="lg:col-span-4">
                     <div className="bg-slate-900/40 p-10 rounded-[2.5rem] border border-white/5 h-full backdrop-blur-3xl flex flex-col">
-                      <label className="block text-[9px] font-black text-indigo-500/60 uppercase tracking-[0.5em] mb-8 italic">02. Requirements_Pool</label>
+                      <label className="block text-[9px] font-black text-indigo-500/60 uppercase tracking-[0.5em] mb-8">Step 2: Job Description</label>
                       <textarea 
                         value={jobDescription} 
                         onChange={(e) => setJobDescription(e.target.value)}
-                        placeholder="Paste target requirements..."
+                        placeholder="Paste the full job description here..."
                         className="flex-1 w-full bg-black/60 border-2 border-white/5 rounded-3xl p-8 text-white text-lg font-medium outline-none focus:border-indigo-500/50 transition-all resize-none placeholder:text-slate-900 shadow-inner"
                       />
                     </div>
                   </div>
                 </div>
               </motion.div>
-            ) : (
+            )}
+
+            {activeTab === 'history' && (
               <motion.div key="history" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-[1400px] mx-auto pb-32 relative z-10">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8 pb-8 border-b border-white/5">
                   <div>
-                    <h1 className="text-6xl font-black text-white tracking-tighter uppercase italic leading-none">The Vault</h1>
-                    <p className="text-slate-600 font-medium text-xl mt-4 uppercase tracking-tighter italic">High-signal career architectures.</p>
+                    <h1 className="text-6xl font-black text-white tracking-tighter uppercase italic leading-none">My Resumes</h1>
+                    <p className="text-slate-600 font-medium text-xl mt-4">All your previous resume analyses</p>
                   </div>
                   <button onClick={() => setActiveTab('scan')} className="bg-white text-black px-10 py-5 rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.4em] hover:bg-indigo-600 hover:text-white transition-all shadow-2xl active:scale-95 flex items-center gap-3">
-                    <Plus className="h-4 w-4" /> New_Strategy
+                    <Plus className="h-4 w-4" /> New Analysis
                   </button>
                 </div>
 
@@ -286,7 +303,8 @@ export default function Dashboard() {
                 ) : history.length === 0 ? (
                   <div className="glass-executive rounded-[4rem] p-32 border border-dashed border-white/5 text-center flex flex-col items-center">
                     <Search className="h-16 w-16 text-white/5 mb-8" />
-                    <h3 className="text-3xl font-black text-white uppercase italic opacity-20 tracking-tighter">Vault_Offline</h3>
+                    <h3 className="text-3xl font-black text-white uppercase opacity-20 tracking-tighter">No resumes yet</h3>
+                    <p className="text-slate-600 mt-4 font-medium">Run your first analysis to get started</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -300,24 +318,132 @@ export default function Dashboard() {
                         <div className="flex justify-between items-start mb-10 relative z-10">
                           <div className="bg-white/5 p-4 rounded-2xl text-slate-600 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-700 border border-white/5"><Briefcase className="h-6 w-6" /></div>
                           <div className="text-right">
-                            <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.4em] mb-1 italic">Signal</p>
+                            <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.4em] mb-1">Match Score</p>
                             <p className="text-3xl font-black text-white tracking-tighter group-hover:text-indigo-500 transition-colors">{item.overall_score}%</p>
                           </div>
                         </div>
-                        <h3 className="text-xl font-black text-white mb-4 truncate uppercase tracking-tighter italic group-hover:text-indigo-400 transition-all">{item.job_title || 'Untitled_Strategy'}</h3>
-                        <div className="flex items-center gap-4 text-slate-600 font-bold text-[8px] uppercase tracking-[0.3em] mb-10 italic">
+                        <h3 className="text-xl font-black text-white mb-4 truncate uppercase tracking-tighter italic group-hover:text-indigo-400 transition-all">{item.job_title || 'Untitled'}</h3>
+                        <div className="flex items-center gap-4 text-slate-600 font-bold text-[8px] uppercase tracking-[0.3em] mb-10">
                           <div className="flex items-center gap-2"><Clock className="h-3 w-3 opacity-30" /> {new Date(item.created_at || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
                           <div className="h-1 w-1 bg-indigo-500/20 rounded-full" />
-                          <div className="text-indigo-500/40 font-black">Strategic</div>
+                          <div className="text-indigo-500/40 font-black">Analyzed</div>
                         </div>
                         <div className="mt-auto pt-6 border-t border-white/5 flex items-center justify-between text-[9px] font-black uppercase tracking-[0.4em]">
-                          <span className="text-slate-700 group-hover:text-slate-500 transition-all italic">Base: {item.initial_score}%</span>
-                          <span className="text-white opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-2 flex items-center gap-2">EXEC <ArrowRight className="h-3 w-3" /></span>
+                          <span className="text-slate-700 group-hover:text-slate-500 transition-all">Original Score: {item.initial_score}%</span>
+                          <span className="text-white opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-2 flex items-center gap-2">Open <ArrowRight className="h-3 w-3" /></span>
                         </div>
                       </motion.div>
                     ))}
                   </div>
                 )}
+              </motion.div>
+            )}
+
+            {activeTab === 'credits' && (
+              <motion.div key="credits" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl mx-auto relative z-10">
+                <div className="mb-12 pb-8 border-b border-white/5">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[8px] font-black uppercase tracking-[0.4em] mb-6">
+                    <Coins className="h-3 w-3" /> Credits
+                  </div>
+                  <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter uppercase leading-none italic mb-4">Buy Credits</h1>
+                  <p className="text-slate-500 font-medium text-lg">Credits are used to run resume analyses. 1 credit = 1 analysis.</p>
+                </div>
+
+                {/* Current Balance */}
+                <div className="glass-executive p-10 rounded-[2.5rem] border border-indigo-500/20 shadow-[0_0_60px_rgba(99,102,241,0.1)] mb-10">
+                  <div className="flex items-center gap-6">
+                    <div className="bg-indigo-600 p-5 rounded-2xl shadow-2xl">
+                      <Coins className="h-10 w-10 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.4em] mb-2">Your Balance</p>
+                      <p className="text-6xl font-black text-white tracking-tighter">{credits} <span className="text-2xl text-slate-500">credits</span></p>
+                    </div>
+                  </div>
+                  <div className="mt-8 p-4 bg-white/5 rounded-2xl border border-white/5">
+                    <p className="text-slate-400 text-sm font-medium">
+                      <span className="text-white font-black">1 credit</span> lets you run one full resume analysis with keyword matching and optimization suggestions.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Pricing Options */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Starter Pack */}
+                  <motion.div
+                    style={{ perspective: 1200 }}
+                    whileHover={{ rotateX: -4, rotateY: 4, z: 30, scale: 1.02 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                    className="bg-white rounded-[2.5rem] p-10 flex flex-col cursor-pointer shadow-2xl"
+                  >
+                    <div className="flex items-center justify-between mb-8">
+                      <div className="bg-indigo-100 p-3 rounded-2xl">
+                        <Star className="h-7 w-7 text-indigo-600" />
+                      </div>
+                      <span className="text-[9px] font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">Best Deal</span>
+                    </div>
+                    <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-2">Starter Pack</h3>
+                    <p className="text-slate-500 text-sm mb-8 leading-relaxed">Perfect for trying things out. Get your first 4 resume analyses for just $1.</p>
+                    <div className="mt-auto">
+                      <div className="flex items-end gap-2 mb-6">
+                        <span className="text-5xl font-black text-slate-900">$1</span>
+                        <span className="text-slate-400 font-bold mb-2">for 4 analyses</span>
+                      </div>
+                      <ul className="space-y-3 mb-8">
+                        {['4 full resume analyses', 'Keyword match report', 'AI improvement suggestions', 'PDF export'].map((f, i) => (
+                          <li key={i} className="flex items-center gap-3 text-sm text-slate-600">
+                            <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+                      <button className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all shadow-xl active:scale-95">
+                        Get Started — $1
+                      </button>
+                    </div>
+                  </motion.div>
+
+                  {/* Pay As You Go */}
+                  <motion.div
+                    style={{ perspective: 1200 }}
+                    whileHover={{ rotateX: -4, rotateY: 4, z: 30, scale: 1.02 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                    className="bg-slate-900 rounded-[2.5rem] p-10 flex flex-col cursor-pointer shadow-2xl border border-white/10"
+                  >
+                    <div className="flex items-center justify-between mb-8">
+                      <div className="bg-white/10 p-3 rounded-2xl">
+                        <CreditCard className="h-7 w-7 text-white" />
+                      </div>
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full border border-white/5">Pay As You Go</span>
+                    </div>
+                    <h3 className="text-2xl font-black text-white tracking-tight mb-2">More Credits</h3>
+                    <p className="text-slate-400 text-sm mb-8 leading-relaxed">Need more after your starter pack? Buy credits one at a time whenever you need them.</p>
+                    <div className="mt-auto">
+                      <div className="flex items-end gap-2 mb-6">
+                        <span className="text-5xl font-black text-white">$1</span>
+                        <span className="text-slate-500 font-bold mb-2">per analysis</span>
+                      </div>
+                      <ul className="space-y-3 mb-8">
+                        {['1 full resume analysis', 'Keyword match report', 'AI improvement suggestions', 'No subscription needed'].map((f, i) => (
+                          <li key={i} className="flex items-center gap-3 text-sm text-slate-400">
+                            <CheckCircle className="h-4 w-4 text-indigo-500 flex-shrink-0" />
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+                      <button className="w-full py-4 bg-white text-black rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-xl active:scale-95">
+                        Buy 1 Credit — $1
+                      </button>
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* Pricing explanation */}
+                <div className="mt-10 p-8 bg-white/5 rounded-[2rem] border border-white/5 text-center">
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    <span className="text-white font-black">How it works:</span> New users get 4 analyses for $1 to start. After that, each analysis costs $1. There are no monthly fees or subscriptions — you only pay when you need it.
+                  </p>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
