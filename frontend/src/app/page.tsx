@@ -18,8 +18,9 @@ import { Particles } from '@/components/ui/Particles';
 import { BentoGrid, BentoGridItem } from '@/components/ui/BentoGrid';
 import { analyzeResume } from '@/lib/api';
 import { useResumeStore } from '@/store/useResumeStore';
+import { Variants } from 'framer-motion';
 
-const kineticContainer = {
+const kineticContainer: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
@@ -30,9 +31,9 @@ const kineticContainer = {
   }
 };
 
-const kineticItem = {
+const kineticItem: Variants = {
   hidden: { opacity: 0, y: 20, filter: 'blur(10px)' },
-  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] } }
+  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.8, ease: "easeOut" } }
 };
 
 export default function Home() {
