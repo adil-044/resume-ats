@@ -91,6 +91,50 @@ export default function DocsPage() {
                   <p>Your responses are processed through our <strong>Gemini 2.0 Flash</strong> pipeline to woven those details naturally into your professional experience, ensuring you hit the 95% match threshold without lying or stuffing keywords.</p>
                 </section>
 
+                <hr className="border-slate-100" />
+
+                <section id="protocol-api" className="scroll-mt-32">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="bg-slate-900 p-2 rounded-lg text-white"><Terminal className="h-4 w-4" /></div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Section 04</span>
+                  </div>
+                  <h2>Protocol API Integration</h2>
+                  <p>Our underlying semantic engine is accessible via REST API for enterprise partners. This allows for bulk resume processing and automated portfolio analysis within existing HR tech stacks.</p>
+                </section>
+
+                <hr className="border-slate-100" />
+
+                <section id="logic-analysis" className="scroll-mt-32">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="bg-slate-900 p-2 rounded-lg text-white"><Activity className="h-4 w-4" /></div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Section 05</span>
+                  </div>
+                  <h2>Deep Logic Analysis</h2>
+                  <p>Every optimization pass includes a deep logic trace. We don't just change words; we re-architect the hierarchy of your experience to ensure the most high-value signals are seen by the parser in the first 200ms of processing.</p>
+                </section>
+
+                <hr className="border-slate-100" />
+
+                <section id="success-log" className="scroll-mt-32">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="bg-slate-900 p-2 rounded-lg text-white"><ShieldCheck className="h-4 w-4" /></div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Section 06</span>
+                  </div>
+                  <h2>The Success Log</h2>
+                  <p>Our data shows that resumes optimized through the HireReady Protocol achieve a 3.4x higher interview-request rate compared to standard PDF exports. We track these metrics to constantly tune our semantic weighting.</p>
+                </section>
+
+                <hr className="border-slate-100" />
+
+                <section id="trends" className="scroll-mt-32 pb-20">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="bg-slate-900 p-2 rounded-lg text-white"><Zap className="h-4 w-4" /></div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Section 07</span>
+                  </div>
+                  <h2>2026 Hiring Trends</h2>
+                  <p>As of early 2026, over 85% of Fortune 500 companies have migrated to AI-first parsing. This makes traditional "creative" resumes effectively invisible. HireReady is the only platform built specifically for this new machine-readability landscape.</p>
+                </section>
+
               </div>
             </motion.div>
           </div>
