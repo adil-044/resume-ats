@@ -65,7 +65,7 @@ const testimonials = [
     avatar: "MJ",
     color: "#4f46e5",
     score: 94,
-    text: "I applied to 30 companies and barely got any callbacks. After using HireReady to tailor my resume, I landed 3 interviews in the first week — including Google. The keyword matching is insane.",
+    text: "I was struggling to get callbacks. After using HireReady to tailor my resume, the difference was night and day. It genuinely helped me understand what I was missing.",
     tags: ["Tech", "FAANG"]
   },
   {
@@ -75,28 +75,8 @@ const testimonials = [
     avatar: "PS",
     color: "#7c3aed",
     score: 91,
-    text: "My resume score jumped from 42% to 91% in one session. The AI suggestions were so specific — it knew exactly what hiring managers at fintech companies look for. Got the Stripe offer within 2 weeks.",
+    text: "The AI suggestions were so specific — it knew exactly what hiring managers at fintech companies look for. I finally started getting the interviews I wanted.",
     tags: ["Product", "FinTech"]
-  },
-  {
-    name: "Daniel Kim",
-    title: "Data Scientist",
-    company: "Hired at Netflix",
-    avatar: "DK",
-    color: "#dc2626",
-    score: 88,
-    text: "I was skeptical at first, but the match score feature is genuinely accurate. It told me exactly which skills to highlight for each role. Went from no responses to 5 final rounds in a month.",
-    tags: ["Data Science", "Streaming"]
-  },
-  {
-    name: "Sophie Williams",
-    title: "UX Designer",
-    company: "Hired at Airbnb",
-    avatar: "SW",
-    color: "#ea580c",
-    score: 96,
-    text: "As a designer I thought resume optimization wasn't for me. Wrong. The AI rewrote my bullet points to match the job description perfectly without losing my voice. Got my dream job at Airbnb.",
-    tags: ["Design", "Travel"]
   },
   {
     name: "Alex Thompson",
@@ -105,18 +85,8 @@ const testimonials = [
     avatar: "AT",
     color: "#16a34a",
     score: 89,
-    text: "Used to spend hours tweaking my resume for every job. Now it takes 5 minutes. The job description analysis is brilliant — it pulls out exactly what the recruiter cares about.",
+    text: "Used to spend hours tweaking my resume for every job. The job description analysis is brilliant and saves me so much time while applying.",
     tags: ["Marketing", "eCommerce"]
-  },
-  {
-    name: "Fatima Al-Hassan",
-    title: "Finance Analyst",
-    company: "Hired at JPMorgan",
-    avatar: "FA",
-    color: "#0284c7",
-    score: 93,
-    text: "Coming from a non-target school, I knew I needed every edge I could get. HireReady helped me beat candidates from top universities by having a perfectly optimized resume. Worth every penny.",
-    tags: ["Finance", "Banking"]
   }
 ];
 
@@ -157,14 +127,11 @@ const howItWorks = [
 
 /* ─── FAQ Data ─── */
 const faqData = [
-  { question: "How does the resume scanner work?", answer: "You upload your resume and paste a job description. Our AI reads both and gives you a match score showing how well your resume fits the job. It also tells you which keywords are missing and how to improve." },
+  { question: "Will this actually improve my chances?", answer: "Yes. Most applicant tracking systems filter out resumes that don't match the job description. By adding the exact skills they are looking for in the right context, you bypass the filter and get your resume in front of a human recruiter." },
+  { question: "How is this different from Jobscan?", answer: "Competitors just give you a raw list of missing keywords and leave you to figure out how to add them. HireReady's AI actually analyzes your experience and shows you exactly how to incorporate those missing skills credibly and naturally into your bullet points." },
   { question: "How much does it cost?", answer: "Your first 4 resume analyses cost just $1 total. After that, it's $1 per analysis — pay as you go. No subscriptions, no hidden fees." },
-  { question: "What file types can I upload?", answer: "We support PDF and DOCX (Microsoft Word) files. PDF is recommended for best results." },
-  { question: "Is my resume data safe?", answer: "Yes. Your data is encrypted and stored securely. We never share or sell your personal information. You can delete your data at any time." },
-  { question: "How do I get the best match score?", answer: "After scanning, we show you which keywords are missing. Use our AI rewrite tool to automatically add those keywords in a natural, readable way." },
-  { question: "What are credits and how do I buy them?", answer: "Credits are used to run resume analyses. 1 credit = 1 analysis. Your first 4 analyses are bundled for $1. After that, credits are $1 each from your dashboard." },
-  { question: "Do I need to create an account?", answer: "You can try a free scan without an account. To save results and access the full optimized resume, you'll need a free account." },
-  { question: "Can I use this for any job type?", answer: "Yes! HireReady works for any industry and job level — from entry-level to executive. Just paste the job description and we'll tailor the analysis." }
+  { question: "What if I upload my resume and it doesn't help?", answer: "If your resume is already perfectly optimized for the job, our system will tell you that you have a 95%+ match score and you're good to apply! You only pay per scan, so there are no wasted subscriptions if you don't need us right now." },
+  { question: "Is my resume data safe?", answer: "Yes. Your data is encrypted and stored securely. We never share or sell your personal information. You can delete your data at any time." }
 ];
 
 function FAQItem({ question, answer }: { question: string; answer: string }) {
@@ -331,7 +298,7 @@ export default function Home() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
               </span>
-              Trusted by 10,000+ job seekers in 2026
+              Trusted by early adopters
             </motion.div>
 
             {/* Headline */}
@@ -344,31 +311,28 @@ export default function Home() {
             <motion.p variants={kineticItem} className="text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed mb-6">
               Our AI analyzes your resume against any job posting and rewrites it to score{' '}
               <span className="text-white font-semibold">95%+ match rate</span> — so you get more interview calls, not more rejections.
+              <span className="text-xs text-slate-500 font-normal mt-2 block">(Match rate = how many of the job's required keywords your resume includes)</span>
             </motion.p>
 
             {/* Social proof micro-text */}
             <motion.div variants={kineticItem} className="flex items-center justify-center gap-3 mb-12 text-sm text-slate-500">
               <div className="flex -space-x-2">
-                {['MJ','PS','DK','SW','AT'].map((a,i) => (
-                  <div key={i} className="h-7 w-7 rounded-full border-2 border-black flex items-center justify-center text-[9px] font-black text-white" style={{ background: ['#4f46e5','#7c3aed','#dc2626','#ea580c','#16a34a'][i] }}>{a}</div>
+                {['MJ','PS','AT'].map((a,i) => (
+                  <div key={i} className="h-7 w-7 rounded-full border-2 border-black flex items-center justify-center text-[9px] font-black text-white" style={{ background: ['#4f46e5','#7c3aed','#16a34a'][i] }}>{a}</div>
                 ))}
               </div>
-              <span><strong className="text-white">4.9/5</strong> from 3,200+ reviews</span>
+              <span><strong className="text-white">5.0/5</strong> from 3 reviews</span>
               <span className="hidden sm:inline text-slate-700">·</span>
-              <span className="hidden sm:inline"><strong className="text-white">$1</strong> to get started</span>
+              <span className="hidden sm:inline"><strong className="text-white">$1</strong> for first 4 scans</span>
             </motion.div>
 
             {/* CTAs */}
             <motion.div variants={kineticItem} className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/auth/login" className="group relative px-10 py-5 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-indigo-500 transition-all shadow-[0_0_40px_rgba(99,102,241,0.4)] active:scale-95 flex items-center gap-3 justify-center overflow-hidden">
+              <a href="#analyzer" className="group relative px-10 py-5 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-indigo-500 transition-all shadow-[0_0_40px_rgba(99,102,241,0.4)] active:scale-95 flex items-center gap-3 justify-center overflow-hidden">
                 <span className="absolute inset-0 shimmer" />
                 <Rocket className="h-4 w-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                Start for $1
+                Start Your Free Scan
                 <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <a href="#analyzer" className="px-10 py-5 bg-white/5 text-white border border-white/10 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-white/10 transition-all backdrop-blur-md flex items-center gap-3 justify-center">
-                <Play className="h-4 w-4 text-indigo-400" />
-                Try Free Scan
               </a>
             </motion.div>
           </motion.div>
@@ -396,10 +360,10 @@ export default function Home() {
               className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center"
             >
               {[
-                { value: 10000, suffix: '+', label: 'Resumes Optimized', color: 'text-indigo-400' },
+                { value: 30, suffix: '+', label: 'Resumes Optimized', color: 'text-indigo-400' },
                 { value: 95,    suffix: '%', label: 'Average Match Rate', color: 'text-cyan-400' },
-                { value: 3200,  suffix: '+', label: '5-Star Reviews',     color: 'text-amber-400' },
-                { value: 1,     suffix: '$', label: 'To Get Started',     color: 'text-green-400', prefix: true },
+                { value: 3,  suffix: '', label: '5-Star Reviews',     color: 'text-amber-400' },
+                { value: 1,     suffix: '$', label: 'First 4 Scans',     color: 'text-green-400', prefix: true },
               ].map((s, i) => (
                 <motion.div key={i} variants={fadeUp} className="flex flex-col items-center gap-2">
                   <p className={`text-4xl md:text-5xl font-black tracking-tighter ${s.color}`}>
@@ -589,7 +553,7 @@ export default function Home() {
                       <><Zap className="h-5 w-5 text-indigo-200 group-hover:scale-110 transition-transform" /><span>Get My Match Score</span><ArrowRight className="h-5 w-5 opacity-60 group-hover:translate-x-1 transition-transform" /></>
                     )}
                   </button>
-                  <p className="text-center text-slate-700 text-[10px] font-bold">No credit card required for free scan</p>
+                  <p className="text-center text-slate-500 text-[11px] font-medium">Start with 4 free scans. After that, $1 per scan. No credit card required.</p>
                 </div>
               </motion.div>
             </div>
@@ -620,12 +584,12 @@ export default function Home() {
               className="grid grid-cols-1 md:grid-cols-3 gap-6"
             >
               {[
-                { title: "Smart Duplicate Removal", desc: "Automatically cleans up repetitive info and formatting issues so your resume looks polished every time.", icon: <Bot className="h-8 w-8 text-indigo-400" />, bg: "glass-card border border-white/5", icon_bg: "bg-white/5", text: "text-white", sub: "text-slate-400", accent: "#6366f1" },
+                { title: "Bridge The Gap", desc: "Competitors just show you keywords. We show you exactly which skills are missing and how to add them credibly to your experience.", icon: <BrainCircuit className="h-8 w-8 text-indigo-400" />, bg: "glass-card border border-white/5", icon_bg: "bg-white/5", text: "text-white", sub: "text-slate-400", accent: "#6366f1" },
                 { title: "95% Match Rate", desc: "We keep improving your resume until it fits the job perfectly. Our AI adds the right keywords for each role with full context.", icon: <Target className="h-8 w-8 text-cyan-400" />, bg: "glass-card border border-white/5", icon_bg: "bg-white/5", text: "text-white", sub: "text-slate-400", accent: "#06b6d4" },
                 { title: "Safe & Private", desc: "Your data is bank-level encrypted and never shared. Full control over your information, always.", icon: <ShieldCheck className="h-8 w-8 text-green-400" />, bg: "glass-card border border-white/5", icon_bg: "bg-white/5", text: "text-white", sub: "text-slate-400", accent: "#4ade80" },
                 { title: "Clean, ATS-Ready Format", desc: "Formatted so ANY applicant tracking system can read your resume — no more getting filtered out for bad formatting.", icon: <FileText className="h-8 w-8 text-slate-300" />, bg: "glass-card border border-white/5", icon_bg: "bg-white/5", text: "text-white", sub: "text-slate-400", accent: "#cbd5e1" },
                 { title: "Instant AI Analysis", desc: "Get your keyword match score and AI recommendations in under 30 seconds. No waiting, no guessing.", icon: <Zap className="h-8 w-8 text-amber-400" />, bg: "glass-card border border-white/5", icon_bg: "bg-white/5", text: "text-white", sub: "text-slate-400", accent: "#fbbf24" },
-                { title: "Pay As You Go", desc: "First 4 analyses for just $1. After that, $1 per analysis. No subscription trap. Only pay when you need it.", icon: <Coins className="h-8 w-8 text-indigo-400" />, bg: "glass-card border border-white/5", icon_bg: "bg-white/5", text: "text-white", sub: "text-slate-400", accent: "#6366f1" }
+                { title: "Pay As You Go", desc: "Start with 4 free scans. After that, $1 per scan. No subscription trap. Only pay when you need it.", icon: <Coins className="h-8 w-8 text-indigo-400" />, bg: "glass-card border border-white/5", icon_bg: "bg-white/5", text: "text-white", sub: "text-slate-400", accent: "#6366f1" }
               ].map((card, i) => (
                 <motion.div
                   key={i}
@@ -676,8 +640,8 @@ export default function Home() {
               {/* Overall rating bar */}
               <motion.div variants={fadeUp} className="flex items-center justify-center gap-4 mt-8">
                 <Stars />
-                <span className="text-white font-black text-lg">4.9</span>
-                <span className="text-slate-600 text-sm">/ 5 · based on 3,200+ reviews</span>
+                <span className="text-white font-black text-lg">5.0</span>
+                <span className="text-slate-600 text-sm">/ 5 · based on 3 reviews</span>
               </motion.div>
             </motion.div>
 
