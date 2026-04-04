@@ -41,6 +41,7 @@ export default function Dashboard() {
   const [analysisStep, setAnalysisStep] = useState<string>('Getting ready...');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [credits, setCredits] = useState(4);
+  const [isPurchasing, setIsPurchasing] = useState<string | null>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -53,6 +54,39 @@ export default function Dashboard() {
     }
   }, []);
 
+  const handlePurchase = async (amount: number, tokens: number, id: string) => {
+    if (!user?.id) {
+      alert("Please wait while we sync your secure session...");
+      return;
+    }
+    
+    setIsPurchasing(id);
+    try {
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, tokens, amount }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || 'Failed to create Stripe session. Check your server logs.');
+      }
+    } catch (err: any) {
+      console.error('Checkout error:', err);
+      alert(`Error initiating checkout: ${err.message}`);
+    } finally {
+      setIsPurchasing(null);
+    }
+  };
+
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -61,6 +95,12 @@ export default function Dashboard() {
       } else {
         setUser(user);
         fetchHistory(user.id);
+        
+        // Try fetching secure credits from DB
+        const { data: profile } = await supabase.from('profiles').select('tokens').eq('id', user.id).single();
+        if (profile && profile.tokens !== undefined && profile.tokens !== null) {
+          setCredits(profile.tokens);
+        }
       }
     };
     getUser();
@@ -125,6 +165,11 @@ export default function Dashboard() {
       if (typeof window !== 'undefined') {
         localStorage.setItem('hireReady_credits', newCredits.toString());
       }
+      // Decrement in DB securely if possible
+      const { data: profile } = await supabase.from('profiles').select('tokens').eq('id', user?.id).single();
+      if (profile && profile.tokens > 0) {
+        await supabase.from('profiles').update({ tokens: profile.tokens - 1 }).eq('id', user?.id);
+      }
 
       const result = await analyzeResume(resumeFile, jobDescription);
       const { data, error } = await supabase
@@ -148,9 +193,16 @@ export default function Dashboard() {
       if (error) throw error;
       setAnalysisResult(result);
       router.push(`/workspace/${data.id}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert('Something went wrong. Please try again.');
+      alert(`Error Analyzing Resume: ${error.message || 'Something went wrong. Please try again.'}`);
+      
+      // refund the credit since it failed
+      const refundedCredits = credits + 1;
+      setCredits(refundedCredits);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('hireReady_credits', refundedCredits.toString());
+      }
     } finally {
       setIsAnalyzing(false);
     }
@@ -392,8 +444,38 @@ export default function Dashboard() {
                 </div>
 
                 {/* Pricing Options */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Starter Pack */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Single Credit */}
+                  <motion.div
+                    style={{ perspective: 1200 }}
+                    whileHover={{ rotateX: -4, rotateY: 4, z: 30, scale: 1.02 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                    className="bg-slate-900 rounded-[2.5rem] p-10 flex flex-col cursor-pointer shadow-2xl border border-white/10"
+                  >
+                    <div className="flex items-center justify-between mb-8">
+                      <div className="bg-white/10 p-3 rounded-2xl">
+                        <Coins className="h-7 w-7 text-white" />
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-black text-white tracking-tight mb-2">1 Credit</h3>
+                    <p className="text-slate-400 text-sm mb-8 leading-relaxed">Need one quick optimization? Buy a single token.</p>
+                    <div className="mt-auto">
+                      <div className="flex items-end gap-2 mb-6">
+                        <span className="text-5xl font-black text-white">$1</span>
+                        <span className="text-slate-500 font-bold mb-2">for 1 token</span>
+                      </div>
+                      <button 
+                        onClick={() => handlePurchase(1, 1, 'tier1')} 
+                        disabled={isPurchasing !== null}
+                        className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2 ${isPurchasing === 'tier1' ? 'bg-indigo-400 text-white' : 'bg-white text-black hover:bg-indigo-600 hover:text-white'}`}
+                      >
+                        {isPurchasing === 'tier1' ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                        {isPurchasing === 'tier1' ? 'Preparing...' : 'Buy 1 Token'}
+                      </button>
+                    </div>
+                  </motion.div>
+
+                  {/* 5 Credits */}
                   <motion.div
                     style={{ perspective: 1200 }}
                     whileHover={{ rotateX: -4, rotateY: 4, z: 30, scale: 1.02 }}
@@ -404,59 +486,52 @@ export default function Dashboard() {
                       <div className="bg-indigo-100 p-3 rounded-2xl">
                         <Star className="h-7 w-7 text-indigo-600" />
                       </div>
-                      <span className="text-[9px] font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">Best Deal</span>
+                      <span className="text-[9px] font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">Popular</span>
                     </div>
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-2">Starter Pack</h3>
-                    <p className="text-slate-500 text-sm mb-8 leading-relaxed">Perfect for trying things out. Get your first 4 resume analyses for just $1.</p>
+                    <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-2">5 Credits</h3>
+                    <p className="text-slate-500 text-sm mb-8 leading-relaxed">Applying to a few jobs? Grab a handful of tokens.</p>
                     <div className="mt-auto">
                       <div className="flex items-end gap-2 mb-6">
-                        <span className="text-5xl font-black text-slate-900">$1</span>
-                        <span className="text-slate-400 font-bold mb-2">for 4 analyses</span>
+                        <span className="text-5xl font-black text-slate-900">$5</span>
+                        <span className="text-slate-400 font-bold mb-2">for 5 tokens</span>
                       </div>
-                      <ul className="space-y-3 mb-8">
-                        {['4 full resume analyses', 'Keyword match report', 'AI improvement suggestions', 'PDF export'].map((f, i) => (
-                          <li key={i} className="flex items-center gap-3 text-sm text-slate-600">
-                            <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-                            {f}
-                          </li>
-                        ))}
-                      </ul>
-                      <button className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-black transition-all shadow-xl active:scale-95">
-                        Get Started — $1
+                      <button 
+                        onClick={() => handlePurchase(5, 5, 'tier5')} 
+                        disabled={isPurchasing !== null}
+                        className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2 ${isPurchasing === 'tier5' ? 'bg-indigo-400 text-white' : 'bg-indigo-600 text-white hover:bg-black'}`}
+                      >
+                        {isPurchasing === 'tier5' ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                        {isPurchasing === 'tier5' ? 'Preparing...' : 'Buy 5 Tokens'}
                       </button>
                     </div>
                   </motion.div>
 
-                  {/* Pay As You Go */}
+                  {/* 10 Credits */}
                   <motion.div
                     style={{ perspective: 1200 }}
                     whileHover={{ rotateX: -4, rotateY: 4, z: 30, scale: 1.02 }}
                     transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                    className="bg-slate-900 rounded-[2.5rem] p-10 flex flex-col cursor-pointer shadow-2xl border border-white/10"
+                    className="bg-slate-900 rounded-[2.5rem] p-10 flex flex-col cursor-pointer shadow-2xl border border-indigo-500/30"
                   >
                     <div className="flex items-center justify-between mb-8">
-                      <div className="bg-white/10 p-3 rounded-2xl">
-                        <CreditCard className="h-7 w-7 text-white" />
+                      <div className="bg-indigo-500/20 p-3 rounded-2xl">
+                        <Zap className="h-7 w-7 text-indigo-400" />
                       </div>
-                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full border border-white/5">Pay As You Go</span>
                     </div>
-                    <h3 className="text-2xl font-black text-white tracking-tight mb-2">More Credits</h3>
-                    <p className="text-slate-400 text-sm mb-8 leading-relaxed">Need more after your starter pack? Buy credits one at a time whenever you need them.</p>
+                    <h3 className="text-2xl font-black text-white tracking-tight mb-2">10 Credits</h3>
+                    <p className="text-slate-400 text-sm mb-8 leading-relaxed">Going on an application spree? Stock up on tokens.</p>
                     <div className="mt-auto">
                       <div className="flex items-end gap-2 mb-6">
-                        <span className="text-5xl font-black text-white">$1</span>
-                        <span className="text-slate-500 font-bold mb-2">per analysis</span>
+                        <span className="text-5xl font-black text-white">$10</span>
+                        <span className="text-slate-500 font-bold mb-2">for 10 tokens</span>
                       </div>
-                      <ul className="space-y-3 mb-8">
-                        {['1 full resume analysis', 'Keyword match report', 'AI improvement suggestions', 'No subscription needed'].map((f, i) => (
-                          <li key={i} className="flex items-center gap-3 text-sm text-slate-400">
-                            <CheckCircle className="h-4 w-4 text-indigo-500 flex-shrink-0" />
-                            {f}
-                          </li>
-                        ))}
-                      </ul>
-                      <button className="w-full py-4 bg-white text-black rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-xl active:scale-95">
-                        Buy 1 Credit — $1
+                      <button 
+                        onClick={() => handlePurchase(10, 10, 'tier10')} 
+                        disabled={isPurchasing !== null}
+                        className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2 ${isPurchasing === 'tier10' ? 'bg-indigo-400 text-white' : 'bg-indigo-600 text-white hover:bg-indigo-500'}`}
+                      >
+                        {isPurchasing === 'tier10' ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                        {isPurchasing === 'tier10' ? 'Preparing...' : 'Buy 10 Tokens'}
                       </button>
                     </div>
                   </motion.div>

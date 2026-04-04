@@ -19,7 +19,10 @@ export async function analyzeResume(file: File, jobDescription: string) {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to analyze resume');
+    const errorMsg = await response.text();
+    let detail = 'Failed to analyze resume';
+    try { detail = JSON.parse(errorMsg).detail || detail; } catch (e) {}
+    throw new Error(detail);
   }
 
   return response.json();
