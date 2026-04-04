@@ -26,6 +26,19 @@ export default function Workspace({ params }: { params: Promise<{ id: string }> 
   const [isGapModalOpen, setIsGapModalOpen] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const [showJobDescription, setShowJobDescription] = useState(false);
+  const [hasAccess, setHasAccess] = useState(false);
+
+  useEffect(() => {
+    const checkAccess = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      const isAdmin = user?.email === 'khatriadil044@gmail.com';
+      const { data: profile } = await supabase.from('profiles').select('subscribed').single();
+      if (isAdmin || profile?.subscribed) {
+        setHasAccess(true);
+      }
+    };
+    checkAccess();
+  }, []);
 
   useEffect(() => {
     const fetchAnalysis = async () => {
@@ -61,8 +74,7 @@ export default function Workspace({ params }: { params: Promise<{ id: string }> 
   }, [id, analysisResult, setAnalysisResult]);
 
   const handleAIRephrase = async () => {
-    const { data: profile } = await supabase.from('profiles').select('subscribed').single();
-    if (!profile?.subscribed) {
+    if (!hasAccess) {
       setShowPaywall(true);
       return;
     }
@@ -215,7 +227,7 @@ export default function Workspace({ params }: { params: Promise<{ id: string }> 
                   <CheckCircle2 className="h-4 w-4 text-indigo-500" /> Keywords
                 </h3>
                 {analysisResult.missing_keywords.length > 0 && (
-                  <button onClick={() => setShowPaywall(true)} className="text-[8px] font-black text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-3 py-1.5 rounded-xl hover:bg-white hover:text-black transition-all shadow-xl active:scale-95">
+                  <button onClick={() => hasAccess ? setIsGapModalOpen(true) : setShowPaywall(true)} className="text-[8px] font-black text-indigo-400 uppercase tracking-widest bg-indigo-500/10 px-3 py-1.5 rounded-xl hover:bg-white hover:text-black transition-all shadow-xl active:scale-95">
                     <Zap className="h-3 w-3 inline mr-1" />Fix
                   </button>
                 )}
@@ -227,19 +239,30 @@ export default function Workspace({ params }: { params: Promise<{ id: string }> 
                     <CheckCircle2 className="h-3 w-3 text-green-500" />
                   </div>
                 ))}
-                <div className="relative group">
-                  <div className="space-y-2 filter blur-[2px] opacity-20 select-none">
-                    {analysisResult.missing_keywords.slice(0, 2).map((kw, i) => (
+                {hasAccess ? (
+                  <div className="space-y-2">
+                    {analysisResult.missing_keywords.map((kw, i) => (
                       <div key={i} className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl">
                         <span className="text-[10px] font-black text-slate-600 uppercase tracking-tighter">{kw}</span>
                         <XCircle className="h-3 w-3 text-slate-800" />
                       </div>
                     ))}
                   </div>
-                  <div className="absolute inset-0 flex items-center justify-center z-10">
-                    <button onClick={() => setShowPaywall(true)} className="px-4 py-2 bg-white text-black rounded-xl font-black text-[8px] uppercase tracking-[0.3em] shadow-2xl">Unlock All</button>
+                ) : (
+                  <div className="relative group">
+                    <div className="space-y-2 filter blur-[2px] opacity-20 select-none">
+                      {analysisResult.missing_keywords.slice(0, 2).map((kw, i) => (
+                        <div key={i} className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl">
+                          <span className="text-[10px] font-black text-slate-600 uppercase tracking-tighter">{kw}</span>
+                          <XCircle className="h-3 w-3 text-slate-800" />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="absolute inset-0 flex items-center justify-center z-10">
+                      <button onClick={() => setShowPaywall(true)} className="px-4 py-2 bg-white text-black rounded-xl font-black text-[8px] uppercase tracking-[0.3em] shadow-2xl">Unlock All</button>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
