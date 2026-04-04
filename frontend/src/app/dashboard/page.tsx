@@ -69,11 +69,25 @@ export default function Dashboard() {
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          // If response is not JSON (e.g. 500 HTML error), fetch the text instead
+          const text = await response.text();
+          console.error('Server error response:', text);
+          errorMessage = `Server Error (${response.status}): ${text.slice(0, 100)}...`;
+        }
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        throw new Error("Failed to parse server response. The server may have crashed.");
+      }
       if (data.url) {
         window.location.href = data.url;
       } else {
