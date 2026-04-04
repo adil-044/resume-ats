@@ -69,22 +69,21 @@ export default function Dashboard() {
       });
       
       if (!response.ok) {
-        let errorMessage = `HTTP error! status: ${response.status}`;
+        const text = await response.text();
+        let errorMessage = `Server Error (${response.status}): ${text.slice(0, 100)}...`;
         try {
-          const errorData = await response.json();
+          const errorData = JSON.parse(text);
           errorMessage = errorData.error || errorMessage;
         } catch (e) {
-          // If response is not JSON (e.g. 500 HTML error), fetch the text instead
-          const text = await response.text();
-          console.error('Server error response:', text);
-          errorMessage = `Server Error (${response.status}): ${text.slice(0, 100)}...`;
+          console.error('Non-JSON server error:', text);
         }
         throw new Error(errorMessage);
       }
 
+      const text = await response.text();
       let data;
       try {
-        data = await response.json();
+        data = JSON.parse(text);
       } catch (e) {
         throw new Error("Failed to parse server response. The server may have crashed.");
       }
