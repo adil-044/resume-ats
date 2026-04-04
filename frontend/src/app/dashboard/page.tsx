@@ -42,6 +42,31 @@ export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [credits, setCredits] = useState(4);
   const [isPurchasing, setIsPurchasing] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('success') === 'true') {
+        setShowSuccess(true);
+        // Refresh credits periodically for 10 seconds to catch the webhook
+        const interval = setInterval(async () => {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const { data: profile } = await supabase.from('profiles').select('tokens').eq('id', user.id).single();
+            if (profile && profile.tokens > credits) {
+              setCredits(profile.tokens);
+              clearInterval(interval);
+              setShowSuccess(false);
+              // Clean up URL
+              router.replace('/dashboard');
+            }
+          }
+        }, 2000);
+        setTimeout(() => clearInterval(interval), 10000);
+      }
+    }
+  }, [credits, router]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -556,6 +581,23 @@ export default function Dashboard() {
                     <span className="text-white font-black">How it works:</span> New users get 4 analyses for $1 to start. After that, each analysis costs $1. There are no monthly fees or subscriptions — you only pay when you need it.
                   </p>
                 </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Success Toast */}
+          <AnimatePresence>
+            {showSuccess && (
+              <motion.div 
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 50 }}
+                className="fixed bottom-12 left-1/2 -translate-x-1/2 z-[100] bg-green-500 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl flex items-center gap-3 border border-white/20 backdrop-blur-xl"
+              >
+                <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center animate-pulse">
+                  <CheckCircle className="h-4 w-4" />
+                </div>
+                <span>Payment Successful! Syncing tokens...</span>
               </motion.div>
             )}
           </AnimatePresence>

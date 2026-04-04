@@ -12,9 +12,11 @@ export async function POST(req: Request) {
   }
 
   const stripe = new Stripe(apiKey);
+  
+  // Use Service Role Key for webhooks to bypass RLS and update profiles
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   );
 
   const payload = await req.text();
