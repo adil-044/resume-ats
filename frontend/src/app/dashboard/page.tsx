@@ -40,7 +40,18 @@ export default function Dashboard() {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [analysisStep, setAnalysisStep] = useState<string>('Getting ready...');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [credits, setCredits] = useState(4); // mock credits balance
+  const [credits, setCredits] = useState(4);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('hireReady_credits');
+      if (saved !== null) {
+        setCredits(parseInt(saved, 10));
+      } else {
+        localStorage.setItem('hireReady_credits', '4');
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const getUser = async () => {
@@ -98,10 +109,23 @@ export default function Dashboard() {
 
   const handleAnalyze = async () => {
     if (!resumeFile || !jobDescription) return;
+    
+    if (credits <= 0) {
+      alert("You have 0 credits left. Please purchase more credits to continue analyzing resumes.");
+      setActiveTab('credits');
+      return;
+    }
+
     setIsAnalyzing(true);
     setAnalysisStep('Reading your resume...');
     
     try {
+      const newCredits = credits - 1;
+      setCredits(newCredits);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('hireReady_credits', newCredits.toString());
+      }
+
       const result = await analyzeResume(resumeFile, jobDescription);
       const { data, error } = await supabase
         .from('resumes')
