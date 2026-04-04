@@ -39,7 +39,7 @@ export default function Footer() {
             <ul className="space-y-5">
               <li><Link href="/" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Home</Link></li>
               <li><Link href="/dashboard" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Dashboard</Link></li>
-              <li><Link href="/docs#protocol-api" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">How It Works</Link></li>
+              <li><Link href="/docs#how-it-works" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">How It Works</Link></li>
               <li><Link href="/pricing" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Pricing</Link></li>
             </ul>
           </div>
@@ -49,9 +49,9 @@ export default function Footer() {
             <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-10">Resources</h4>
             <ul className="space-y-5">
               <li><Link href="/docs" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Documentation</Link></li>
-              <li><Link href="/docs#logic-analysis" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Resume Tips</Link></li>
-              <li><Link href="/docs#success-log" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Success Stories</Link></li>
-              <li><Link href="/docs#trends" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">2026 Job Trends</Link></li>
+              <li><Link href="/docs#resume-tips" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Resume Tips</Link></li>
+              <li><Link href="/docs#success-stories" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Success Stories</Link></li>
+              <li><Link href="/docs#job-trends" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">2026 Job Trends</Link></li>
             </ul>
           </div>
 
