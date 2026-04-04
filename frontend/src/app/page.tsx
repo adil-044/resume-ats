@@ -323,7 +323,7 @@ export default function Home() {
               </div>
               <span><strong className="text-white">5.0/5</strong> from 3 reviews</span>
               <span className="hidden sm:inline text-slate-700">·</span>
-              <span className="hidden sm:inline"><strong className="text-white">$1</strong> for first 4 scans</span>
+              <span className="hidden sm:inline"><strong className="text-amber-400">Launch Special:</strong> $1 for 4 Lifetime Tokens</span>
             </motion.div>
 
             {/* CTAs */}
@@ -331,7 +331,7 @@ export default function Home() {
               <a href="#analyzer" className="group relative px-10 py-5 bg-indigo-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-indigo-500 transition-all shadow-[0_0_40px_rgba(99,102,241,0.4)] active:scale-95 flex items-center gap-3 justify-center overflow-hidden">
                 <span className="absolute inset-0 shimmer" />
                 <Rocket className="h-4 w-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                Start Your Free Scan
+                Claim Launch Special ($1)
                 <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </a>
             </motion.div>
