@@ -779,14 +779,15 @@ export default function Home() {
                 Ready to <span className="text-gradient-purple not-italic">Get Hired?</span>
               </h2>
               <p className="text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
-                Join 10,000+ job seekers who use HireReady to stand out. Start your first 4 analyses for just $1.
+                <span className="text-amber-400 font-black block mb-2 tracking-widest uppercase text-sm">🚀 Launch Special</span>
+                For the first 100 users: Get 4 lifetime resume tokens for just $1. Normally $1 per resume scan. Claim your tokens before the launch offer ends!
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Link href="/auth/login" className="relative group px-12 py-6 bg-white text-black rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-[0_0_60px_rgba(255,255,255,0.15)] active:scale-95 flex items-center gap-3 overflow-hidden">
-                  Start for $1 <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                <Link href="/auth/login" className="relative group px-12 py-6 bg-amber-400 text-black rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-amber-300 hover:text-black transition-all shadow-[0_0_60px_rgba(251,191,36,0.2)] active:scale-95 flex items-center gap-3 overflow-hidden">
+                  Claim Launch Special ($1) <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </Link>
                 <div className="flex items-center gap-3 text-slate-500 text-sm">
-                  <Check className="h-4 w-4 text-green-500" /> No subscription · Cancel anytime
+                  <Check className="h-4 w-4 text-green-500" /> 4 Lifetime Tokens · No subscription
                 </div>
               </div>
             </motion.div>

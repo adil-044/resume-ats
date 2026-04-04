@@ -31,14 +31,15 @@ export default function PricingPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 max-w-4xl mx-auto relative z-10">
-          {/* Starter Pack */}
-          <motion.div whileHover={{ y: -8 }} className="bg-[#0f172a] border border-white/5 p-12 rounded-[3.5rem] flex flex-col h-full transition-all duration-500 hover:border-indigo-500/30">
-            <div className="mb-10">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">For New Users</span>
-              <h3 className="text-5xl font-black text-white mt-4">$1 <span className="text-sm font-bold text-slate-500">/ first 4 resumes</span></h3>
+          {/* Starter Pack / Launch Special */}
+          <motion.div whileHover={{ y: -8 }} className="bg-[#0f172a] border-2 border-amber-500/20 p-12 rounded-[3.5rem] flex flex-col h-full transition-all duration-500 hover:border-amber-500/40 relative overflow-hidden">
+            <div className="absolute top-0 right-0 bg-amber-500 text-black text-[9px] font-black uppercase tracking-widest px-4 py-1.5 rounded-bl-3xl">Launch Special</div>
+            <div className="mb-10 mt-2">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-amber-400">First 100 Users Only</span>
+              <h3 className="text-5xl font-black text-white mt-4">$1 <span className="text-sm font-bold text-slate-500">/ 4 lifetime tokens</span></h3>
             </div>
             <p className="text-slate-400 mb-8 leading-relaxed">
-              Get 4 credits to try out our AI resume optimization and land your first interviews.
+              Normally $1 per resume. Claim your 4 lifetime tokens to try out our AI resume optimization and land your first interviews.
             </p>
             <ul className="space-y-5 mb-12 flex-1">
               {[
@@ -56,7 +57,7 @@ export default function PricingPage() {
                 </li>
               ))}
             </ul>
-            <Link href="/auth/login" className="w-full py-5 bg-white/5 border border-white/10 text-white rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] text-center hover:bg-white hover:text-black transition-all active:scale-95 shadow-lg">Start for $1</Link>
+            <Link href="/auth/login" className="w-full py-5 bg-amber-400 text-black rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.2em] text-center hover:bg-amber-300 transition-all active:scale-95 shadow-[0_0_30px_rgba(251,191,36,0.15)]">Claim For $1</Link>
           </motion.div>
 
           {/* Pay As You Go */}
