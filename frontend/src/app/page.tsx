@@ -90,11 +90,11 @@ const testimonials = [
   }
 ];
 
-/* ─── Companies where users got hired ─── */
-const companies = [
-  "Google", "Stripe", "Netflix", "Airbnb", "Shopify", "JPMorgan",
-  "Meta", "Amazon", "Apple", "Microsoft", "Nvidia", "OpenAI",
-  "Salesforce", "Uber", "LinkedIn", "Notion", "Figma", "Vercel"
+/* ─── Core Features Marquee ─── */
+const scrollingFeatures = [
+  "AI Keyword Optimization", "ATS Bypass Engine", "Semantic Profile Diffing", 
+  "Format-Perfect PDF Export", "Gemini 2.0 Flash Powered", "Military-Grade Encryption",
+  "100% Machine Readable", "Targeted Gap Analysis", "Real-time Scoring"
 ];
 
 /* ─── How It Works Steps ─── */
@@ -270,7 +270,7 @@ export default function Home() {
   const handleContactSubmit = (e: React.FormEvent) => { e.preventDefault(); setContactSent(true); };
 
   // doubled for seamless marquee
-  const marqueeCompanies = [...companies, ...companies];
+  const marqueeFeatures = [...scrollingFeatures, ...scrollingFeatures, ...scrollingFeatures];
 
   return (
     <div className="min-h-screen bg-black selection:bg-indigo-500/30 selection:text-indigo-200 overflow-x-hidden">
@@ -376,19 +376,16 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ═══════════════════ COMPANY LOGOS MARQUEE ═══════════════════ */}
-        <section className="py-16 border-b border-white/5 overflow-hidden">
-          <div className="text-center mb-10">
-            <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.5em]">Users have landed jobs at</p>
-          </div>
+        {/* ═══════════════════ FEATURES MARQUEE STRIP ═══════════════════ */}
+        <section className="py-8 border-b border-white/5 overflow-hidden bg-indigo-600/5">
           <div className="relative overflow-hidden">
             <div className="absolute left-0 top-0 bottom-0 w-32 z-10 pointer-events-none" style={{ background: 'linear-gradient(90deg, #000 0%, transparent 100%)' }} />
             <div className="absolute right-0 top-0 bottom-0 w-32 z-10 pointer-events-none" style={{ background: 'linear-gradient(270deg, #000 0%, transparent 100%)' }} />
-            <div className="marquee-track">
-              {marqueeCompanies.map((company, i) => (
-                <div key={i} className="flex items-center gap-3 mx-10 flex-shrink-0">
-                  <div className="h-2 w-2 rounded-full bg-indigo-600/60" />
-                  <span className="text-slate-500 font-black text-sm uppercase tracking-widest whitespace-nowrap hover:text-white transition-colors cursor-default">{company}</span>
+            <div className="marquee-track flex" style={{ animationDuration: '40s' }}>
+              {marqueeFeatures.map((feature, i) => (
+                <div key={i} className="flex items-center gap-8 mx-8 flex-shrink-0">
+                  <span className="text-indigo-400 font-bold text-xs uppercase tracking-widest whitespace-nowrap cursor-default">{feature}</span>
+                  <div className="h-1.5 w-1.5 rounded-full bg-slate-600" />
                 </div>
               ))}
             </div>
