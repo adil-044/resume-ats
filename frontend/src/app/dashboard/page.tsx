@@ -68,16 +68,7 @@ export default function Dashboard() {
     }
   }, [credits, router]);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('hireReady_credits');
-      if (saved !== null) {
-        setCredits(parseInt(saved, 10));
-      } else {
-        localStorage.setItem('hireReady_credits', '4');
-      }
-    }
-  }, []);
+
 
   const handlePurchase = async (amount: number, tokens: number, id: string) => {
     if (!user?.id) {
@@ -200,16 +191,33 @@ export default function Dashboard() {
     setAnalysisStep('Reading your resume...');
     
     try {
-      const newCredits = credits - 1;
-      setCredits(newCredits);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('hireReady_credits', newCredits.toString());
+      // 1. Fetch current tokens from DB to ensure we have the latest
+      const { data: profile, error: fetchError } = await supabase.from('profiles').select('tokens').eq('id', user?.id).single();
+      
+      if (fetchError || !profile) {
+        throw new Error("Could not verify your token balance. Please try again.");
       }
-      // Decrement in DB securely if possible
-      const { data: profile } = await supabase.from('profiles').select('tokens').eq('id', user?.id).single();
-      if (profile && profile.tokens > 0) {
-        await supabase.from('profiles').update({ tokens: profile.tokens - 1 }).eq('id', user?.id);
+
+      if (profile.tokens <= 0) {
+        alert("You have 0 credits left. Please purchase more credits to continue analyzing resumes.");
+        setActiveTab('credits');
+        setIsAnalyzing(false);
+        return;
       }
+
+      // 2. Decrement in DB securely
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ tokens: profile.tokens - 1 })
+        .eq('id', user?.id);
+
+      if (updateError) {
+        throw new Error("Failed to use token. Please check your connection.");
+      }
+
+      // Update local state for immediate feedback
+      setCredits(profile.tokens - 1);
+
 
       const result = await analyzeResume(resumeFile, jobDescription);
       const { data, error } = await supabase
@@ -237,12 +245,9 @@ export default function Dashboard() {
       console.error(error);
       alert(`Error Analyzing Resume: ${error.message || 'Something went wrong. Please try again.'}`);
       
-      // refund the credit since it failed
-      const refundedCredits = credits + 1;
-      setCredits(refundedCredits);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('hireReady_credits', refundedCredits.toString());
-      }
+      // Refresh credits to get the correct state after failure
+      const { data: currentProfile } = await supabase.from('profiles').select('tokens').eq('id', user?.id).single();
+      if (currentProfile) setCredits(currentProfile.tokens);
     } finally {
       setIsAnalyzing(false);
     }
