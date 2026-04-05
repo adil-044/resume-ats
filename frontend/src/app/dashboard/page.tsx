@@ -125,6 +125,41 @@ export default function Dashboard() {
     }
   };
 
+  const handleRequestInvoice = async () => {
+    if (!user?.id) {
+      alert("Please wait for your session to sync...");
+      return;
+    }
+    
+    setIsPurchasing('invoice');
+    try {
+      const response = await fetch('/api/stripe/invoice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id }),
+      });
+      
+      const text = await response.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        throw new Error("Failed to parse server response.");
+      }
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || 'Failed to create invoice.');
+      }
+    } catch (err: any) {
+      console.error('Invoice error:', err);
+      alert(`Error requesting invoice: ${err.message}`);
+    } finally {
+      setIsPurchasing(null);
+    }
+  };
+
   useEffect(() => {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -573,6 +608,27 @@ export default function Dashboard() {
                       </button>
                     </div>
                   </motion.div>
+                </div>
+
+                {/* User-Requested Invoice Section */}
+                <div className="mt-12 p-10 bg-indigo-600/10 border border-indigo-500/20 rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-8 backdrop-blur-3xl">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-4 text-indigo-400 font-black text-[9px] uppercase tracking-[0.4em]">
+                      <Terminal className="h-4 w-4" /> B2B / Premium Services
+                    </div>
+                    <h3 className="text-3xl font-black text-white italic tracking-tighter uppercase mb-4">Request Custom Invoice</h3>
+                    <p className="text-slate-500 text-sm font-medium leading-relaxed max-w-xl">
+                      Need a formal invoice for your company? Request a premium invoice for <span className="text-white font-black">Example Services ($100)</span> and receive 100 optimization tokens instantly upon payment.
+                    </p>
+                  </div>
+                  <button 
+                    onClick={handleRequestInvoice}
+                    disabled={isPurchasing !== null}
+                    className={`px-12 py-6 rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.4em] transition-all shadow-2xl active:scale-95 flex items-center gap-3 ${isPurchasing === 'invoice' ? 'bg-indigo-400 text-white' : 'bg-white text-black hover:bg-indigo-600 hover:text-white'}`}
+                  >
+                    {isPurchasing === 'invoice' ? <Loader2 className="h-4 w-4 animate-spin" /> : <CreditCard className="h-4 w-4" />}
+                    {isPurchasing === 'invoice' ? 'Generating...' : 'Request Invoice'}
+                  </button>
                 </div>
 
                 {/* Pricing explanation */}
