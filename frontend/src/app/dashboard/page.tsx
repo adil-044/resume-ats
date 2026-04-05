@@ -47,26 +47,34 @@ export default function Dashboard() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
-      if (params.get('success') === 'true') {
+      const sessionId = params.get('session_id');
+      if (params.get('success') === 'true' && sessionId) {
         setShowSuccess(true);
-        // Refresh credits periodically for 10 seconds to catch the webhook
-        const interval = setInterval(async () => {
-          const { data: { user } } = await supabase.auth.getUser();
-          if (user) {
-            const { data: profile } = await supabase.from('profiles').select('tokens').eq('id', user.id).single();
-            if (profile && profile.tokens > credits) {
-              setCredits(profile.tokens);
-              clearInterval(interval);
+        // Verify the purchase server-side and grant tokens
+        fetch('/api/stripe/verify-purchase', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId }),
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (data.tokens !== undefined) {
+              setCredits(data.tokens);
               setShowSuccess(false);
-              // Clean up URL
               router.replace('/dashboard');
+            } else {
+              console.error('Verify purchase failed:', data.error);
+              alert('Token sync issue: ' + (data.error || 'Unknown error. Please contact support.'));
+              setShowSuccess(false);
             }
-          }
-        }, 2000);
-        setTimeout(() => clearInterval(interval), 10000);
+          })
+          .catch(err => {
+            console.error('Verify purchase error:', err);
+            setShowSuccess(false);
+          });
       }
     }
-  }, [credits, router]);
+  }, [router]);
 
 
 
