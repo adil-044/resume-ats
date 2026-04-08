@@ -43,11 +43,11 @@ export default function PricingPage() {
             </p>
             <ul className="space-y-5 mb-12 flex-1">
               {[
-                "4 Full Resume Analyses",
-                "Advanced AI Optimization",
-                "Job Description Matching",
-                "Format-Perfect PDF Export",
-                "Lifetime tokens (no expiry)"
+                "4 Credits Included",
+                "AI Resume Optimization",
+                "AI Cover Letter Generator",
+                "Job Application Pipeline",
+                "Format-Perfect PDF Export"
               ].map((f, i) => (
                 <li key={i} className="flex items-center gap-4 text-sm font-bold text-slate-300">
                   <div className="h-5 w-5 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center shrink-0">
@@ -69,15 +69,15 @@ export default function PricingPage() {
               </h3>
             </div>
             <p className="text-indigo-100 mb-8 leading-relaxed relative z-10 text-sm">
-              Buy a token precisely when you need to land that interview. 1 token = 1 deeply optimized resume.
+              Buy a token precisely when you need to land that interview. 1 token = 1 Resume or Cover Letter.
             </p>
             <ul className="space-y-5 mb-12 flex-1 relative z-10">
               {[
-                "Unlimited Match Scores",
-                "Keyword Gap Analysis",
-                "AI Rewrite Suggestions",
-                "History & Saved Resumes",
-                "Volume Discounts Available"
+                "1 Credit = 1 AI Task",
+                "Job Application Pipeline Included",
+                "Advanced Resume & Cover Letters",
+                "History & Saved Files",
+                "No Expiry on Credits"
               ].map((f, i) => (
                 <li key={i} className="flex items-center gap-4 text-sm font-bold text-indigo-50">
                   <div className="h-5 w-5 rounded-full bg-white/20 flex items-center justify-center shrink-0 shadow-lg">

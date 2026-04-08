@@ -34,7 +34,7 @@ export default function Dashboard() {
 
   const [dragActive, setDragActive] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'scan' | 'history' | 'credits' | 'coverletter'>('scan');
+  const [activeTab, setActiveTab] = useState<'scan' | 'history' | 'credits' | 'coverletter' | 'pipeline'>('scan');
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isGapModalOpen, setIsGapModalOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
@@ -43,9 +43,13 @@ export default function Dashboard() {
   const [credits, setCredits] = useState(4);
   const [isPurchasing, setIsPurchasing] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [clResumeText, setClResumeText] = useState('');
+  const [clFile, setClFile] = useState<File | null>(null);
   const [clJobDescription, setClJobDescription] = useState('');
   const [isGeneratingCL, setIsGeneratingCL] = useState(false);
+  // Pipeline state
+  const [pipelineJobs, setPipelineJobs] = useState<any[]>([]);
+  const [showAddJob, setShowAddJob] = useState(false);
+  const [newJob, setNewJob] = useState({ company: '', job_title: '', job_url: '', notes: '' });
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -137,6 +141,7 @@ export default function Dashboard() {
       } else {
         setUser(user);
         fetchHistory(user.id);
+        fetchPipeline(user.id);
         
         // Try fetching secure credits from DB
         const { data: profile } = await supabase.from('profiles').select('tokens').eq('id', user.id).single();
@@ -176,6 +181,21 @@ export default function Dashboard() {
       })));
     }
     setIsLoadingHistory(false);
+  };
+
+  const fetchPipeline = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('job_pipeline')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setPipelineJobs(data || []);
+    } catch (error) {
+      console.error('Error fetching pipeline:', error);
+    }
   };
 
   const handleLogout = async () => {
@@ -300,6 +320,7 @@ export default function Dashboard() {
               { id: 'scan', label: 'New Analysis', icon: <LayoutGrid className="h-4 w-4" /> },
               { id: 'history', label: 'My Resumes', icon: <FileText className="h-4 w-4" /> },
               { id: 'coverletter', label: 'Cover Letter', icon: <Mail className="h-4 w-4" /> },
+              { id: 'pipeline', label: 'Job Pipeline', icon: <Briefcase className="h-4 w-4" /> },
               { id: 'credits', label: 'Buy Credits', icon: <Coins className="h-4 w-4" /> }
             ].map(tab => (
               <button 
@@ -612,18 +633,33 @@ export default function Dashboard() {
                     <Mail className="h-3 w-3" /> Cover Letter
                   </div>
                   <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter uppercase leading-none italic mb-4">Generate Cover Letter</h1>
-                  <p className="text-slate-500 font-medium text-lg">Paste your resume and job description to get a personalized, AI-powered cover letter. Costs 1 credit.</p>
+                  <p className="text-slate-500 font-medium text-lg">Upload your resume and paste the job description to get a personalized, AI-powered cover letter. Costs 1 credit.</p>
                 </div>
 
                 <div className="space-y-8">
+                  {/* File Upload Zone */}
                   <div>
-                    <label className="block text-[9px] font-black text-slate-600 uppercase tracking-[0.4em] mb-3">Your Resume (paste text)</label>
-                    <textarea
-                      value={clResumeText}
-                      onChange={(e) => setClResumeText(e.target.value)}
-                      className="w-full h-48 bg-white/5 border border-white/10 rounded-2xl p-6 text-white text-sm font-medium resize-none outline-none focus:border-indigo-500/50 transition-colors placeholder:text-slate-700 intelligence-scrollbar"
-                      placeholder="Paste your resume content here..."
-                    />
+                    <label className="block text-[9px] font-black text-slate-600 uppercase tracking-[0.4em] mb-3">Upload Your Resume</label>
+                    <div className="relative border-2 border-dashed border-white/10 rounded-[2rem] p-14 text-center group/drop transition-all duration-500 hover:border-indigo-500/40 hover:bg-indigo-500/5 cursor-pointer bg-black/40">
+                      <input type="file" accept=".pdf,.docx,.doc" onChange={(e) => setClFile(e.target.files?.[0] || null)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                      {clFile ? (
+                        <div className="flex flex-col items-center">
+                          <div className="bg-indigo-600 p-5 rounded-2xl mb-4 shadow-[0_0_30px_rgba(99,102,241,0.5)]">
+                            <FileText className="h-7 w-7 text-white" />
+                          </div>
+                          <p className="text-white font-black text-sm truncate max-w-full px-4">{clFile.name}</p>
+                          <span className="mt-2 text-indigo-400 text-[9px] font-black uppercase tracking-[0.4em] bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">Ready ✓</span>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center">
+                          <div className="bg-white/5 p-5 rounded-2xl mb-4 border border-white/10 group-hover/drop:bg-indigo-600 group-hover/drop:border-indigo-600 transition-all duration-500">
+                            <Upload className="h-7 w-7 text-white/30 group-hover/drop:text-white transition-colors duration-500" />
+                          </div>
+                          <p className="text-white font-bold text-base">Drop your resume here</p>
+                          <p className="text-slate-600 text-[9px] mt-1.5 font-black uppercase tracking-[0.2em]">PDF or DOCX</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div>
@@ -638,8 +674,8 @@ export default function Dashboard() {
 
                   <button
                     onClick={async () => {
-                      if (!clResumeText.trim() || !clJobDescription.trim()) {
-                        alert('Please paste both your resume and the job description.');
+                      if (!clFile || !clJobDescription.trim()) {
+                        alert('Please upload your resume and paste the job description.');
                         return;
                       }
                       if (credits <= 0) {
@@ -649,22 +685,20 @@ export default function Dashboard() {
                       }
                       setIsGeneratingCL(true);
                       try {
-                        // Decrement token
                         const { data: profile } = await supabase.from('profiles').select('tokens').eq('id', user?.id).single();
                         if (profile && profile.tokens > 0) {
                           await supabase.from('profiles').update({ tokens: profile.tokens - 1 }).eq('id', user?.id);
                           setCredits(profile.tokens - 1);
                         }
 
-                        const result = await generateCoverLetter(clResumeText, clJobDescription);
+                        const result = await generateCoverLetter(clFile, clJobDescription);
 
-                        // Save to Supabase
                         const jobTitle = clJobDescription.split('\n')[0].slice(0, 60) || 'Untitled';
                         const { data, error } = await supabase.from('cover_letters').insert({
                           user_id: user.id,
                           job_title: jobTitle,
                           content: result.cover_letter,
-                          resume_text: clResumeText,
+                          resume_text: '',
                           job_description: clJobDescription,
                         }).select().single();
 
@@ -673,14 +707,13 @@ export default function Dashboard() {
                       } catch (err: any) {
                         console.error(err);
                         alert(`Error generating cover letter: ${err.message}`);
-                        // Refresh credits
                         const { data: p } = await supabase.from('profiles').select('tokens').eq('id', user?.id).single();
                         if (p) setCredits(p.tokens);
                       } finally {
                         setIsGeneratingCL(false);
                       }
                     }}
-                    disabled={isGeneratingCL || !clResumeText.trim() || !clJobDescription.trim()}
+                    disabled={isGeneratingCL || !clFile || !clJobDescription.trim()}
                     className={`w-full py-6 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-2xl active:scale-95 flex items-center justify-center gap-3 ${
                       isGeneratingCL ? 'bg-indigo-400 text-white' : 'bg-white text-black hover:bg-indigo-600 hover:text-white'
                     }`}
@@ -691,9 +724,103 @@ export default function Dashboard() {
 
                   <div className="p-8 bg-white/5 rounded-[2rem] border border-white/5 text-center">
                     <p className="text-slate-400 text-sm leading-relaxed">
-                      <span className="text-white font-black">AI-Powered:</span> Your cover letter is personalized using your actual resume experience and tailored to the specific job requirements. Edit and export as PDF from the workspace.
+                      <span className="text-white font-black">AI-Powered:</span> Upload your resume (PDF/DOCX) and we'll extract your experience to craft a personalized cover letter tailored to the job. Edit and export as PDF.
                     </p>
                   </div>
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === 'pipeline' && (
+              <motion.div key="pipeline" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-6xl mx-auto relative z-10">
+                <div className="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+                  <div>
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[8px] font-black uppercase tracking-[0.4em] mb-6">
+                      <Briefcase className="h-3 w-3" /> Job Pipeline
+                    </div>
+                    <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter uppercase leading-none italic mb-4">Track Your Applications</h1>
+                    <p className="text-slate-500 font-medium text-lg">Organize every job from saved to offer. Never lose track of an opportunity.</p>
+                  </div>
+                  <button
+                    onClick={() => setShowAddJob(true)}
+                    className="flex items-center gap-3 px-8 py-4 bg-white text-black rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all active:scale-95 shadow-2xl flex-shrink-0"
+                  >
+                    <Plus className="h-4 w-4" /> Add Job
+                  </button>
+                </div>
+
+                {/* Add Job Form */}
+                <AnimatePresence>
+                  {showAddJob && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden mb-8">
+                      <div className="bg-white/5 border border-white/10 rounded-[2rem] p-8 space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <input value={newJob.company} onChange={(e) => setNewJob(prev => ({ ...prev, company: e.target.value }))} placeholder="Company Name" className="bg-black/60 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm font-medium outline-none focus:border-indigo-500/50 placeholder:text-slate-700" />
+                          <input value={newJob.job_title} onChange={(e) => setNewJob(prev => ({ ...prev, job_title: e.target.value }))} placeholder="Job Title" className="bg-black/60 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm font-medium outline-none focus:border-indigo-500/50 placeholder:text-slate-700" />
+                        </div>
+                        <input value={newJob.job_url} onChange={(e) => setNewJob(prev => ({ ...prev, job_url: e.target.value }))} placeholder="Job URL (optional)" className="w-full bg-black/60 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm font-medium outline-none focus:border-indigo-500/50 placeholder:text-slate-700" />
+                        <textarea value={newJob.notes} onChange={(e) => setNewJob(prev => ({ ...prev, notes: e.target.value }))} placeholder="Notes (optional)" className="w-full bg-black/60 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm font-medium outline-none focus:border-indigo-500/50 placeholder:text-slate-700 resize-none h-24" />
+                        <div className="flex gap-3">
+                          <button
+                            onClick={async () => {
+                              if (!newJob.company.trim() || !newJob.job_title.trim()) { alert('Company and Job Title are required.'); return; }
+                              const { data, error } = await supabase.from('job_pipeline').insert({ user_id: user.id, ...newJob, status: 'saved' }).select().single();
+                              if (!error && data) {
+                                setPipelineJobs(prev => [data, ...prev]);
+                                setNewJob({ company: '', job_title: '', job_url: '', notes: '' });
+                                setShowAddJob(false);
+                              } else { alert('Failed to add job: ' + error?.message); }
+                            }}
+                            className="px-8 py-3 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white hover:text-black transition-all active:scale-95"
+                          >Save Job</button>
+                          <button onClick={() => setShowAddJob(false)} className="px-8 py-3 bg-white/5 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:text-white transition-all">Cancel</button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Pipeline Columns */}
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                  {['saved', 'applied', 'interview', 'offer', 'rejected'].map((status) => {
+                    const statusColors: Record<string, string> = { saved: 'border-slate-500/20', applied: 'border-blue-500/20', interview: 'border-amber-500/20', offer: 'border-green-500/20', rejected: 'border-red-500/20' };
+                    const statusLabels: Record<string, string> = { saved: '📌 Saved', applied: '📤 Applied', interview: '💬 Interview', offer: '🎉 Offer', rejected: '❌ Rejected' };
+                    const jobs = pipelineJobs.filter(j => j.status === status);
+                    return (
+                      <div key={status} className={`bg-white/[0.02] border ${statusColors[status]} rounded-[2rem] p-5 min-h-[300px]`}>
+                        <div className="flex items-center justify-between mb-5 px-1">
+                          <span className="text-[10px] font-black text-white uppercase tracking-widest">{statusLabels[status]}</span>
+                          <span className="text-[10px] font-black text-slate-700 bg-white/5 px-2.5 py-1 rounded-full">{jobs.length}</span>
+                        </div>
+                        <div className="space-y-3">
+                          {jobs.map((job) => (
+                            <motion.div key={job.id} layout whileHover={{ scale: 1.02 }} className="bg-white/5 border border-white/5 rounded-2xl p-4 cursor-pointer group hover:border-indigo-500/30 transition-all">
+                              <p className="text-white font-black text-sm truncate">{job.company}</p>
+                              <p className="text-slate-500 text-xs font-medium truncate mb-3">{job.job_title}</p>
+                              {job.job_url && <a href={job.job_url} target="_blank" rel="noopener noreferrer" className="text-indigo-400 text-[9px] font-black uppercase tracking-widest hover:text-white transition-colors">View Posting →</a>}
+                              <div className="mt-3 pt-3 border-t border-white/5">
+                                <select
+                                  value={job.status}
+                                  onChange={async (e) => {
+                                    const newStatus = e.target.value;
+                                    await supabase.from('job_pipeline').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', job.id);
+                                    setPipelineJobs(prev => prev.map(j => j.id === job.id ? { ...j, status: newStatus } : j));
+                                  }}
+                                  className="w-full bg-black/60 border border-white/10 rounded-xl px-3 py-2 text-[10px] font-black text-white uppercase tracking-widest outline-none cursor-pointer"
+                                >
+                                  <option value="saved">📌 Saved</option>
+                                  <option value="applied">📤 Applied</option>
+                                  <option value="interview">💬 Interview</option>
+                                  <option value="offer">🎉 Offer</option>
+                                  <option value="rejected">❌ Rejected</option>
+                                </select>
+                              </div>
+                            </motion.div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </motion.div>
             )}

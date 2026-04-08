@@ -8,7 +8,7 @@ import {
   BrainCircuit, Rocket, Fingerprint, Activity, Terminal,
   HelpCircle, ChevronDown, Mail, User, MessageSquare, Coins,
   CheckCircle2, Star, Quote, TrendingUp, Users, Award, Sparkles,
-  Play, ChevronRight, BarChart2, Search, Check
+  Play, ChevronRight, BarChart2, Search, Check, Briefcase
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Scene3D from '@/components/Scene3D';
@@ -583,6 +583,8 @@ export default function Home() {
               {[
                 { title: "Bridge The Gap", desc: "Competitors just show you keywords. We show you exactly which skills are missing and how to add them credibly to your experience.", icon: <BrainCircuit className="h-8 w-8 text-indigo-400" />, bg: "glass-card border border-white/5", icon_bg: "bg-white/5", text: "text-white", sub: "text-slate-400", accent: "#6366f1" },
                 { title: "95% Match Rate", desc: "We keep improving your resume until it fits the job perfectly. Our AI adds the right keywords for each role with full context.", icon: <Target className="h-8 w-8 text-cyan-400" />, bg: "glass-card border border-white/5", icon_bg: "bg-white/5", text: "text-white", sub: "text-slate-400", accent: "#06b6d4" },
+                { title: "AI Cover Letters", desc: "Generate personalized, job-targeted cover letters from your resume in one click. Edit and export as PDF.", icon: <Mail className="h-8 w-8 text-rose-400" />, bg: "glass-card border border-white/5", icon_bg: "bg-white/5", text: "text-white", sub: "text-slate-400", accent: "#fb7185" },
+                { title: "Job Pipeline", desc: "Track every application from saved to offer. Stay organized and never lose track of an opportunity.", icon: <Briefcase className="h-8 w-8 text-emerald-400" />, bg: "glass-card border border-white/5", icon_bg: "bg-white/5", text: "text-white", sub: "text-slate-400", accent: "#34d399" },
                 { title: "Safe & Private", desc: "Your data is bank-level encrypted and never shared. Full control over your information, always.", icon: <ShieldCheck className="h-8 w-8 text-green-400" />, bg: "glass-card border border-white/5", icon_bg: "bg-white/5", text: "text-white", sub: "text-slate-400", accent: "#4ade80" },
                 { title: "Clean, ATS-Ready Format", desc: "Formatted so ANY applicant tracking system can read your resume — no more getting filtered out for bad formatting.", icon: <FileText className="h-8 w-8 text-slate-300" />, bg: "glass-card border border-white/5", icon_bg: "bg-white/5", text: "text-white", sub: "text-slate-400", accent: "#cbd5e1" },
                 { title: "Instant AI Analysis", desc: "Get your keyword match score and AI recommendations in under 30 seconds. No waiting, no guessing.", icon: <Zap className="h-8 w-8 text-amber-400" />, bg: "glass-card border border-white/5", icon_bg: "bg-white/5", text: "text-white", sub: "text-slate-400", accent: "#fbbf24" },

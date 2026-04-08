@@ -112,9 +112,9 @@ export async function exportResume(markdown: string) {
   window.URL.revokeObjectURL(url);
 }
 
-export async function generateCoverLetter(resumeText: string, jobDescription: string) {
+export async function generateCoverLetter(file: File, jobDescription: string) {
   const formData = new FormData();
-  formData.append('resume_text', resumeText);
+  formData.append('resume', file);
   formData.append('job_description', jobDescription);
 
   const response = await fetch(`${API_BASE_URL}/cover-letter`, {

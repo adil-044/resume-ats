@@ -172,13 +172,20 @@ async def export_pdf(
 
 @app.post("/api/v1/cover-letter")
 async def create_cover_letter(
-    resume_text: str = Form(...),
+    resume: UploadFile = File(...),
     job_description: str = Form(...)
 ):
-    """Generate a personalized cover letter from resume + job description."""
+    """Generate a personalized cover letter from an uploaded resume file + job description."""
     try:
-        cover_letter_md = generate_cover_letter(resume_text, job_description)
+        content = await resume.read()
+        resume_text = parse_file(content, resume.filename)
+        if not resume_text:
+            raise HTTPException(status_code=400, detail="Unsupported file format. Please upload a PDF or DOCX.")
+        cleaned_text = pre_clean_raw_text(resume_text)
+        cover_letter_md = generate_cover_letter(cleaned_text, job_description)
         return {"cover_letter": cover_letter_md}
+    except HTTPException:
+        raise
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
