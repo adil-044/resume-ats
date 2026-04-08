@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useResumeStore } from '@/store/useResumeStore';
-import { analyzeResume } from '@/lib/api';
+import { analyzeResume, generateCoverLetter } from '@/lib/api';
 import { supabase } from '@/lib/supabase';
 import { 
   Upload, FileText, ArrowRight, Loader2, Sparkles, 
@@ -10,7 +10,7 @@ import {
   TrendingUp, Clock, CheckCircle2, ShieldCheck, Briefcase,
   Zap, AlertTriangle, FileUp, Cpu, Terminal, Command, LayoutGrid,
   Rocket, Activity, Fingerprint, Globe, Shield, Menu, X, Coins,
-  CreditCard, Star, ChevronRight, CheckCircle
+  CreditCard, Star, ChevronRight, CheckCircle, Mail
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -34,7 +34,7 @@ export default function Dashboard() {
 
   const [dragActive, setDragActive] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'scan' | 'history' | 'credits'>('scan');
+  const [activeTab, setActiveTab] = useState<'scan' | 'history' | 'credits' | 'coverletter'>('scan');
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isGapModalOpen, setIsGapModalOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
@@ -43,6 +43,9 @@ export default function Dashboard() {
   const [credits, setCredits] = useState(4);
   const [isPurchasing, setIsPurchasing] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [clResumeText, setClResumeText] = useState('');
+  const [clJobDescription, setClJobDescription] = useState('');
+  const [isGeneratingCL, setIsGeneratingCL] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -296,6 +299,7 @@ export default function Dashboard() {
             {[
               { id: 'scan', label: 'New Analysis', icon: <LayoutGrid className="h-4 w-4" /> },
               { id: 'history', label: 'My Resumes', icon: <FileText className="h-4 w-4" /> },
+              { id: 'coverletter', label: 'Cover Letter', icon: <Mail className="h-4 w-4" /> },
               { id: 'credits', label: 'Buy Credits', icon: <Coins className="h-4 w-4" /> }
             ].map(tab => (
               <button 
@@ -597,6 +601,99 @@ export default function Dashboard() {
                   <p className="text-slate-400 text-sm leading-relaxed">
                     <span className="text-white font-black">How it works:</span> New users get 4 analyses for $1 to start. After that, each analysis costs $1. There are no monthly fees or subscriptions — you only pay when you need it.
                   </p>
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === 'coverletter' && (
+              <motion.div key="coverletter" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl mx-auto relative z-10">
+                <div className="mb-12 pb-8 border-b border-white/5">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[8px] font-black uppercase tracking-[0.4em] mb-6">
+                    <Mail className="h-3 w-3" /> Cover Letter
+                  </div>
+                  <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter uppercase leading-none italic mb-4">Generate Cover Letter</h1>
+                  <p className="text-slate-500 font-medium text-lg">Paste your resume and job description to get a personalized, AI-powered cover letter. Costs 1 credit.</p>
+                </div>
+
+                <div className="space-y-8">
+                  <div>
+                    <label className="block text-[9px] font-black text-slate-600 uppercase tracking-[0.4em] mb-3">Your Resume (paste text)</label>
+                    <textarea
+                      value={clResumeText}
+                      onChange={(e) => setClResumeText(e.target.value)}
+                      className="w-full h-48 bg-white/5 border border-white/10 rounded-2xl p-6 text-white text-sm font-medium resize-none outline-none focus:border-indigo-500/50 transition-colors placeholder:text-slate-700 intelligence-scrollbar"
+                      placeholder="Paste your resume content here..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[9px] font-black text-slate-600 uppercase tracking-[0.4em] mb-3">Job Description</label>
+                    <textarea
+                      value={clJobDescription}
+                      onChange={(e) => setClJobDescription(e.target.value)}
+                      className="w-full h-48 bg-white/5 border border-white/10 rounded-2xl p-6 text-white text-sm font-medium resize-none outline-none focus:border-indigo-500/50 transition-colors placeholder:text-slate-700 intelligence-scrollbar"
+                      placeholder="Paste the job description here..."
+                    />
+                  </div>
+
+                  <button
+                    onClick={async () => {
+                      if (!clResumeText.trim() || !clJobDescription.trim()) {
+                        alert('Please paste both your resume and the job description.');
+                        return;
+                      }
+                      if (credits <= 0) {
+                        alert('You need at least 1 credit to generate a cover letter.');
+                        setActiveTab('credits');
+                        return;
+                      }
+                      setIsGeneratingCL(true);
+                      try {
+                        // Decrement token
+                        const { data: profile } = await supabase.from('profiles').select('tokens').eq('id', user?.id).single();
+                        if (profile && profile.tokens > 0) {
+                          await supabase.from('profiles').update({ tokens: profile.tokens - 1 }).eq('id', user?.id);
+                          setCredits(profile.tokens - 1);
+                        }
+
+                        const result = await generateCoverLetter(clResumeText, clJobDescription);
+
+                        // Save to Supabase
+                        const jobTitle = clJobDescription.split('\n')[0].slice(0, 60) || 'Untitled';
+                        const { data, error } = await supabase.from('cover_letters').insert({
+                          user_id: user.id,
+                          job_title: jobTitle,
+                          content: result.cover_letter,
+                          resume_text: clResumeText,
+                          job_description: clJobDescription,
+                        }).select().single();
+
+                        if (error) throw error;
+                        router.push(`/cover-letter/${data.id}`);
+                      } catch (err: any) {
+                        console.error(err);
+                        alert(`Error generating cover letter: ${err.message}`);
+                        // Refresh credits
+                        const { data: p } = await supabase.from('profiles').select('tokens').eq('id', user?.id).single();
+                        if (p) setCredits(p.tokens);
+                      } finally {
+                        setIsGeneratingCL(false);
+                      }
+                    }}
+                    disabled={isGeneratingCL || !clResumeText.trim() || !clJobDescription.trim()}
+                    className={`w-full py-6 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-2xl active:scale-95 flex items-center justify-center gap-3 ${
+                      isGeneratingCL ? 'bg-indigo-400 text-white' : 'bg-white text-black hover:bg-indigo-600 hover:text-white'
+                    }`}
+                  >
+                    {isGeneratingCL ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
+                    {isGeneratingCL ? 'Generating Your Cover Letter...' : 'Generate Cover Letter (1 Credit)'}
+                  </button>
+
+                  <div className="p-8 bg-white/5 rounded-[2rem] border border-white/5 text-center">
+                    <p className="text-slate-400 text-sm leading-relaxed">
+                      <span className="text-white font-black">AI-Powered:</span> Your cover letter is personalized using your actual resume experience and tailored to the specific job requirements. Edit and export as PDF from the workspace.
+                    </p>
+                  </div>
                 </div>
               </motion.div>
             )}

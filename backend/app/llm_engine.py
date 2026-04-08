@@ -157,3 +157,63 @@ def optimize_with_context(resume_markdown: str, job_description: str, user_answe
     except Exception as e:
         print(f"Final Optimization Error: {e}")
         return resume_markdown
+
+
+def generate_cover_letter(resume_text: str, job_description: str) -> str:
+    """Use Gemini to generate a tailored, professional cover letter."""
+    if not client:
+        return "# ERROR: AI KEY NOT FOUND\n\nPlease set your GOOGLE_API_KEY environment variable."
+
+    prompt = f"""
+    ROLE: Professional Career Writer & Cover Letter Specialist.
+    TASK: Write a compelling, personalized cover letter for the candidate below.
+
+    ---
+    RULES:
+    1. The letter MUST be tailored to the specific job description provided.
+    2. Reference 2-3 SPECIFIC achievements or experiences from the candidate's resume that directly relate to the job requirements.
+    3. Use a professional but warm tone. Avoid generic phrases like "I am writing to express my interest".
+    4. Keep it concise: 3-4 paragraphs maximum (Opening, Body 1-2, Closing).
+    5. Do NOT fabricate any experience — only reference what is in the resume.
+    6. Include placeholders for [Company Name] and [Hiring Manager Name] if not known.
+    7. Output clean Markdown format.
+    8. Do NOT include the candidate's address or date header — just the letter body.
+
+    ---
+    STRUCTURE:
+    # Cover Letter
+
+    Dear [Hiring Manager Name],
+
+    [Opening paragraph: Hook + why this role + why this company]
+
+    [Body paragraph 1: Most relevant achievement from resume, connected to a key job requirement. Use specific metrics/results.]
+
+    [Body paragraph 2: Second relevant skill/experience. Show how it maps to another job requirement.]
+
+    [Closing paragraph: Enthusiasm + call to action + thank you]
+
+    Sincerely,
+    [Candidate Name]
+
+    ---
+    CANDIDATE'S RESUME:
+    {resume_text[:3000]}
+
+    TARGET JOB DESCRIPTION:
+    {job_description[:2000]}
+
+    OUTPUT THE COVER LETTER IN MARKDOWN:
+    """
+
+    try:
+        response = client.models.generate_content(
+            model=MODEL_ID,
+            contents=prompt
+        )
+        text = response.text.replace('```markdown', '').replace('```', '').strip()
+        return text
+    except Exception as e:
+        print(f"Cover Letter Generation Error: {e}")
+        return f"# Cover Letter Generation Error\n\n{str(e)}\n\nPlease try again."
+

@@ -111,3 +111,47 @@ export async function exportResume(markdown: string) {
   a.click();
   window.URL.revokeObjectURL(url);
 }
+
+export async function generateCoverLetter(resumeText: string, jobDescription: string) {
+  const formData = new FormData();
+  formData.append('resume_text', resumeText);
+  formData.append('job_description', jobDescription);
+
+  const response = await fetch(`${API_BASE_URL}/cover-letter`, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorMsg = await response.text();
+    let detail = 'Failed to generate cover letter';
+    try { detail = JSON.parse(errorMsg).detail || detail; } catch (e) {}
+    throw new Error(detail);
+  }
+
+  return response.json();
+}
+
+export async function exportCoverLetter(markdown: string) {
+  const response = await fetch(`${API_BASE_URL}/export`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ markdown }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to export PDF');
+  }
+
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Cover_Letter.pdf';
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+}
+
