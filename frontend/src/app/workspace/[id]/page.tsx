@@ -32,9 +32,15 @@ export default function Workspace({ params }: { params: Promise<{ id: string }> 
     const checkAccess = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       const isAdmin = user?.email === 'khatriadil044@gmail.com';
-      const { data: profile } = await supabase.from('profiles').select('subscribed').single();
-      if (isAdmin || profile?.subscribed) {
+      if (isAdmin) {
         setHasAccess(true);
+        return;
+      }
+      if (user) {
+        const { data: profile } = await supabase.from('profiles').select('tokens').eq('id', user.id).single();
+        if (profile && profile.tokens > 0) {
+          setHasAccess(true);
+        }
       }
     };
     checkAccess();
