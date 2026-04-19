@@ -361,7 +361,7 @@ export default function Dashboard() {
                         </div>
                         <h3 className="text-xl font-display font-extrabold text-[#3D4852] mb-4 truncate uppercase italic leading-tight">{item.job_title || 'Untitled'}</h3>
                         <div className="flex items-center gap-4 text-[#6B7280] font-display font-bold text-[9px] uppercase tracking-widest mb-10">
-                          <div className="flex items-center gap-2"><Clock className="h-3 w-3" /> {new Date(item.created_at).toLocaleDateString()}</div>
+                          <div className="flex items-center gap-2"><Clock className="h-3 w-3" /> {new Date(item.created_at || Date.now()).toLocaleDateString()}</div>
                           <div className="h-1.5 w-1.5 bg-[#6C63FF]/30 rounded-full" />
                           <div className="text-[#6C63FF]">Analyzed</div>
                         </div>
