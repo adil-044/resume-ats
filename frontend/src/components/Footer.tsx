@@ -5,28 +5,30 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="bg-[#020617] pt-32 pb-12 text-white overflow-hidden relative border-t border-white/5">
-      {/* Decorative Background */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full opacity-[0.03] pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-[800px] h-[800px] bg-indigo-500 rounded-full blur-[150px]" />
+    <footer className="bg-[#E0E5EC] pt-32 pb-12 text-[#3D4852] overflow-hidden relative">
+      {/* Decorative Background Elements */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full opacity-40 pointer-events-none overflow-hidden">
+        <div className="absolute top-10 left-10 w-64 h-64 rounded-full shadow-extruded" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 rounded-full shadow-inset" />
+        <div className="absolute top-1/2 left-1/4 w-32 h-32 rounded-full shadow-extruded-sm" />
       </div>
 
-      <div className="max-w-[1600px] mx-auto px-8 lg:px-12 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-20 mb-24">
+      <div className="max-w-[1400px] mx-auto px-8 lg:px-12 relative z-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-24">
           {/* Brand Block */}
           <div className="space-y-10">
             <Link href="/" className="flex items-center gap-4 group">
-              <div className="bg-white p-2.5 rounded-2xl group-hover:rotate-12 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.1)]">
-                <FileText className="h-6 w-6 text-black" />
+              <div className="bg-[#E0E5EC] p-3 rounded-2xl shadow-extruded group-hover:shadow-inset transition-all duration-300">
+                <FileText className="h-6 w-6 text-[#6C63FF]" />
               </div>
-              <span className="text-2xl font-black tracking-tighter uppercase italic text-white">HIREREADY</span>
+              <span className="text-2xl font-display font-extrabold tracking-tight uppercase text-[#3D4852]">HIREREADY</span>
             </Link>
-            <p className="text-slate-500 font-medium leading-relaxed max-w-xs text-lg">
-              The smart way to optimize your resume for any job. Get hired faster.
+            <p className="text-[#6B7280] font-medium leading-relaxed max-w-xs text-base font-body">
+              The tactile, intelligent way to optimize your resume for any job. Get hired faster with Soft UI clarity.
             </p>
-            <div className="flex gap-6">
+            <div className="flex gap-4">
               {[Github, Linkedin, Twitter].map((Icon, i) => (
-                <a key={i} href="#" className="p-3 bg-white/5 rounded-xl hover:bg-indigo-600 hover:text-white transition-all border border-white/5">
+                <a key={i} href="#" className="p-3 bg-[#E0E5EC] rounded-xl shadow-extruded-sm hover:shadow-inset-sm transition-all duration-300 text-[#3D4852] hover:text-[#6C63FF]">
                   <Icon className="h-5 w-5" />
                 </a>
               ))}
@@ -35,39 +37,39 @@ export default function Footer() {
 
           {/* Navigation */}
           <div>
-            <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-10">Quick Links</h4>
+            <h4 className="text-[10px] font-display font-black uppercase tracking-[0.4em] text-[#6C63FF] mb-10">Quick Links</h4>
             <ul className="space-y-5">
-              <li><Link href="/" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Home</Link></li>
-              <li><Link href="/dashboard" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Dashboard</Link></li>
-              <li><Link href="/docs#how-it-works" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">How It Works</Link></li>
-              <li><Link href="/pricing" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Pricing</Link></li>
+              <li><Link href="/" className="text-[#6B7280] hover:text-[#3D4852] transition-all font-bold text-sm uppercase tracking-widest font-display">Home</Link></li>
+              <li><Link href="/dashboard" className="text-[#6B7280] hover:text-[#3D4852] transition-all font-bold text-sm uppercase tracking-widest font-display">Dashboard</Link></li>
+              <li><Link href="/docs#how-it-works" className="text-[#6B7280] hover:text-[#3D4852] transition-all font-bold text-sm uppercase tracking-widest font-display">How It Works</Link></li>
+              <li><Link href="/pricing" className="text-[#6B7280] hover:text-[#3D4852] transition-all font-bold text-sm uppercase tracking-widest font-display">Pricing</Link></li>
             </ul>
           </div>
 
           {/* Resources */}
           <div>
-            <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-indigo-500 mb-10">Resources</h4>
+            <h4 className="text-[10px] font-display font-black uppercase tracking-[0.4em] text-[#6C63FF] mb-10">Resources</h4>
             <ul className="space-y-5">
-              <li><Link href="/docs" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Documentation</Link></li>
-              <li><Link href="/docs#resume-tips" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Resume Tips</Link></li>
-              <li><Link href="/docs#success-stories" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">Success Stories</Link></li>
-              <li><Link href="/docs#job-trends" className="text-slate-400 hover:text-white transition-all font-bold text-sm uppercase tracking-widest">2026 Job Trends</Link></li>
+              <li><Link href="/docs" className="text-[#6B7280] hover:text-[#3D4852] transition-all font-bold text-sm uppercase tracking-widest font-display">Documentation</Link></li>
+              <li><Link href="/docs#resume-tips" className="text-[#6B7280] hover:text-[#3D4852] transition-all font-bold text-sm uppercase tracking-widest font-display">Resume Tips</Link></li>
+              <li><Link href="/docs#success-stories" className="text-[#6B7280] hover:text-[#3D4852] transition-all font-bold text-sm uppercase tracking-widest font-display">Success Stories</Link></li>
+              <li><Link href="/docs#job-trends" className="text-[#6B7280] hover:text-[#3D4852] transition-all font-bold text-sm uppercase tracking-widest font-display">2026 Job Trends</Link></li>
             </ul>
           </div>
 
           {/* Newsletter */}
-          <div className="glass-executive p-10 rounded-[2.5rem] border border-white/5">
-            <h4 className="text-sm font-black mb-4 uppercase tracking-widest italic text-white flex items-center gap-3">
-              <Zap className="h-4 w-4 text-indigo-500" /> Stay Updated
+          <div className="bg-[#E0E5EC] p-8 rounded-[32px] shadow-extruded border border-white/20">
+            <h4 className="text-sm font-display font-black mb-4 uppercase tracking-widest text-[#3D4852] flex items-center gap-3">
+              <Zap className="h-4 w-4 text-[#6C63FF]" /> Stay Updated
             </h4>
-            <p className="text-xs text-slate-500 mb-8 font-medium leading-relaxed">Get weekly tips to improve your resume and land more interviews.</p>
+            <p className="text-xs text-[#6B7280] mb-8 font-medium leading-relaxed font-body">Get weekly tips to improve your resume and land more interviews.</p>
             <div className="relative">
               <input 
                 type="email" 
                 placeholder="your@email.com" 
-                className="w-full bg-black/40 border border-white/10 rounded-2xl py-4 pl-5 pr-14 outline-none focus:border-indigo-500 transition-all text-xs font-bold text-white shadow-inner"
+                className="w-full bg-[#E0E5EC] shadow-inset rounded-2xl py-4 pl-5 pr-14 outline-none focus:shadow-inset-deep transition-all text-xs font-bold text-[#3D4852] placeholder-[#A0AEC0]"
               />
-              <button className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-indigo-600 rounded-xl hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-900/40">
+              <button className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-[#6C63FF] rounded-xl hover:bg-[#8B84FF] transition-all shadow-lg shadow-[#6C63FF]/30 active:scale-95">
                 <ArrowRight className="h-4 w-4 text-white" />
               </button>
             </div>
@@ -75,17 +77,17 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-10">
-          <div className="flex items-center gap-8 text-[10px] font-black text-slate-600 uppercase tracking-[0.2em]">
+        <div className="pt-12 border-t border-[#A3B1C6]/30 flex flex-col md:flex-row justify-between items-center gap-10">
+          <div className="flex items-center gap-8 text-[10px] font-display font-black text-[#6B7280] uppercase tracking-[0.2em]">
             <span>© 2026 HireReady</span>
-            <span className="h-1 w-1 bg-slate-800 rounded-full" />
-            <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
-            <span className="h-1 w-1 bg-slate-800 rounded-full" />
-            <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
+            <span className="h-1 w-1 bg-[#A3B1C6] rounded-full" />
+            <Link href="/privacy" className="hover:text-[#3D4852] transition-colors">Privacy</Link>
+            <span className="h-1 w-1 bg-[#A3B1C6] rounded-full" />
+            <Link href="/terms" className="hover:text-[#3D4852] transition-colors">Terms</Link>
           </div>
-          <div className="flex items-center gap-4 px-6 py-3 bg-white/5 rounded-2xl border border-white/5">
-            <ShieldCheck className="h-4 w-4 text-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Your data is always encrypted & secure</span>
+          <div className="flex items-center gap-4 px-6 py-3 bg-[#E0E5EC] rounded-2xl shadow-inset-sm">
+            <ShieldCheck className="h-4 w-4 text-[#38B2AC]" />
+            <span className="text-[10px] font-display font-black uppercase tracking-widest text-[#6B7280]">Your data is encrypted & secure</span>
           </div>
         </div>
       </div>

@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function Navbar() {
   const [user, setUser] = useState<any>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -21,69 +22,77 @@ export default function Navbar() {
       setUser(session?.user ?? null);
     });
 
-    return () => subscription.unsubscribe();
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   const isAuthPage = pathname.startsWith('/auth');
   const isDashboard = pathname.startsWith('/dashboard') || pathname.startsWith('/workspace');
 
   return (
-    <nav className="border-b border-white/5 bg-[#020617]/80 backdrop-blur-2xl sticky top-0 z-[100]">
-      <div className="max-w-[1600px] mx-auto px-8 lg:px-12">
-        <div className="flex justify-between items-center h-24">
+    <nav className={`bg-[#E0E5EC] sticky top-0 z-[100] transition-all duration-300 ${isScrolled ? 'shadow-extruded py-2' : 'py-4'}`}>
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
+        <div className="flex justify-between items-center h-20">
           <Link href="/" className="flex items-center gap-4 group">
-            <div className="bg-white p-3 rounded-2xl group-hover:scale-110 transition-all duration-700 shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-              <FileText className="h-7 w-7 text-black" />
+            <div className="bg-[#E0E5EC] p-3 rounded-2xl shadow-extruded-sm group-hover:shadow-inset-sm transition-all duration-300">
+              <FileText className="h-6 w-6 text-[#6C63FF]" />
             </div>
             <div className="flex flex-col">
-              <span className="text-2xl font-black text-white tracking-tighter leading-none italic uppercase">
-                HIRE<span className="text-indigo-500">READY</span>
+              <span className="text-xl font-display font-extrabold text-[#3D4852] tracking-tight leading-none uppercase">
+                HIRE<span className="text-[#6C63FF]">READY</span>
               </span>
-              <div className="flex items-center gap-2 mt-1.5">
-                <div className="h-1 w-1 bg-indigo-500 rounded-full animate-pulse" />
-                <span className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em]">AI Resume Optimizer</span>
+              <div className="flex items-center gap-1.5 mt-1">
+                <div className="h-1 w-1 bg-[#6C63FF] rounded-full animate-pulse" />
+                <span className="text-[8px] font-display font-bold text-[#6B7280] uppercase tracking-[0.3em]">AI Resume Optimizer</span>
               </div>
             </div>
           </Link>
 
           {!isAuthPage && (
-            <div className="hidden md:flex items-center gap-12">
-              <div className="flex items-center gap-10 text-[11px] font-black uppercase tracking-[0.3em] text-slate-400">
-                <Link href="/" className={`hover:text-white transition-all duration-500 ${pathname === '/' ? 'text-indigo-400 border-b-2 border-indigo-500 pb-1' : ''}`}>Home</Link>
+            <div className="hidden md:flex items-center gap-8">
+              <div className="flex items-center gap-6 p-2 bg-[#E0E5EC] rounded-full shadow-inset-sm">
+                <Link href="/" className={`px-5 py-2 rounded-full text-[11px] font-display font-bold uppercase tracking-widest transition-all duration-300 ${pathname === '/' ? 'bg-[#E0E5EC] shadow-extruded-sm text-[#6C63FF]' : 'text-[#6B7280] hover:text-[#3D4852]'}`}>Home</Link>
                 {!isDashboard && (
-                  <Link href="/pricing" className={`hover:text-white transition-all duration-500 ${pathname === '/pricing' ? 'text-indigo-400 border-b-2 border-indigo-500 pb-1' : ''}`}>Pricing</Link>
+                  <Link href="/pricing" className={`px-5 py-2 rounded-full text-[11px] font-display font-bold uppercase tracking-widest transition-all duration-300 ${pathname === '/pricing' ? 'bg-[#E0E5EC] shadow-extruded-sm text-[#6C63FF]' : 'text-[#6B7280] hover:text-[#3D4852]'}`}>Pricing</Link>
                 )}
-                <Link href="/docs" className={`hover:text-white transition-all duration-500 ${pathname === '/docs' ? 'text-indigo-400 border-b-2 border-indigo-500 pb-1' : ''}`}>How It Works</Link>
-                {user && <Link href="/dashboard" className={`hover:text-white transition-all duration-500 ${isDashboard ? 'text-indigo-400 border-b-2 border-indigo-500 pb-1' : ''}`}>Dashboard</Link>}
+                <Link href="/docs" className={`px-5 py-2 rounded-full text-[11px] font-display font-bold uppercase tracking-widest transition-all duration-300 ${pathname === '/docs' ? 'bg-[#E0E5EC] shadow-extruded-sm text-[#6C63FF]' : 'text-[#6B7280] hover:text-[#3D4852]'}`}>How It Works</Link>
+                {user && <Link href="/dashboard" className={`px-5 py-2 rounded-full text-[11px] font-display font-bold uppercase tracking-widest transition-all duration-300 ${isDashboard ? 'bg-[#E0E5EC] shadow-extruded-sm text-[#6C63FF]' : 'text-[#6B7280] hover:text-[#3D4852]'}`}>Dashboard</Link>}
               </div>
 
-              <div className="h-8 w-px bg-white/5" />
+              <div className="h-6 w-px bg-slate-300/30" />
 
               {user ? (
-                <Link href="/dashboard" className="flex items-center gap-4 group bg-white/5 px-5 py-2.5 rounded-2xl border border-white/5 hover:bg-white/10 transition-all duration-500">
+                <Link href="/dashboard" className="flex items-center gap-3 group bg-[#E0E5EC] pl-4 pr-2 py-2 rounded-2xl shadow-extruded-sm hover:shadow-inset-sm transition-all duration-300">
                   <div className="flex flex-col text-right">
-                    <span className="text-[10px] font-black text-white uppercase tracking-tighter leading-none mb-1">
+                    <span className="text-[10px] font-display font-extrabold text-[#3D4852] uppercase tracking-tighter leading-none mb-1">
                       {user.user_metadata?.full_name || user.email?.split('@')[0]}
                     </span>
-                    <span className="text-[8px] font-bold text-indigo-400 uppercase tracking-widest flex items-center justify-end gap-1.5">
-                      <Fingerprint className="h-2.5 w-2.5" /> Logged In
+                    <span className="text-[8px] font-bold text-[#6C63FF] uppercase tracking-widest flex items-center justify-end gap-1.5">
+                      <Fingerprint className="h-2 w-2" /> Logged In
                     </span>
                   </div>
-                  <div className="h-10 w-10 rounded-xl bg-indigo-600 flex items-center justify-center text-[11px] font-black text-white shadow-xl shadow-indigo-900/40 border border-white/10">
+                  <div className="h-10 w-10 rounded-xl bg-[#E0E5EC] shadow-inset-sm flex items-center justify-center text-[11px] font-display font-black text-[#6C63FF]">
                     {(user.user_metadata?.full_name?.[0] || user.email?.[0]).toUpperCase()}
                   </div>
                 </Link>
               ) : (
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-4">
                   <Link 
                     href="/auth/login" 
-                    className="text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-all"
+                    className="text-[11px] font-display font-bold uppercase tracking-widest text-[#6B7280] hover:text-[#3D4852] transition-all px-4"
                   >
                     Log In
                   </Link>
                   <Link 
                     href="/auth/login" 
-                    className="bg-white text-black px-8 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] hover:bg-indigo-500 hover:text-white transition-all shadow-2xl active:scale-95"
+                    className="bg-[#6C63FF] text-white px-6 py-3 rounded-xl text-[11px] font-display font-bold uppercase tracking-widest hover:bg-[#8B84FF] transition-all shadow-[6px_6px_12px_rgba(108,99,255,0.3),-6px_-6px_12px_rgba(255,255,255,0.3)] active:scale-95"
                   >
                     Get Started
                   </Link>
@@ -93,8 +102,8 @@ export default function Navbar() {
           )}
 
           {/* Mobile Toggle */}
-          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden p-3 text-white hover:bg-white/5 rounded-2xl transition-all border border-white/5">
-            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden p-3 bg-[#E0E5EC] text-[#3D4852] rounded-xl shadow-extruded-sm active:shadow-inset-sm transition-all">
+            {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
       </div>
@@ -103,17 +112,17 @@ export default function Navbar() {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="md:hidden border-t border-white/5 bg-[#020617] overflow-hidden"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden bg-[#E0E5EC] overflow-hidden shadow-inset"
           >
-            <div className="p-8 space-y-6">
-              <Link href="/" className="block text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors">Home</Link>
-              {!isDashboard && <Link href="/pricing" className="block text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors">Pricing</Link>}
-              <Link href="/docs" className="block text-[11px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors">How It Works</Link>
-              {user && <Link href="/dashboard" className="block text-[11px] font-black uppercase tracking-widest text-indigo-400">Dashboard</Link>}
-              {!user && <Link href="/auth/login" className="block text-[11px] font-black uppercase tracking-widest text-indigo-400">Log In</Link>}
+            <div className="p-8 space-y-4">
+              <Link href="/" className="block p-4 rounded-xl shadow-extruded-sm text-[11px] font-display font-bold uppercase tracking-widest text-[#6B7280] hover:text-[#3D4852] transition-colors">Home</Link>
+              {!isDashboard && <Link href="/pricing" className="block p-4 rounded-xl shadow-extruded-sm text-[11px] font-display font-bold uppercase tracking-widest text-[#6B7280] hover:text-[#3D4852] transition-colors">Pricing</Link>}
+              <Link href="/docs" className="block p-4 rounded-xl shadow-extruded-sm text-[11px] font-display font-bold uppercase tracking-widest text-[#6B7280] hover:text-[#3D4852] transition-colors">How It Works</Link>
+              {user && <Link href="/dashboard" className="block p-4 rounded-xl shadow-extruded-sm text-[11px] font-display font-bold uppercase tracking-widest text-[#6C63FF]">Dashboard</Link>}
+              {!user && <Link href="/auth/login" className="block p-4 rounded-xl shadow-extruded-sm text-[11px] font-display font-bold uppercase tracking-widest text-[#6C63FF]">Log In</Link>}
             </div>
           </motion.div>
         )}

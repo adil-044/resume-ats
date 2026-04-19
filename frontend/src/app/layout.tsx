@@ -1,20 +1,20 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, DM_Sans } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "HireReady | Elite AI Resume Architect & ATS-Killer",
-  description: "Bypass Applicant Tracking Systems with machine-readable executive resumes. Next-Gen AI optimization for the modern job seeker.",
+  title: "HireReady | Elite AI Resume Architect",
+  description: "Bypass Applicant Tracking Systems with machine-readable executive resumes. Premium Soft UI optimization for the modern job seeker.",
 };
 
 export default function RootLayout({
@@ -28,7 +28,7 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${plusJakartaSans.variable} ${dmSans.variable} font-sans antialiased bg-[#E0E5EC] text-[#3D4852]`}
       >
         {children}
       </body>
