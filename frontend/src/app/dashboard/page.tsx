@@ -46,7 +46,6 @@ export default function Dashboard() {
   const [clFile, setClFile] = useState<File | null>(null);
   const [clJobDescription, setClJobDescription] = useState('');
   const [isGeneratingCL, setIsGeneratingCL] = useState(false);
-  // Pipeline state
   const [pipelineJobs, setPipelineJobs] = useState<any[]>([]);
   const [showAddJob, setShowAddJob] = useState(false);
   const [newJob, setNewJob] = useState({ company: '', job_title: '', job_url: '', notes: '' });
@@ -57,7 +56,6 @@ export default function Dashboard() {
       const sessionId = params.get('session_id');
       if (params.get('success') === 'true' && sessionId) {
         setShowSuccess(true);
-        // Verify the purchase server-side and grant tokens
         fetch('/api/stripe/verify-purchase', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -70,27 +68,19 @@ export default function Dashboard() {
               setShowSuccess(false);
               router.replace('/dashboard');
             } else {
-              console.error('Verify purchase failed:', data.error);
-              alert('Token sync issue: ' + (data.error || 'Unknown error. Please contact support.'));
               setShowSuccess(false);
             }
           })
-          .catch(err => {
-            console.error('Verify purchase error:', err);
-            setShowSuccess(false);
-          });
+          .catch(() => setShowSuccess(false));
       }
     }
   }, [router]);
-
-
 
   const handlePurchase = async (amount: number, tokens: number, id: string) => {
     if (!user?.id) {
       alert("Please wait while we sync your secure session...");
       return;
     }
-    
     setIsPurchasing(id);
     try {
       const response = await fetch('/api/stripe/checkout', {
@@ -98,40 +88,18 @@ export default function Dashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id, tokens, amount }),
       });
-      
-      if (!response.ok) {
-        const text = await response.text();
-        let errorMessage = `Server Error (${response.status}): ${text.slice(0, 100)}...`;
-        try {
-          const errorData = JSON.parse(text);
-          errorMessage = errorData.error || errorMessage;
-        } catch (e) {
-          console.error('Non-JSON server error:', text);
-        }
-        throw new Error(errorMessage);
-      }
-
-      const text = await response.text();
-      let data;
-      try {
-        data = JSON.parse(text);
-      } catch (e) {
-        throw new Error("Failed to parse server response. The server may have crashed.");
-      }
+      const data = await response.json();
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert(data.error || 'Failed to create Stripe session. Check your server logs.');
+        alert(data.error || 'Failed to create Stripe session.');
       }
     } catch (err: any) {
-      console.error('Checkout error:', err);
       alert(`Error initiating checkout: ${err.message}`);
     } finally {
       setIsPurchasing(null);
     }
   };
-
-
 
   useEffect(() => {
     const getUser = async () => {
@@ -142,12 +110,8 @@ export default function Dashboard() {
         setUser(user);
         fetchHistory(user.id);
         fetchPipeline(user.id);
-        
-        // Try fetching secure credits from DB
         const { data: profile } = await supabase.from('profiles').select('tokens').eq('id', user.id).single();
-        if (profile && profile.tokens !== undefined && profile.tokens !== null) {
-          setCredits(profile.tokens);
-        }
+        if (profile) setCredits(profile.tokens);
       }
     };
     getUser();
@@ -166,17 +130,7 @@ export default function Dashboard() {
         id: item.id,
         overall_score: item.after_score || item.before_score,
         initial_score: item.before_score,
-        breakdown: item.breakdown || { keyword_match: 0, semantic_alignment: 0, section_integrity: 0 },
-        missing_keywords: item.missing_keywords || [],
-        matched_keywords: item.matched_keywords || [],
-        formatting_issues: item.formatting_issues || [],
-        optimized_content: {
-          format: 'markdown',
-          raw_text: item.optimized_text || item.original_text
-        },
         job_title: item.job_title,
-        job_description: item.job_description,
-        original_text: item.original_text,
         created_at: item.created_at
       })));
     }
@@ -184,18 +138,8 @@ export default function Dashboard() {
   };
 
   const fetchPipeline = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('job_pipeline')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setPipelineJobs(data || []);
-    } catch (error) {
-      console.error('Error fetching pipeline:', error);
-    }
+    const { data } = await supabase.from('job_pipeline').select('*').eq('user_id', userId).order('created_at', { ascending: false });
+    setPipelineJobs(data || []);
   };
 
   const handleLogout = async () => {
@@ -204,88 +148,44 @@ export default function Dashboard() {
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setResumeFile(e.target.files[0]);
-    }
+    if (e.target.files?.[0]) setResumeFile(e.target.files[0]);
   };
 
   const handleAnalyze = async () => {
-    if (!resumeFile || !jobDescription) return;
-    
-    if (credits <= 0) {
-      alert("You have 0 credits left. Please purchase more credits to continue analyzing resumes.");
-      setActiveTab('credits');
-      return;
-    }
-
+    if (!resumeFile || !jobDescription || credits <= 0) return;
     setIsAnalyzing(true);
-    setAnalysisStep('Reading your resume...');
-    
+    setAnalysisStep('Mapping semantic delta...');
     try {
-      // 1. Fetch current tokens from DB to ensure we have the latest
-      const { data: profile, error: fetchError } = await supabase.from('profiles').select('tokens').eq('id', user?.id).single();
-      
-      if (fetchError || !profile) {
-        throw new Error("Could not verify your token balance. Please try again.");
-      }
-
-      if (profile.tokens <= 0) {
-        alert("You have 0 credits left. Please purchase more credits to continue analyzing resumes.");
-        setActiveTab('credits');
-        setIsAnalyzing(false);
-        return;
-      }
-
-      // 2. Decrement in DB securely
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ tokens: profile.tokens - 1 })
-        .eq('id', user?.id);
-
-      if (updateError) {
-        throw new Error("Failed to use token. Please check your connection.");
-      }
-
-      // Update local state for immediate feedback
+      const { data: profile } = await supabase.from('profiles').select('tokens').eq('id', user?.id).single();
+      if (!profile || profile.tokens <= 0) return;
+      await supabase.from('profiles').update({ tokens: profile.tokens - 1 }).eq('id', user?.id);
       setCredits(profile.tokens - 1);
 
-
       const result = await analyzeResume(resumeFile, jobDescription);
-      const { data, error } = await supabase
-        .from('resumes')
-        .insert({
-          user_id: user.id,
-          job_title: result.optimized_content.raw_text.split('\n')[0].replace('# ', '').slice(0, 50) || 'Untitled',
-          original_text: result.original_text || '',
-          optimized_text: result.optimized_content.raw_text,
-          before_score: result.initial_score,
-          after_score: result.overall_score,
-          job_description: jobDescription,
-          missing_keywords: result.missing_keywords,
-          matched_keywords: result.matched_keywords,
-          breakdown: result.breakdown,
-          formatting_issues: result.formatting_issues
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
+      const { data } = await supabase.from('resumes').insert({
+        user_id: user.id,
+        job_title: result.optimized_content.raw_text.split('\n')[0].replace('# ', '').slice(0, 50) || 'Untitled',
+        original_text: result.original_text || '',
+        optimized_text: result.optimized_content.raw_text,
+        before_score: result.initial_score,
+        after_score: result.overall_score,
+        job_description: jobDescription,
+        missing_keywords: result.missing_keywords,
+        matched_keywords: result.matched_keywords,
+        breakdown: result.breakdown,
+        formatting_issues: result.formatting_issues
+      }).select().single();
       setAnalysisResult(result);
       router.push(`/workspace/${data.id}`);
     } catch (error: any) {
-      console.error(error);
-      alert(`Error Analyzing Resume: ${error.message || 'Something went wrong. Please try again.'}`);
-      
-      // Refresh credits to get the correct state after failure
-      const { data: currentProfile } = await supabase.from('profiles').select('tokens').eq('id', user?.id).single();
-      if (currentProfile) setCredits(currentProfile.tokens);
+      alert(`Error: ${error.message}`);
     } finally {
       setIsAnalyzing(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-black flex flex-col font-sans selection:bg-indigo-500/30">
+    <div className="min-h-screen bg-[#E0E5EC] flex flex-col font-body selection:bg-[#6C63FF]/20 text-[#3D4852]">
       <Navbar />
       
       <AnimatePresence>
@@ -300,22 +200,14 @@ export default function Dashboard() {
       </AnimatePresence>
 
       <div className="flex-1 flex overflow-hidden relative">
-        {/* Mobile Toggle */}
-        <button 
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="lg:hidden fixed bottom-8 right-8 z-[100] bg-white text-black p-5 rounded-full shadow-2xl active:scale-90 transition-transform"
-        >
-          {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
-
         {/* Sidebar */}
         <aside className={`
-          fixed lg:relative inset-y-0 left-0 w-72 bg-black border-r border-white/5 z-[90] 
-          flex flex-col p-6 backdrop-blur-3xl transition-transform duration-500
+          fixed lg:relative inset-y-0 left-0 w-72 bg-[#E0E5EC] border-r border-[#A3B1C6]/30 z-[90] 
+          flex flex-col p-6 transition-transform duration-500
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}>
-          <div className="flex-1 space-y-2 pt-10 lg:pt-0">
-            <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.5em] mb-8 px-4">Navigation</p>
+          <div className="flex-1 space-y-3 pt-10 lg:pt-0">
+            <p className="text-[10px] font-display font-black text-[#6B7280] uppercase tracking-[0.4em] mb-8 px-4">Workspace</p>
             {[
               { id: 'scan', label: 'New Analysis', icon: <LayoutGrid className="h-4 w-4" /> },
               { id: 'history', label: 'My Resumes', icon: <FileText className="h-4 w-4" /> },
@@ -326,7 +218,7 @@ export default function Dashboard() {
               <button 
                 key={tab.id}
                 onClick={() => { setActiveTab(tab.id as any); setSidebarOpen(false); }}
-                className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all duration-500 ${activeTab === tab.id ? 'bg-white text-black shadow-2xl' : 'text-slate-500 hover:bg-white/5 hover:text-white'}`}
+                className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-display font-bold text-[11px] uppercase tracking-widest transition-all duration-300 ${activeTab === tab.id ? 'bg-[#E0E5EC] shadow-inset-sm text-[#6C63FF]' : 'text-[#6B7280] hover:text-[#3D4852] shadow-extruded-sm hover:shadow-inset-sm'}`}
               >
                 {tab.icon}
                 {tab.label}
@@ -334,31 +226,20 @@ export default function Dashboard() {
             ))}
           </div>
 
-          <div className="pt-8 border-t border-white/5">
-            {/* Credits Badge */}
-            <div className="bg-indigo-600/10 border border-indigo-500/20 p-4 rounded-2xl mb-4 flex items-center gap-3">
-              <Coins className="h-5 w-5 text-indigo-400 flex-shrink-0" />
-              <div>
-                <p className="text-white font-black text-sm">{credits} credits left</p>
-                <p className="text-indigo-400 text-[9px] font-bold uppercase tracking-widest">1 credit = 1 analysis</p>
+          <div className="pt-8 border-t border-[#A3B1C6]/30">
+            <div className="bg-[#E0E5EC] shadow-inset-sm p-5 rounded-2xl mb-6 flex items-center gap-4">
+              <div className="h-10 w-10 rounded-xl bg-[#6C63FF] shadow-lg flex items-center justify-center text-white text-xs font-display font-black">
+                {user?.email?.[0].toUpperCase()}
               </div>
-            </div>
-
-            <div className="bg-white/5 p-5 rounded-3xl border border-white/5 mb-6">
-              <div className="flex items-center gap-4">
-                <div className="h-10 w-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white text-xs font-black">
-                  {user?.email?.[0].toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-black text-white truncate uppercase">{user?.email?.split('@')[0]}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <div className="h-1 w-1 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(34,197,94,1)]" />
-                    <span className="text-[8px] font-bold text-slate-600 uppercase tracking-widest">Active</span>
-                  </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-display font-black text-[#3D4852] truncate uppercase">{user?.email?.split('@')[0]}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="h-1.5 w-1.5 bg-[#38B2AC] rounded-full animate-pulse shadow-[0_0_8px_rgba(56,178,172,1)]" />
+                  <span className="text-[9px] font-display font-bold text-[#6B7280] uppercase tracking-widest">Active</span>
                 </div>
               </div>
             </div>
-            <button onClick={handleLogout} className="w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-black text-[9px] text-red-500/60 hover:text-red-400 hover:bg-red-500/5 transition-all uppercase tracking-[0.4em]">
+            <button onClick={handleLogout} className="w-full flex items-center gap-4 px-6 py-4 rounded-xl font-display font-bold text-[10px] text-red-500/70 hover:text-red-600 hover:shadow-inset-sm transition-all uppercase tracking-widest">
               <LogOut className="h-4 w-4" />
               Log Out
             </button>
@@ -366,39 +247,35 @@ export default function Dashboard() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto bg-black p-6 lg:p-16 intelligence-scrollbar relative">
-          <div className="absolute inset-0 z-0 opacity-10 pointer-events-none scale-75">
-            <NexusCore />
-          </div>
-
+        <main className="flex-1 overflow-y-auto p-6 lg:p-16 relative">
           <AnimatePresence mode="wait">
             {activeTab === 'scan' && (
               <motion.div key="scan" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-5xl mx-auto relative z-10">
-                <div className="mb-16 pb-8 border-b border-white/5">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[8px] font-black uppercase tracking-[0.4em] mb-6">
-                    <Zap className="h-3 w-3 animate-pulse" /> AI Ready
+                <div className="mb-16">
+                  <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full shadow-extruded-sm text-[#6C63FF] text-[10px] font-display font-black uppercase tracking-[0.4em] mb-8">
+                    <Zap className="h-3 w-3" /> System Ready
                   </div>
-                  <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter uppercase leading-none italic mb-4">Resume Analyzer</h1>
-                  <p className="text-slate-600 font-medium text-lg">Upload your resume and paste a job description to get your match score.</p>
+                  <h1 className="text-5xl md:text-7xl font-display font-extrabold text-[#3D4852] tracking-tighter uppercase leading-none italic mb-6">Resume Analyzer.</h1>
+                  <p className="text-[#6B7280] font-medium text-xl font-body">Optimize your profile with tactile AI precision.</p>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-                  <div className="lg:col-span-8 space-y-8">
-                    <div className="glass-executive p-10 rounded-[2.5rem] border-white/10 shadow-2xl relative overflow-hidden group">
-                      <label className="block text-[9px] font-black text-slate-600 uppercase tracking-[0.5em] mb-8">Step 1: Your Resume</label>
-                      <div className={`relative border-2 border-dashed rounded-[2rem] p-16 text-center transition-all duration-700 bg-black/40 ${dragActive ? 'border-indigo-500 bg-indigo-500/10' : 'border-white/5 hover:border-white/10'}`}>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                  <div className="lg:col-span-8 space-y-10">
+                    <div className="bg-[#E0E5EC] p-10 rounded-[40px] shadow-extruded border border-white/20">
+                      <label className="block text-[10px] font-display font-black text-[#6B7280] uppercase tracking-[0.4em] mb-8">01. Source Material</label>
+                      <div className={`relative border-2 border-dashed rounded-[32px] p-16 text-center transition-all duration-700 bg-[#E0E5EC] shadow-inset ${dragActive ? 'shadow-inset-deep' : ''}`}>
                         <input type="file" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" accept=".pdf,.docx" />
                         {resumeFile ? (
                           <div className="flex flex-col items-center">
-                            <div className="bg-indigo-600 p-6 rounded-2xl mb-6 shadow-2xl"><FileText className="h-10 w-10 text-white" /></div>
-                            <p className="text-white font-black text-2xl mb-2 tracking-tighter uppercase italic truncate max-w-full px-4">{resumeFile.name}</p>
-                            <span className="text-indigo-400 text-[9px] font-black uppercase tracking-[0.4em] bg-indigo-500/10 px-4 py-1.5 rounded-full border border-indigo-500/20">File Ready</span>
+                            <div className="bg-[#6C63FF] p-6 rounded-2xl mb-6 shadow-lg"><FileText className="h-10 w-10 text-white" /></div>
+                            <p className="text-[#3D4852] font-display font-black text-2xl mb-2 tracking-tighter uppercase italic">{resumeFile.name}</p>
+                            <span className="text-[#38B2AC] text-[10px] font-display font-black uppercase tracking-[0.4em]">Ready ✓</span>
                           </div>
                         ) : (
-                          <div className="flex flex-col items-center opacity-40 group-hover:opacity-100 transition-opacity">
-                            <Upload className="h-12 w-12 text-white mb-6" />
-                            <p className="text-white font-black text-xl uppercase italic tracking-tighter">Upload Your Resume</p>
-                            <p className="text-slate-600 text-[8px] font-black uppercase mt-2">PDF / DOCX Required</p>
+                          <div className="flex flex-col items-center text-[#A3B1C6]">
+                            <Upload className="h-12 w-12 mb-6" />
+                            <p className="text-[#3D4852] font-display font-black text-xl uppercase tracking-tighter">Upload Resume</p>
+                            <p className="text-[#6B7280] text-[9px] font-display font-black uppercase mt-2">PDF / DOCX Required</p>
                           </div>
                         )}
                       </div>
@@ -407,30 +284,27 @@ export default function Dashboard() {
                     <button 
                       onClick={handleAnalyze} 
                       disabled={!resumeFile || !jobDescription || isAnalyzing}
-                      className={`w-full py-10 rounded-[2.5rem] font-black text-2xl flex items-center justify-center gap-6 transition-all duration-700 shadow-2xl uppercase tracking-tighter italic border border-white/10 ${!resumeFile || !jobDescription || isAnalyzing ? 'bg-white/5 text-slate-800 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-white hover:text-black'}`}
+                      className={`w-full py-8 rounded-[32px] font-display font-black text-2xl flex items-center justify-center gap-6 transition-all duration-500 shadow-extruded active:scale-[0.98] uppercase tracking-tighter italic ${!resumeFile || !jobDescription || isAnalyzing ? 'text-[#A3B1C6] cursor-not-allowed' : 'bg-[#6C63FF] text-white hover:bg-[#8B84FF]'}`}
                     >
                       {isAnalyzing ? (
                         <div className="flex items-center gap-4">
                           <Loader2 className="h-8 w-8 animate-spin" />
-                          <div className="flex flex-col items-start leading-none">
-                            <span className="text-xl">Analyzing...</span>
-                            <span className="text-[9px] opacity-60 uppercase tracking-[0.4em] mt-1">{analysisStep}</span>
-                          </div>
+                          <span className="text-xl">Processing...</span>
                         </div>
                       ) : (
-                        <><Rocket className="h-8 w-8 text-indigo-400 group-hover:rotate-12 transition-transform" /><span>Analyze My Resume</span><ArrowRight className="h-8 w-8 opacity-30 group-hover:translate-x-4 transition-transform" /></>
+                        <><Rocket className="h-8 w-8" /><span>Analyze Profile</span><ChevronRight className="h-8 w-8 opacity-40" /></>
                       )}
                     </button>
                   </div>
 
                   <div className="lg:col-span-4">
-                    <div className="bg-slate-900/40 p-10 rounded-[2.5rem] border border-white/5 h-full backdrop-blur-3xl flex flex-col">
-                      <label className="block text-[9px] font-black text-indigo-500/60 uppercase tracking-[0.5em] mb-8">Step 2: Job Description</label>
+                    <div className="bg-[#E0E5EC] p-10 rounded-[40px] shadow-extruded border border-white/20 h-full flex flex-col">
+                      <label className="block text-[10px] font-display font-black text-[#6B7280] uppercase tracking-[0.4em] mb-8">02. Target Pattern</label>
                       <textarea 
                         value={jobDescription} 
                         onChange={(e) => setJobDescription(e.target.value)}
-                        placeholder="Paste the full job description here..."
-                        className="flex-1 w-full bg-black/60 border-2 border-white/5 rounded-3xl p-8 text-white text-lg font-medium outline-none focus:border-indigo-500/50 transition-all resize-none placeholder:text-slate-900 shadow-inner"
+                        placeholder="Paste the job description..."
+                        className="flex-1 w-full bg-[#E0E5EC] shadow-inset rounded-3xl p-8 text-[#3D4852] text-lg font-medium outline-none focus:shadow-inset-deep transition-all resize-none font-body placeholder-[#A3B1C6]"
                       />
                     </div>
                   </div>
@@ -439,52 +313,51 @@ export default function Dashboard() {
             )}
 
             {activeTab === 'history' && (
-              <motion.div key="history" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-[1400px] mx-auto pb-32 relative z-10">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8 pb-8 border-b border-white/5">
+              <motion.div key="history" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-[1400px] mx-auto relative z-10">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
                   <div>
-                    <h1 className="text-6xl font-black text-white tracking-tighter uppercase italic leading-none">My Resumes</h1>
-                    <p className="text-slate-600 font-medium text-xl mt-4">All your previous resume analyses</p>
+                    <h1 className="text-6xl font-display font-extrabold text-[#3D4852] tracking-tighter uppercase italic leading-none">History.</h1>
+                    <p className="text-[#6B7280] font-medium text-xl mt-4 font-body">Tactile archive of previous optimizations.</p>
                   </div>
-                  <button onClick={() => setActiveTab('scan')} className="bg-white text-black px-10 py-5 rounded-[1.5rem] font-black text-[10px] uppercase tracking-[0.4em] hover:bg-indigo-600 hover:text-white transition-all shadow-2xl active:scale-95 flex items-center gap-3">
+                  <button onClick={() => setActiveTab('scan')} className="bg-[#E0E5EC] text-[#3D4852] shadow-extruded px-10 py-5 rounded-[2rem] font-display font-black text-[11px] uppercase tracking-widest hover:shadow-inset transition-all active:scale-95 flex items-center gap-3">
                     <Plus className="h-4 w-4" /> New Analysis
                   </button>
                 </div>
 
                 {isLoadingHistory ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {[1,2,3,4].map(i => <div key={i} className="h-80 bg-white/5 rounded-[2.5rem] animate-pulse border border-white/5" />)}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    {[1,2,3,4].map(i => <div key={i} className="h-80 bg-[#E0E5EC] rounded-[40px] shadow-extruded animate-pulse" />)}
                   </div>
                 ) : history.length === 0 ? (
-                  <div className="glass-executive rounded-[4rem] p-32 border border-dashed border-white/5 text-center flex flex-col items-center">
-                    <Search className="h-16 w-16 text-white/5 mb-8" />
-                    <h3 className="text-3xl font-black text-white uppercase opacity-20 tracking-tighter">No resumes yet</h3>
-                    <p className="text-slate-600 mt-4 font-medium">Run your first analysis to get started</p>
+                  <div className="bg-[#E0E5EC] shadow-inset rounded-[4rem] p-32 text-center flex flex-col items-center">
+                    <Search className="h-16 w-16 text-[#A3B1C6] opacity-30 mb-8" />
+                    <h3 className="text-3xl font-display font-black text-[#3D4852] uppercase opacity-40 tracking-tighter">No History Detected</h3>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                     {history.map((item) => (
                       <motion.div 
                         key={item.id} 
-                        whileHover={{ y: -8, scale: 1.02 }}
-                        className="bg-slate-900/40 p-8 rounded-[2.5rem] border border-white/5 shadow-xl group cursor-pointer flex flex-col relative overflow-hidden transition-all duration-700 hover:border-indigo-500/30 hover:bg-black/60 border-beam"
+                        whileHover={{ y: -6 }}
+                        className="bg-[#E0E5EC] p-8 rounded-[40px] shadow-extruded border border-white/20 group cursor-pointer flex flex-col relative transition-all duration-500"
                         onClick={() => { setAnalysisResult(item); router.push(`/workspace/${item.id}`); }}
                       >
-                        <div className="flex justify-between items-start mb-10 relative z-10">
-                          <div className="bg-white/5 p-4 rounded-2xl text-slate-600 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-700 border border-white/5"><Briefcase className="h-6 w-6" /></div>
+                        <div className="flex justify-between items-start mb-10">
+                          <div className="p-4 rounded-2xl shadow-inset-sm text-[#6B7280] group-hover:text-[#6C63FF] transition-all"><Briefcase className="h-6 w-6" /></div>
                           <div className="text-right">
-                            <p className="text-[8px] font-black text-slate-600 uppercase tracking-[0.4em] mb-1">Match Score</p>
-                            <p className="text-3xl font-black text-white tracking-tighter group-hover:text-indigo-500 transition-colors">{item.overall_score}%</p>
+                            <p className="text-[9px] font-display font-black text-[#6B7280] uppercase tracking-widest mb-1">Score</p>
+                            <p className="text-3xl font-display font-black text-[#3D4852] group-hover:text-[#6C63FF] transition-colors">{item.overall_score}%</p>
                           </div>
                         </div>
-                        <h3 className="text-xl font-black text-white mb-4 truncate uppercase tracking-tighter italic group-hover:text-indigo-400 transition-all">{item.job_title || 'Untitled'}</h3>
-                        <div className="flex items-center gap-4 text-slate-600 font-bold text-[8px] uppercase tracking-[0.3em] mb-10">
-                          <div className="flex items-center gap-2"><Clock className="h-3 w-3 opacity-30" /> {new Date(item.created_at || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
-                          <div className="h-1 w-1 bg-indigo-500/20 rounded-full" />
-                          <div className="text-indigo-500/40 font-black">Analyzed</div>
+                        <h3 className="text-xl font-display font-extrabold text-[#3D4852] mb-4 truncate uppercase italic leading-tight">{item.job_title || 'Untitled'}</h3>
+                        <div className="flex items-center gap-4 text-[#6B7280] font-display font-bold text-[9px] uppercase tracking-widest mb-10">
+                          <div className="flex items-center gap-2"><Clock className="h-3 w-3" /> {new Date(item.created_at).toLocaleDateString()}</div>
+                          <div className="h-1.5 w-1.5 bg-[#6C63FF]/30 rounded-full" />
+                          <div className="text-[#6C63FF]">Analyzed</div>
                         </div>
-                        <div className="mt-auto pt-6 border-t border-white/5 flex items-center justify-between text-[9px] font-black uppercase tracking-[0.4em]">
-                          <span className="text-slate-700 group-hover:text-slate-500 transition-all">Original Score: {item.initial_score}%</span>
-                          <span className="text-white opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-2 flex items-center gap-2">Open <ArrowRight className="h-3 w-3" /></span>
+                        <div className="mt-auto pt-6 border-t border-[#A3B1C6]/20 flex items-center justify-between text-[10px] font-display font-black uppercase tracking-widest">
+                          <span className="text-[#6B7280]">Initial: {item.initial_score}%</span>
+                          <span className="text-[#6C63FF] opacity-0 group-hover:opacity-100 transition-all flex items-center gap-2">View <ChevronRight className="h-3 w-3" /></span>
                         </div>
                       </motion.div>
                     ))}
@@ -494,195 +367,94 @@ export default function Dashboard() {
             )}
 
             {activeTab === 'credits' && (
-              <motion.div key="credits" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl mx-auto relative z-10">
-                <div className="mb-12 pb-8 border-b border-white/5">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[8px] font-black uppercase tracking-[0.4em] mb-6">
-                    <Coins className="h-3 w-3" /> Credits
+              <motion.div key="credits" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto relative z-10">
+                <div className="mb-16">
+                   <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full shadow-extruded-sm text-[#6C63FF] text-[10px] font-display font-black uppercase tracking-[0.4em] mb-8">
+                    <Coins className="h-3 w-3" /> Resources
                   </div>
-                  <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter uppercase leading-none italic mb-4">Buy Credits</h1>
-                  <p className="text-slate-500 font-medium text-lg">Credits are used to run resume analyses. 1 credit = 1 analysis.</p>
+                  <h1 className="text-5xl md:text-7xl font-display font-extrabold text-[#3D4852] tracking-tighter uppercase leading-none italic mb-6">Fuel Optimization.</h1>
                 </div>
 
-                {/* Current Balance */}
-                <div className="glass-executive p-10 rounded-[2.5rem] border border-indigo-500/20 shadow-[0_0_60px_rgba(99,102,241,0.1)] mb-10">
-                  <div className="flex items-center gap-6">
-                    <div className="bg-indigo-600 p-5 rounded-2xl shadow-2xl">
-                      <Coins className="h-10 w-10 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.4em] mb-2">Your Balance</p>
-                      <p className="text-6xl font-black text-white tracking-tighter">{credits} <span className="text-2xl text-slate-500">credits</span></p>
-                    </div>
-                  </div>
-                  <div className="mt-8 p-4 bg-white/5 rounded-2xl border border-white/5">
-                    <p className="text-slate-400 text-sm font-medium">
-                      <span className="text-white font-black">1 credit</span> lets you run one full resume analysis with keyword matching and optimization suggestions.
-                    </p>
-                  </div>
+                <div className="bg-[#E0E5EC] p-12 rounded-[40px] shadow-inset border border-white/20 mb-12 flex items-center gap-10">
+                   <div className="p-8 rounded-[32px] shadow-extruded text-[#6C63FF]">
+                      <Coins className="h-12 w-12" />
+                   </div>
+                   <div>
+                      <p className="text-[10px] font-display font-black text-[#6B7280] uppercase tracking-[0.4em] mb-2">Available Balance</p>
+                      <p className="text-6xl font-display font-black text-[#3D4852] tracking-tighter">{credits} <span className="text-2xl text-[#A3B1C6]">Tokens</span></p>
+                   </div>
                 </div>
 
-                {/* Pricing Options */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Single Credit */}
-                  <motion.div
-                    style={{ perspective: 1200 }}
-                    whileHover={{ rotateX: -4, rotateY: 4, z: 30, scale: 1.02 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                    className="bg-slate-900 rounded-[2.5rem] p-10 flex flex-col cursor-pointer shadow-2xl border border-white/10"
-                  >
-                    <div className="flex items-center justify-between mb-8">
-                      <div className="bg-white/10 p-3 rounded-2xl">
-                        <Coins className="h-7 w-7 text-white" />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  {[
+                    { id: 'tier1', tokens: 1, price: 1, label: 'Single Shot', icon: <Coins className="h-6 w-6" />, accent: "#6B7280" },
+                    { id: 'tier5', tokens: 5, price: 5, label: 'Growth Pack', icon: <Star className="h-6 w-6" />, accent: "#6C63FF", popular: true },
+                    { id: 'tier10', tokens: 10, price: 10, label: 'Elite Bundle', icon: <Zap className="h-6 w-6" />, accent: "#38B2AC" }
+                  ].map((tier) => (
+                    <div key={tier.id} className="bg-[#E0E5EC] p-10 rounded-[32px] shadow-extruded flex flex-col relative border border-white/20">
+                      {tier.popular && <span className="absolute top-0 right-10 bg-[#6C63FF] text-white text-[9px] font-display font-black px-4 py-2 rounded-b-xl shadow-lg">POPULAR</span>}
+                      <div className="p-4 rounded-2xl shadow-inset-sm w-fit mb-8" style={{ color: tier.accent }}>
+                        {tier.icon}
+                      </div>
+                      <h3 className="text-2xl font-display font-black text-[#3D4852] mb-2 uppercase">{tier.tokens} Tokens</h3>
+                      <p className="text-[#6B7280] text-sm mb-10 font-body">{tier.label}</p>
+                      <div className="mt-auto">
+                         <div className="text-5xl font-display font-black text-[#3D4852] mb-8">${tier.price}</div>
+                         <button 
+                           onClick={() => handlePurchase(tier.price, tier.tokens, tier.id)}
+                           disabled={isPurchasing !== null}
+                           className={`w-full py-5 rounded-2xl font-display font-black text-[11px] uppercase tracking-widest transition-all active:scale-95 ${tier.popular ? 'bg-[#6C63FF] text-white shadow-lg hover:bg-[#8B84FF]' : 'bg-[#E0E5EC] text-[#3D4852] shadow-extruded-sm hover:shadow-inset-sm'}`}
+                         >
+                           {isPurchasing === tier.id ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : `Buy ${tier.tokens} Tokens`}
+                         </button>
                       </div>
                     </div>
-                    <h3 className="text-2xl font-black text-white tracking-tight mb-2">1 Credit</h3>
-                    <p className="text-slate-400 text-sm mb-8 leading-relaxed">Need one quick optimization? Buy a single token.</p>
-                    <div className="mt-auto">
-                      <div className="flex items-end gap-2 mb-6">
-                        <span className="text-5xl font-black text-white">$1</span>
-                        <span className="text-slate-500 font-bold mb-2">for 1 token</span>
-                      </div>
-                      <button 
-                        onClick={() => handlePurchase(1, 1, 'tier1')} 
-                        disabled={isPurchasing !== null}
-                        className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2 ${isPurchasing === 'tier1' ? 'bg-indigo-400 text-white' : 'bg-white text-black hover:bg-indigo-600 hover:text-white'}`}
-                      >
-                        {isPurchasing === 'tier1' ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                        {isPurchasing === 'tier1' ? 'Preparing...' : 'Buy 1 Token'}
-                      </button>
-                    </div>
-                  </motion.div>
-
-                  {/* 5 Credits */}
-                  <motion.div
-                    style={{ perspective: 1200 }}
-                    whileHover={{ rotateX: -4, rotateY: 4, z: 30, scale: 1.02 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                    className="bg-white rounded-[2.5rem] p-10 flex flex-col cursor-pointer shadow-2xl"
-                  >
-                    <div className="flex items-center justify-between mb-8">
-                      <div className="bg-indigo-100 p-3 rounded-2xl">
-                        <Star className="h-7 w-7 text-indigo-600" />
-                      </div>
-                      <span className="text-[9px] font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">Popular</span>
-                    </div>
-                    <h3 className="text-2xl font-black text-slate-900 tracking-tight mb-2">5 Credits</h3>
-                    <p className="text-slate-500 text-sm mb-8 leading-relaxed">Applying to a few jobs? Grab a handful of tokens.</p>
-                    <div className="mt-auto">
-                      <div className="flex items-end gap-2 mb-6">
-                        <span className="text-5xl font-black text-slate-900">$5</span>
-                        <span className="text-slate-400 font-bold mb-2">for 5 tokens</span>
-                      </div>
-                      <button 
-                        onClick={() => handlePurchase(5, 5, 'tier5')} 
-                        disabled={isPurchasing !== null}
-                        className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2 ${isPurchasing === 'tier5' ? 'bg-indigo-400 text-white' : 'bg-indigo-600 text-white hover:bg-black'}`}
-                      >
-                        {isPurchasing === 'tier5' ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                        {isPurchasing === 'tier5' ? 'Preparing...' : 'Buy 5 Tokens'}
-                      </button>
-                    </div>
-                  </motion.div>
-
-                  {/* 10 Credits */}
-                  <motion.div
-                    style={{ perspective: 1200 }}
-                    whileHover={{ rotateX: -4, rotateY: 4, z: 30, scale: 1.02 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                    className="bg-slate-900 rounded-[2.5rem] p-10 flex flex-col cursor-pointer shadow-2xl border border-indigo-500/30"
-                  >
-                    <div className="flex items-center justify-between mb-8">
-                      <div className="bg-indigo-500/20 p-3 rounded-2xl">
-                        <Zap className="h-7 w-7 text-indigo-400" />
-                      </div>
-                    </div>
-                    <h3 className="text-2xl font-black text-white tracking-tight mb-2">10 Credits</h3>
-                    <p className="text-slate-400 text-sm mb-8 leading-relaxed">Going on an application spree? Stock up on tokens.</p>
-                    <div className="mt-auto">
-                      <div className="flex items-end gap-2 mb-6">
-                        <span className="text-5xl font-black text-white">$10</span>
-                        <span className="text-slate-500 font-bold mb-2">for 10 tokens</span>
-                      </div>
-                      <button 
-                        onClick={() => handlePurchase(10, 10, 'tier10')} 
-                        disabled={isPurchasing !== null}
-                        className={`w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all shadow-xl active:scale-95 flex items-center justify-center gap-2 ${isPurchasing === 'tier10' ? 'bg-indigo-400 text-white' : 'bg-indigo-600 text-white hover:bg-indigo-500'}`}
-                      >
-                        {isPurchasing === 'tier10' ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                        {isPurchasing === 'tier10' ? 'Preparing...' : 'Buy 10 Tokens'}
-                      </button>
-                    </div>
-                  </motion.div>
-                </div>
-
-
-
-                {/* Pricing explanation */}
-                <div className="mt-10 p-8 bg-white/5 rounded-[2rem] border border-white/5 text-center">
-                  <p className="text-slate-400 text-sm leading-relaxed">
-                    <span className="text-white font-black">How it works:</span> New users get 4 analyses for $1 to start. After that, each analysis costs $1. There are no monthly fees or subscriptions — you only pay when you need it.
-                  </p>
+                  ))}
                 </div>
               </motion.div>
             )}
 
             {activeTab === 'coverletter' && (
-              <motion.div key="coverletter" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-3xl mx-auto relative z-10">
-                <div className="mb-12 pb-8 border-b border-white/5">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[8px] font-black uppercase tracking-[0.4em] mb-6">
-                    <Mail className="h-3 w-3" /> Cover Letter
+              <motion.div key="coverletter" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto relative z-10">
+                <div className="mb-16">
+                   <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full shadow-extruded-sm text-[#fb7185] text-[10px] font-display font-black uppercase tracking-[0.4em] mb-8">
+                    <Mail className="h-3 w-3" /> Synthesis
                   </div>
-                  <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter uppercase leading-none italic mb-4">Generate Cover Letter</h1>
-                  <p className="text-slate-500 font-medium text-lg">Upload your resume and paste the job description to get a personalized, AI-powered cover letter. Costs 1 credit.</p>
+                  <h1 className="text-5xl md:text-7xl font-display font-extrabold text-[#3D4852] tracking-tighter uppercase leading-none italic mb-6">Cover Letters.</h1>
                 </div>
 
-                <div className="space-y-8">
-                  {/* File Upload Zone */}
-                  <div>
-                    <label className="block text-[9px] font-black text-slate-600 uppercase tracking-[0.4em] mb-3">Upload Your Resume</label>
-                    <div className="relative border-2 border-dashed border-white/10 rounded-[2rem] p-14 text-center group/drop transition-all duration-500 hover:border-indigo-500/40 hover:bg-indigo-500/5 cursor-pointer bg-black/40">
-                      <input type="file" accept=".pdf,.docx,.doc" onChange={(e) => setClFile(e.target.files?.[0] || null)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                <div className="space-y-12">
+                   <div className="bg-[#E0E5EC] p-12 rounded-[40px] shadow-extruded border border-white/20">
+                    <label className="block text-[10px] font-display font-black text-[#6B7280] uppercase tracking-[0.4em] mb-8">01. Identity Context</label>
+                    <div className="relative h-48 rounded-[32px] shadow-inset flex flex-col items-center justify-center p-10 text-center group">
+                      <input type="file" onChange={(e) => setClFile(e.target.files?.[0] || null)} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
                       {clFile ? (
                         <div className="flex flex-col items-center">
-                          <div className="bg-indigo-600 p-5 rounded-2xl mb-4 shadow-[0_0_30px_rgba(99,102,241,0.5)]">
-                            <FileText className="h-7 w-7 text-white" />
-                          </div>
-                          <p className="text-white font-black text-sm truncate max-w-full px-4">{clFile.name}</p>
-                          <span className="mt-2 text-indigo-400 text-[9px] font-black uppercase tracking-[0.4em] bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">Ready ✓</span>
+                          <div className="bg-[#fb7185] p-5 rounded-2xl mb-4 shadow-lg text-white"><FileText className="h-8 w-8" /></div>
+                          <p className="text-[#3D4852] font-display font-black text-xl">{clFile.name}</p>
                         </div>
                       ) : (
-                        <div className="flex flex-col items-center">
-                          <div className="bg-white/5 p-5 rounded-2xl mb-4 border border-white/10 group-hover/drop:bg-indigo-600 group-hover/drop:border-indigo-600 transition-all duration-500">
-                            <Upload className="h-7 w-7 text-white/30 group-hover/drop:text-white transition-colors duration-500" />
-                          </div>
-                          <p className="text-white font-bold text-base">Drop your resume here</p>
-                          <p className="text-slate-600 text-[9px] mt-1.5 font-black uppercase tracking-[0.2em]">PDF or DOCX</p>
+                        <div className="flex flex-col items-center text-[#A3B1C6]">
+                          <Upload className="h-10 w-10 mb-4" />
+                          <p className="text-[#3D4852] font-display font-black text-lg">Upload Resume Profile</p>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-[9px] font-black text-slate-600 uppercase tracking-[0.4em] mb-3">Job Description</label>
+                  <div className="bg-[#E0E5EC] p-12 rounded-[40px] shadow-extruded border border-white/20">
+                    <label className="block text-[10px] font-display font-black text-[#6B7280] uppercase tracking-[0.4em] mb-8">02. Opportunity Vector</label>
                     <textarea
                       value={clJobDescription}
                       onChange={(e) => setClJobDescription(e.target.value)}
-                      className="w-full h-48 bg-white/5 border border-white/10 rounded-2xl p-6 text-white text-sm font-medium resize-none outline-none focus:border-indigo-500/50 transition-colors placeholder:text-slate-700 intelligence-scrollbar"
-                      placeholder="Paste the job description here..."
+                      className="w-full h-48 bg-[#E0E5EC] shadow-inset rounded-3xl p-8 text-[#3D4852] text-lg font-medium outline-none focus:shadow-inset-deep transition-all resize-none font-body placeholder-[#A3B1C6]"
+                      placeholder="Paste target job description..."
                     />
                   </div>
 
                   <button
                     onClick={async () => {
-                      if (!clFile || !clJobDescription.trim()) {
-                        alert('Please upload your resume and paste the job description.');
-                        return;
-                      }
-                      if (credits <= 0) {
-                        alert('You need at least 1 credit to generate a cover letter.');
-                        setActiveTab('credits');
-                        return;
-                      }
+                      if (!clFile || !clJobDescription.trim() || credits <= 0) return;
                       setIsGeneratingCL(true);
                       try {
                         const { data: profile } = await supabase.from('profiles').select('tokens').eq('id', user?.id).single();
@@ -690,131 +462,88 @@ export default function Dashboard() {
                           await supabase.from('profiles').update({ tokens: profile.tokens - 1 }).eq('id', user?.id);
                           setCredits(profile.tokens - 1);
                         }
-
                         const result = await generateCoverLetter(clFile, clJobDescription);
-
                         const jobTitle = clJobDescription.split('\n')[0].slice(0, 60) || 'Untitled';
-                        const { data, error } = await supabase.from('cover_letters').insert({
-                          user_id: user.id,
-                          job_title: jobTitle,
-                          content: result.cover_letter,
-                          resume_text: '',
-                          job_description: clJobDescription,
+                        const { data } = await supabase.from('cover_letters').insert({
+                          user_id: user.id, job_title: jobTitle, content: result.cover_letter, job_description: clJobDescription,
                         }).select().single();
-
-                        if (error) throw error;
                         router.push(`/cover-letter/${data.id}`);
                       } catch (err: any) {
-                        console.error(err);
-                        alert(`Error generating cover letter: ${err.message}`);
-                        const { data: p } = await supabase.from('profiles').select('tokens').eq('id', user?.id).single();
-                        if (p) setCredits(p.tokens);
+                        alert(`Error: ${err.message}`);
                       } finally {
                         setIsGeneratingCL(false);
                       }
                     }}
                     disabled={isGeneratingCL || !clFile || !clJobDescription.trim()}
-                    className={`w-full py-6 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-2xl active:scale-95 flex items-center justify-center gap-3 ${
-                      isGeneratingCL ? 'bg-indigo-400 text-white' : 'bg-white text-black hover:bg-indigo-600 hover:text-white'
-                    }`}
+                    className={`w-full py-8 rounded-[32px] font-display font-black text-xl uppercase tracking-widest transition-all active:scale-[0.98] shadow-extruded flex items-center justify-center gap-4 ${isGeneratingCL ? 'text-[#A3B1C6]' : 'bg-[#fb7185] text-white hover:bg-[#ff8a9a]'}`}
                   >
-                    {isGeneratingCL ? <Loader2 className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />}
-                    {isGeneratingCL ? 'Generating Your Cover Letter...' : 'Generate Cover Letter (1 Credit)'}
+                    {isGeneratingCL ? <Loader2 className="h-6 w-6 animate-spin" /> : <Sparkles className="h-6 w-6" />}
+                    {isGeneratingCL ? 'Generating Synthesis...' : 'Generate Cover Letter (1 Token)'}
                   </button>
-
-                  <div className="p-8 bg-white/5 rounded-[2rem] border border-white/5 text-center">
-                    <p className="text-slate-400 text-sm leading-relaxed">
-                      <span className="text-white font-black">AI-Powered:</span> Upload your resume (PDF/DOCX) and we'll extract your experience to craft a personalized cover letter tailored to the job. Edit and export as PDF.
-                    </p>
-                  </div>
                 </div>
               </motion.div>
             )}
 
             {activeTab === 'pipeline' && (
-              <motion.div key="pipeline" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-6xl mx-auto relative z-10">
-                <div className="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+              <motion.div key="pipeline" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-7xl mx-auto relative z-10">
+                <div className="mb-16 flex flex-col md:flex-row justify-between items-end gap-10">
                   <div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[8px] font-black uppercase tracking-[0.4em] mb-6">
-                      <Briefcase className="h-3 w-3" /> Job Pipeline
+                    <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full shadow-extruded-sm text-[#38B2AC] text-[10px] font-display font-black uppercase tracking-[0.4em] mb-8">
+                      <Briefcase className="h-3 w-3" /> Log
                     </div>
-                    <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter uppercase leading-none italic mb-4">Track Your Applications</h1>
-                    <p className="text-slate-500 font-medium text-lg">Organize every job from saved to offer. Never lose track of an opportunity.</p>
+                    <h1 className="text-5xl md:text-7xl font-display font-extrabold text-[#3D4852] tracking-tighter uppercase leading-none italic mb-6">Job Pipeline.</h1>
+                    <p className="text-[#6B7280] font-medium text-xl font-body">Map your career trajectory with tactile precision.</p>
                   </div>
                   <button
                     onClick={() => setShowAddJob(true)}
-                    className="flex items-center gap-3 px-8 py-4 bg-white text-black rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all active:scale-95 shadow-2xl flex-shrink-0"
+                    className="flex items-center gap-3 px-10 py-5 bg-[#E0E5EC] text-[#3D4852] shadow-extruded rounded-[2rem] font-display font-black text-[11px] uppercase tracking-widest hover:shadow-inset transition-all active:scale-95"
                   >
-                    <Plus className="h-4 w-4" /> Add Job
+                    <Plus className="h-4 w-4" /> Add Record
                   </button>
                 </div>
 
-                {/* Add Job Form */}
                 <AnimatePresence>
                   {showAddJob && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden mb-8">
-                      <div className="bg-white/5 border border-white/10 rounded-[2rem] p-8 space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <input value={newJob.company} onChange={(e) => setNewJob(prev => ({ ...prev, company: e.target.value }))} placeholder="Company Name" className="bg-black/60 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm font-medium outline-none focus:border-indigo-500/50 placeholder:text-slate-700" />
-                          <input value={newJob.job_title} onChange={(e) => setNewJob(prev => ({ ...prev, job_title: e.target.value }))} placeholder="Job Title" className="bg-black/60 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm font-medium outline-none focus:border-indigo-500/50 placeholder:text-slate-700" />
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mb-16 overflow-hidden">
+                      <div className="bg-[#E0E5EC] p-12 rounded-[40px] shadow-extruded border border-white/20 space-y-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                          <div className="space-y-3">
+                             <label className="text-[10px] font-display font-black text-[#6B7280] uppercase">Company</label>
+                             <input value={newJob.company} onChange={(e) => setNewJob(prev => ({ ...prev, company: e.target.value }))} className="w-full bg-[#E0E5EC] shadow-inset rounded-2xl px-6 py-4 outline-none text-[#3D4852] font-medium font-body" placeholder="e.g. Google" />
+                          </div>
+                          <div className="space-y-3">
+                             <label className="text-[10px] font-display font-black text-[#6B7280] uppercase">Job Title</label>
+                             <input value={newJob.job_title} onChange={(e) => setNewJob(prev => ({ ...prev, job_title: e.target.value }))} className="w-full bg-[#E0E5EC] shadow-inset rounded-2xl px-6 py-4 outline-none text-[#3D4852] font-medium font-body" placeholder="e.g. Senior Architect" />
+                          </div>
                         </div>
-                        <input value={newJob.job_url} onChange={(e) => setNewJob(prev => ({ ...prev, job_url: e.target.value }))} placeholder="Job URL (optional)" className="w-full bg-black/60 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm font-medium outline-none focus:border-indigo-500/50 placeholder:text-slate-700" />
-                        <textarea value={newJob.notes} onChange={(e) => setNewJob(prev => ({ ...prev, notes: e.target.value }))} placeholder="Notes (optional)" className="w-full bg-black/60 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm font-medium outline-none focus:border-indigo-500/50 placeholder:text-slate-700 resize-none h-24" />
-                        <div className="flex gap-3">
-                          <button
-                            onClick={async () => {
-                              if (!newJob.company.trim() || !newJob.job_title.trim()) { alert('Company and Job Title are required.'); return; }
-                              const { data, error } = await supabase.from('job_pipeline').insert({ user_id: user.id, ...newJob, status: 'saved' }).select().single();
-                              if (!error && data) {
-                                setPipelineJobs(prev => [data, ...prev]);
-                                setNewJob({ company: '', job_title: '', job_url: '', notes: '' });
-                                setShowAddJob(false);
-                              } else { alert('Failed to add job: ' + error?.message); }
-                            }}
-                            className="px-8 py-3 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-white hover:text-black transition-all active:scale-95"
-                          >Save Job</button>
-                          <button onClick={() => setShowAddJob(false)} className="px-8 py-3 bg-white/5 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:text-white transition-all">Cancel</button>
+                        <div className="flex gap-6 pt-4">
+                          <button onClick={async () => {
+                            if (!newJob.company.trim() || !newJob.job_title.trim()) return;
+                            const { data } = await supabase.from('job_pipeline').insert({ user_id: user.id, ...newJob, status: 'saved' }).select().single();
+                            if (data) { setPipelineJobs(prev => [data, ...prev]); setShowAddJob(false); setNewJob({ company: '', job_title: '', job_url: '', notes: '' }); }
+                          }} className="px-10 py-4 bg-[#6C63FF] text-white rounded-2xl font-display font-black text-[11px] uppercase tracking-widest shadow-lg hover:bg-[#8B84FF]">Record Job</button>
+                          <button onClick={() => setShowAddJob(false)} className="px-10 py-4 bg-[#E0E5EC] text-[#6B7280] shadow-extruded-sm rounded-2xl font-display font-black text-[11px] uppercase tracking-widest hover:shadow-inset-sm transition-all">Cancel</button>
                         </div>
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                {/* Pipeline Columns */}
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
                   {['saved', 'applied', 'interview', 'offer', 'rejected'].map((status) => {
-                    const statusColors: Record<string, string> = { saved: 'border-slate-500/20', applied: 'border-blue-500/20', interview: 'border-amber-500/20', offer: 'border-green-500/20', rejected: 'border-red-500/20' };
-                    const statusLabels: Record<string, string> = { saved: '📌 Saved', applied: '📤 Applied', interview: '💬 Interview', offer: '🎉 Offer', rejected: '❌ Rejected' };
+                    const statusLabels: Record<string, string> = { saved: 'Saved', applied: 'Applied', interview: 'Interview', offer: 'Offer', rejected: 'Rejected' };
                     const jobs = pipelineJobs.filter(j => j.status === status);
                     return (
-                      <div key={status} className={`bg-white/[0.02] border ${statusColors[status]} rounded-[2rem] p-5 min-h-[300px]`}>
-                        <div className="flex items-center justify-between mb-5 px-1">
-                          <span className="text-[10px] font-black text-white uppercase tracking-widest">{statusLabels[status]}</span>
-                          <span className="text-[10px] font-black text-slate-700 bg-white/5 px-2.5 py-1 rounded-full">{jobs.length}</span>
+                      <div key={status} className="bg-[#E0E5EC] p-6 rounded-[32px] shadow-inset min-h-[400px]">
+                        <div className="flex items-center justify-between mb-8 px-2">
+                          <span className="text-[10px] font-display font-black text-[#3D4852] uppercase tracking-[0.2em]">{statusLabels[status]}</span>
+                          <span className="text-[10px] font-display font-black text-[#6B7280] bg-[#E0E5EC] shadow-extruded-sm px-3 py-1 rounded-full">{jobs.length}</span>
                         </div>
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                           {jobs.map((job) => (
-                            <motion.div key={job.id} layout whileHover={{ scale: 1.02 }} className="bg-white/5 border border-white/5 rounded-2xl p-4 cursor-pointer group hover:border-indigo-500/30 transition-all">
-                              <p className="text-white font-black text-sm truncate">{job.company}</p>
-                              <p className="text-slate-500 text-xs font-medium truncate mb-3">{job.job_title}</p>
-                              {job.job_url && <a href={job.job_url} target="_blank" rel="noopener noreferrer" className="text-indigo-400 text-[9px] font-black uppercase tracking-widest hover:text-white transition-colors">View Posting →</a>}
-                              <div className="mt-3 pt-3 border-t border-white/5">
-                                <select
-                                  value={job.status}
-                                  onChange={async (e) => {
-                                    const newStatus = e.target.value;
-                                    await supabase.from('job_pipeline').update({ status: newStatus, updated_at: new Date().toISOString() }).eq('id', job.id);
-                                    setPipelineJobs(prev => prev.map(j => j.id === job.id ? { ...j, status: newStatus } : j));
-                                  }}
-                                  className="w-full bg-black/60 border border-white/10 rounded-xl px-3 py-2 text-[10px] font-black text-white uppercase tracking-widest outline-none cursor-pointer"
-                                >
-                                  <option value="saved">📌 Saved</option>
-                                  <option value="applied">📤 Applied</option>
-                                  <option value="interview">💬 Interview</option>
-                                  <option value="offer">🎉 Offer</option>
-                                  <option value="rejected">❌ Rejected</option>
-                                </select>
-                              </div>
+                            <motion.div key={job.id} layout className="bg-[#E0E5EC] p-5 rounded-2xl shadow-extruded border border-white/20">
+                              <p className="text-[#3D4852] font-display font-extrabold text-sm truncate uppercase">{job.company}</p>
+                              <p className="text-[#6B7280] text-[11px] font-body truncate mt-1">{job.job_title}</p>
                             </motion.div>
                           ))}
                         </div>
@@ -822,23 +551,6 @@ export default function Dashboard() {
                     );
                   })}
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Success Toast */}
-          <AnimatePresence>
-            {showSuccess && (
-              <motion.div 
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 50 }}
-                className="fixed bottom-12 left-1/2 -translate-x-1/2 z-[100] bg-green-500 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-2xl flex items-center gap-3 border border-white/20 backdrop-blur-xl"
-              >
-                <div className="h-6 w-6 rounded-full bg-white/20 flex items-center justify-center animate-pulse">
-                  <CheckCircle className="h-4 w-4" />
-                </div>
-                <span>Payment Successful! Syncing tokens...</span>
               </motion.div>
             )}
           </AnimatePresence>
