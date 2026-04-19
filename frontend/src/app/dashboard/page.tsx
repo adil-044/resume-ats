@@ -130,7 +130,17 @@ export default function Dashboard() {
         id: item.id,
         overall_score: item.after_score || item.before_score,
         initial_score: item.before_score,
+        breakdown: item.breakdown || { keyword_match: 0, semantic_alignment: 0, section_integrity: 0 },
+        missing_keywords: item.missing_keywords || [],
+        matched_keywords: item.matched_keywords || [],
+        formatting_issues: item.formatting_issues || [],
+        optimized_content: {
+          format: 'markdown',
+          raw_text: item.optimized_text || item.original_text
+        },
         job_title: item.job_title,
+        job_description: item.job_description,
+        original_text: item.original_text,
         created_at: item.created_at
       })));
     }
