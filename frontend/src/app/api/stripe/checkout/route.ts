@@ -13,34 +13,52 @@ export async function POST(req: Request) {
   const stripe = new Stripe(apiKey);
   
   try {
-    const { userId, tokens, amount } = await req.json();
+    const { userId, planType } = await req.json();
 
-    if (!userId || !tokens || !amount) {
+    if (!userId || !planType) {
       return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
+    }
+
+    let priceData: any;
+    if (planType === 'starter') {
+      priceData = {
+        currency: 'usd',
+        product_data: {
+          name: 'HireReady Starter (BYOK)',
+          description: 'Monthly subscription for Bring Your Own Key access',
+        },
+        unit_amount: 200, // $2.00
+        recurring: { interval: 'month' },
+      };
+    } else if (planType === 'pro') {
+      priceData = {
+        currency: 'usd',
+        product_data: {
+          name: 'HireReady Pro (Unlimited)',
+          description: 'Monthly subscription for Unlimited managed generations',
+        },
+        unit_amount: 700, // $7.00
+        recurring: { interval: 'month' },
+      };
+    } else {
+      return NextResponse.json({ error: 'Invalid plan type' }, { status: 400 });
     }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
         {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: `${tokens} Tokens for HireReady`,
-              description: 'Resume optimization tokens',
-            },
-            unit_amount: amount * 100, // in cents
-          },
+          price_data: priceData,
           quantity: 1,
         },
       ],
-      mode: 'payment',
+      mode: 'subscription',
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://hire-ready.app'}/dashboard?success=true&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://hire-ready.app'}/dashboard?canceled=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://hire-ready.app'}/pricing?canceled=true`,
       client_reference_id: userId,
       metadata: {
         userId,
-        tokens: tokens.toString(),
+        planType,
       },
     });
 

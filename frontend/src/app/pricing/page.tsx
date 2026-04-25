@@ -3,8 +3,11 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { motion, Variants } from 'framer-motion';
-import { Check, Zap, Key, Sparkles, Crown, ShieldCheck, FileText, Briefcase, BarChart2, Mail, Clock, Download, Brain, Lock } from 'lucide-react';
+import { Check, Zap, Key, Sparkles, Crown, ShieldCheck, FileText, Briefcase, BarChart2, Mail, Clock, Download, Brain, Lock, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 30 },
@@ -39,6 +42,43 @@ const proFeatures = [
 ];
 
 export default function PricingPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+  }, []);
+
+  const handleSubscribe = async (planType: 'starter' | 'pro') => {
+    if (!user) {
+      router.push('/auth/login');
+      return;
+    }
+
+    setLoading(planType);
+    try {
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id, planType }),
+      });
+
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || 'Failed to create checkout session');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Something went wrong');
+    } finally {
+      setLoading(null);
+    }
+  };
   return (
     <div className="min-h-screen bg-[#E0E5EC] font-body selection:bg-[#6C63FF]/20 selection:text-[#6C63FF]">
       <Navbar />
@@ -112,9 +152,13 @@ export default function PricingPage() {
               ))}
             </ul>
 
-            <Link href="/auth/login" className="w-full py-5 bg-[#E0E5EC] shadow-extruded hover:shadow-inset text-[#6C63FF] rounded-2xl font-display font-black text-[11px] uppercase tracking-[0.2em] text-center transition-all active:scale-95 block">
-              Start for $2/mo
-            </Link>
+            <button 
+              onClick={() => handleSubscribe('starter')}
+              disabled={loading !== null}
+              className="w-full py-5 bg-[#E0E5EC] shadow-extruded hover:shadow-inset text-[#6C63FF] rounded-2xl font-display font-black text-[11px] uppercase tracking-[0.2em] text-center transition-all active:scale-95 flex items-center justify-center gap-2"
+            >
+              {loading === 'starter' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Start for $2/mo'}
+            </button>
           </motion.div>
 
           {/* Pro — $7/mo Unlimited */}
@@ -154,9 +198,13 @@ export default function PricingPage() {
               ))}
             </ul>
 
-            <Link href="/auth/login" className="w-full py-5 bg-[#6C63FF] text-white rounded-2xl font-display font-black text-[11px] uppercase tracking-[0.2em] text-center hover:bg-[#8B84FF] transition-all shadow-[8px_8px_16px_rgba(108,99,255,0.3),-8px_-8px_16px_rgba(255,255,255,0.3)] active:scale-95 block">
-              Go Unlimited — $7/mo
-            </Link>
+            <button 
+              onClick={() => handleSubscribe('pro')}
+              disabled={loading !== null}
+              className="w-full py-5 bg-[#6C63FF] text-white rounded-2xl font-display font-black text-[11px] uppercase tracking-[0.2em] text-center hover:bg-[#8B84FF] transition-all shadow-[8px_8px_16px_rgba(108,99,255,0.3),-8px_-8px_16px_rgba(255,255,255,0.3)] active:scale-95 flex items-center justify-center gap-2 relative z-10"
+            >
+              {loading === 'pro' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Go Unlimited — $7/mo'}
+            </button>
           </motion.div>
         </motion.div>
 
@@ -213,10 +261,13 @@ export default function PricingPage() {
               Both plans are month-to-month with no commitments. Your data stays encrypted and private. Switch plans or cancel whenever you want.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <Link href="/auth/login" className="px-10 py-5 bg-[#6C63FF] text-white rounded-2xl font-display font-black text-[11px] uppercase tracking-[0.2em] hover:bg-[#8B84FF] transition-all shadow-[6px_6px_15px_rgba(108,99,255,0.3)] active:scale-95 flex items-center justify-center gap-3">
-                <Sparkles className="h-4 w-4" />
-                Get Started Now
-              </Link>
+              <button 
+                onClick={() => handleSubscribe('pro')}
+                disabled={loading !== null}
+                className="px-10 py-5 bg-[#6C63FF] text-white rounded-2xl font-display font-black text-[11px] uppercase tracking-[0.2em] hover:bg-[#8B84FF] transition-all shadow-[6px_6px_15px_rgba(108,99,255,0.3)] active:scale-95 flex items-center justify-center gap-3"
+              >
+                {loading === 'pro' ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Sparkles className="h-4 w-4" /> Get Started Now</>}
+              </button>
               <Link href="/" className="px-10 py-5 bg-[#E0E5EC] text-[#3D4852] shadow-extruded hover:shadow-inset rounded-2xl font-display font-black text-[11px] uppercase tracking-[0.2em] transition-all active:scale-95 flex items-center justify-center">
                 Learn More
               </Link>

@@ -36,14 +36,12 @@ export async function POST(req: Request) {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
     const userId = session.metadata?.userId;
-    const tokens = parseInt(session.metadata?.tokens || '0', 10);
+    const planType = session.metadata?.planType;
 
-    if (userId && tokens > 0) {
+    if (userId && planType) {
       try {
-        const { data: profile } = await supabase.from('profiles').select('tokens').eq('id', userId).single();
-        const newTokens = (profile?.tokens || 0) + tokens;
-        await supabase.from('profiles').update({ tokens: newTokens }).eq('id', userId);
-        console.log(`Successfully added ${tokens} tokens to user ${userId}`);
+        await supabase.from('profiles').update({ subscription_tier: planType }).eq('id', userId);
+        console.log(`Successfully updated subscription_tier to ${planType} for user ${userId}`);
       } catch (err: any) {
         console.error('Database update failed in checkout webhook:', err);
       }
@@ -75,6 +73,21 @@ export async function POST(req: Request) {
         }
       } catch (err: any) {
         console.error('Database update failed in invoice webhook:', err);
+      }
+    }
+  }
+
+  // Handle subscription cancellations
+  if (event.type === 'customer.subscription.deleted') {
+    const subscription = event.data.object as Stripe.Subscription;
+    const userId = subscription.metadata?.userId;
+
+    if (userId) {
+      try {
+        await supabase.from('profiles').update({ subscription_tier: null }).eq('id', userId);
+        console.log(`Successfully removed subscription_tier for user ${userId}`);
+      } catch (err: any) {
+        console.error('Database update failed in subscription deleted webhook:', err);
       }
     }
   }
