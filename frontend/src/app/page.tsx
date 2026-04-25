@@ -129,7 +129,7 @@ const howItWorks = [
 const faqData = [
   { question: "Will this actually improve my chances?", answer: "Yes. Most applicant tracking systems filter out resumes that don't match the job description. By adding the exact skills they are looking for in the right context, you bypass the filter and get your resume in front of a human recruiter." },
   { question: "How is this different from Jobscan?", answer: "Competitors just give you a raw list of missing keywords and leave you to figure out how to add them. HireReady's AI actually analyzes your experience and shows you exactly how to incorporate those missing skills credibly and naturally into your bullet points." },
-  { question: "How much does it cost?", answer: "Your first 4 resume analyses cost just $1 total. After that, it's $1 per analysis — pay as you go. No subscriptions, no hidden fees." },
+  { question: "How much does it cost?", answer: "We offer two simple plans: $2/month if you bring your own API key (Gemini), or $7/month for unlimited AI generations with zero setup. Cancel anytime — no contracts, no hidden fees." },
   { question: "What if I upload my resume and it doesn't help?", answer: "If your resume is already perfectly optimized for the job, our system will tell you that you have a 95%+ match score and you're good to apply! You only pay per scan, so there are no wasted subscriptions if you don't need us right now." },
   { question: "Is my resume data safe?", answer: "Yes. Your data is encrypted and stored securely. We never share or sell your personal information. You can delete your data at any time." }
 ];
@@ -283,27 +283,27 @@ export default function Home() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#6C63FF] opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#6C63FF]"></span>
               </span>
-              Intelligent Career Architect
+              AI-Powered Career Engine
             </motion.div>
 
             <motion.h1 variants={kineticItem} className="text-6xl md:text-8xl lg:text-[10rem] font-display font-extrabold text-[#3D4852] leading-[0.8] tracking-tighter mb-10 uppercase italic">
-              Land the Job <br />
-              <span className="text-[#6C63FF] not-italic">You Deserve.</span>
+              Stop Getting <br />
+              <span className="text-[#6C63FF] not-italic">Ghosted by ATS.</span>
             </motion.h1>
 
             <motion.p variants={kineticItem} className="text-xl md:text-2xl text-[#6B7280] max-w-2xl mx-auto leading-relaxed mb-12 font-body font-medium">
-              Our AI analyzes your resume against any job posting and optimizes it to score{' '}
-              <span className="text-[#3D4852] font-black underline decoration-[#6C63FF]/30">95%+ match rate</span> — bypass the ATS with a single click.
+              Your resume gets rejected by robots before a human ever sees it. Our AI rewrites it to score{' '}
+              <span className="text-[#3D4852] font-black underline decoration-[#6C63FF]/30">95%+ ATS match</span> — so you get interviews, not silence.
             </motion.p>
 
             <motion.div variants={kineticItem} className="flex flex-col sm:flex-row gap-6 justify-center">
-              <a href="#analyzer" className="px-12 py-6 bg-[#6C63FF] text-white rounded-[2rem] font-display font-black text-sm uppercase tracking-widest hover:bg-[#8B84FF] transition-all shadow-[8px_8px_20px_rgba(108,99,255,0.3)] active:scale-95 flex items-center gap-3 justify-center">
+              <Link href="/auth/login" className="px-12 py-6 bg-[#6C63FF] text-white rounded-[2rem] font-display font-black text-sm uppercase tracking-widest hover:bg-[#8B84FF] transition-all shadow-[8px_8px_20px_rgba(108,99,255,0.3)] active:scale-95 flex items-center gap-3 justify-center">
                 <Rocket className="h-5 w-5" />
-                Claim Launch Special ($1)
+                Optimize Your Resume Free
                 <ChevronRight className="h-5 w-5 opacity-50" />
-              </a>
+              </Link>
               <Link href="/pricing" className="px-12 py-6 bg-[#E0E5EC] text-[#3D4852] rounded-[2rem] font-display font-black text-sm uppercase tracking-widest shadow-extruded hover:shadow-inset transition-all flex items-center justify-center">
-                View Pricing
+                See Plans from $2/mo
               </Link>
             </motion.div>
           </motion.div>
@@ -339,7 +339,7 @@ export default function Home() {
                 { value: 30, suffix: '+', label: 'Optimized', color: 'text-[#6C63FF]' },
                 { value: 95,    suffix: '%', label: 'Match Rate', color: 'text-[#38B2AC]' },
                 { value: 3,  suffix: '', label: 'Reviews',     color: 'text-[#fbbf24]' },
-                { value: 1,     suffix: '$', label: 'Initial Scans',     color: 'text-[#3D4852]', prefix: true },
+                { value: 2,     suffix: '$', label: 'Starting At',     color: 'text-[#3D4852]', prefix: true },
               ].map((s, i) => (
                 <motion.div key={i} variants={fadeUp} className="flex flex-col items-center gap-2">
                   <p className={`text-5xl font-display font-extrabold tracking-tight ${s.color}`}>
@@ -487,7 +487,7 @@ export default function Home() {
                       <><Zap className="h-5 w-5" /><span>Analyze Match Score</span><ChevronRight className="h-5 w-5 opacity-50" /></>
                     )}
                   </button>
-                  <p className="text-center text-[#6B7280] text-[10px] font-display font-bold uppercase tracking-widest">Start with 4 free scans · $1 per scan after</p>
+                  <p className="text-center text-[#6B7280] text-[10px] font-display font-bold uppercase tracking-widest">Plans from $2/mo · Try your first scan free</p>
                 </div>
               </motion.div>
             </div>
@@ -524,7 +524,7 @@ export default function Home() {
                 { title: "Safe & Private", desc: "Your data is bank-level encrypted and never shared. You own your profile.", icon: <ShieldCheck className="h-7 w-7" />, accent: "#4ade80" },
                 { title: "ATS-Ready Format", desc: "Clean, machine-readable formatting that passes any ATS filter with ease.", icon: <FileText className="h-7 w-7" />, accent: "#A3B1C6" },
                 { title: "Instant Analysis", desc: "Get keyword match scores and AI recommendations in under 30 seconds.", icon: <Zap className="h-7 w-7" />, accent: "#fbbf24" },
-                { title: "Pay As You Go", desc: "Start with 4 free scans. After that, $1 per scan. No subscription trap.", icon: <Coins className="h-7 w-7" />, accent: "#6C63FF" }
+                { title: "Plans from $2/mo", desc: "Bring your own API key for $2/mo, or go unlimited at $7/mo. Cancel anytime.", icon: <Coins className="h-7 w-7" />, accent: "#6C63FF" }
               ].map((card, i) => (
                 <motion.div
                   key={i}
@@ -672,17 +672,17 @@ export default function Home() {
                 Ready to <span className="text-[#6C63FF] not-italic">Get Hired?</span>
               </h2>
               <p className="text-xl text-[#6B7280] mb-12 max-w-2xl mx-auto leading-relaxed font-body">
-                Join the first 100 users and claim your launch special: <strong className="text-[#3D4852]">4 lifetime resume tokens for just $1.</strong> Experience the depth of HireReady.
+                Start optimizing your resume today. Plans from <strong className="text-[#3D4852]">$2/month</strong> — or go unlimited at <strong className="text-[#3D4852]">$7/month</strong> with zero setup.
               </p>
               <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
                 <Link href="/auth/login" className="px-12 py-6 bg-[#6C63FF] text-white rounded-[2rem] font-display font-black text-sm uppercase tracking-widest hover:bg-[#8B84FF] transition-all shadow-[8px_8px_20px_rgba(108,99,255,0.3)] active:scale-95 flex items-center gap-3">
-                  Claim Special ($1) <ArrowRight className="h-5 w-5 opacity-50" />
+                  Get Started Now <ArrowRight className="h-5 w-5 opacity-50" />
                 </Link>
                 <div className="flex items-center gap-3 text-[#6B7280] text-[10px] font-display font-black uppercase tracking-widest">
                   <div className="h-4 w-4 rounded-full bg-[#38B2AC] flex items-center justify-center">
                     <Check className="h-2.5 w-2.5 text-white" />
                   </div>
-                  No Subscription Required
+                  Cancel Anytime · No Contracts
                 </div>
               </div>
             </motion.div>
@@ -718,9 +718,9 @@ export default function Home() {
               </p>
 
               <Link href="/auth/login" className="block w-full py-5 bg-[#6C63FF] text-white rounded-2xl font-display font-black text-sm uppercase tracking-widest hover:bg-[#8B84FF] transition-all shadow-[6px_6px_15px_rgba(108,99,255,0.3)] active:scale-95">
-                Claim Launch Special ($1)
+                Start Optimizing Now
               </Link>
-              <p className="text-[10px] font-display font-bold text-[#6B7280] mt-6 uppercase tracking-widest">First 4 scans for $1 · Then $1/scan</p>
+              <p className="text-[10px] font-display font-bold text-[#6B7280] mt-6 uppercase tracking-widest">Plans from $2/mo · Cancel anytime</p>
             </motion.div>
           </div>
         )}

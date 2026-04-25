@@ -2,9 +2,41 @@
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { motion } from 'framer-motion';
-import { Check, Zap, Coins, Calculator, Sparkles, TrendingUp } from 'lucide-react';
+import { motion, Variants } from 'framer-motion';
+import { Check, Zap, Key, Sparkles, Crown, ShieldCheck, FileText, Briefcase, BarChart2, Mail, Clock, Download, Brain, Lock } from 'lucide-react';
 import Link from 'next/link';
+
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } }
+};
+
+const stagger: Variants = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.1 } }
+};
+
+const starterFeatures = [
+  { label: "AI Resume Optimization", icon: <Brain className="h-3.5 w-3.5" /> },
+  { label: "AI Cover Letter Generator", icon: <Mail className="h-3.5 w-3.5" /> },
+  { label: "Job Application Pipeline", icon: <Briefcase className="h-3.5 w-3.5" /> },
+  { label: "Real-time ATS Scoring", icon: <BarChart2 className="h-3.5 w-3.5" /> },
+  { label: "ATS Bypass Engine", icon: <Zap className="h-3.5 w-3.5" /> },
+  { label: "Format-Perfect PDF Export", icon: <Download className="h-3.5 w-3.5" /> },
+  { label: "History & Saved Files", icon: <Clock className="h-3.5 w-3.5" /> },
+  { label: "Secure Data Encryption", icon: <Lock className="h-3.5 w-3.5" /> },
+];
+
+const proFeatures = [
+  { label: "Everything in Starter", icon: <Check className="h-3.5 w-3.5" /> },
+  { label: "Unlimited AI Generations", icon: <Sparkles className="h-3.5 w-3.5" /> },
+  { label: "Managed AI Infrastructure", icon: <Brain className="h-3.5 w-3.5" /> },
+  { label: "No API Key Setup Required", icon: <Key className="h-3.5 w-3.5" /> },
+  { label: "AI Cover Letter Generator", icon: <Mail className="h-3.5 w-3.5" /> },
+  { label: "Job Application Pipeline", icon: <Briefcase className="h-3.5 w-3.5" /> },
+  { label: "Format-Perfect PDF Export", icon: <Download className="h-3.5 w-3.5" /> },
+  { label: "Priority Support", icon: <Crown className="h-3.5 w-3.5" /> },
+];
 
 export default function PricingPage() {
   return (
@@ -19,121 +51,178 @@ export default function PricingPage() {
           <div className="absolute top-[40%] right-[15%] w-24 h-24 rounded-full shadow-extruded-sm opacity-60" />
         </div>
 
-        <div className="text-center space-y-6 mb-24 relative z-10">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
+        {/* Header */}
+        <motion.div
+          initial="hidden"
+          animate="show"
+          variants={stagger}
+          className="text-center space-y-6 mb-24 relative z-10"
+        >
+          <motion.div
+            variants={fadeUp}
             className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-[#E0E5EC] shadow-extruded-sm text-[#6C63FF] text-[10px] font-display font-black uppercase tracking-[0.3em] mb-4"
           >
-            <Coins className="h-3.5 w-3.5" />
-            <span>Pay As You Go</span>
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>Simple Pricing</span>
           </motion.div>
-          <h1 className="text-5xl lg:text-7xl font-display font-extrabold text-[#3D4852] tracking-tighter leading-[1.1]">
-            Simple, Tactile <br /><span className="text-[#6C63FF]">Pricing System.</span>
-          </h1>
-          <p className="text-xl text-[#6B7280] font-medium max-w-2xl mx-auto leading-relaxed">
-            No subscriptions. No hidden fees. Experience premium AI optimization with a physical touch.
-          </p>
-        </div>
+          <motion.h1 variants={fadeUp} className="text-5xl lg:text-7xl font-display font-extrabold text-[#3D4852] tracking-tighter leading-[1.1]">
+            Choose Your <br /><span className="text-[#6C63FF]">Career Engine.</span>
+          </motion.h1>
+          <motion.p variants={fadeUp} className="text-xl text-[#6B7280] font-medium max-w-2xl mx-auto leading-relaxed">
+            Two plans. Full access to every feature. Pick the one that fits your workflow — bring your own keys, or let us handle everything.
+          </motion.p>
+        </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto relative z-10">
-          {/* Starter Pack / Launch Special */}
-          <motion.div 
-            whileHover={{ y: -8 }} 
+        {/* Pricing Cards */}
+        <motion.div
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true }}
+          variants={stagger}
+          className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto relative z-10"
+        >
+          {/* Starter — $2/mo BYOK */}
+          <motion.div
+            variants={fadeUp}
+            whileHover={{ y: -8 }}
             className="bg-[#E0E5EC] p-12 rounded-[32px] shadow-extruded flex flex-col h-full transition-all duration-500 relative overflow-hidden group border border-white/20"
           >
-            <div className="absolute top-0 right-0 bg-[#38B2AC] text-white text-[9px] font-display font-black uppercase tracking-widest px-6 py-2 rounded-bl-3xl shadow-lg">Most Popular</div>
-            
             <div className="mb-10 mt-2">
               <div className="inline-block p-4 rounded-2xl shadow-inset-deep mb-6">
-                <Sparkles className="h-8 w-8 text-[#38B2AC]" />
+                <Key className="h-8 w-8 text-[#6C63FF]" />
               </div>
-              <span className="text-[10px] font-display font-black uppercase tracking-[0.2em] text-[#38B2AC] block">First 100 Users Only</span>
-              <h3 className="text-5xl font-display font-extrabold text-[#3D4852] mt-4">$1 <span className="text-sm font-bold text-[#6B7280]">/ 4 lifetime tokens</span></h3>
+              <span className="text-[10px] font-display font-black uppercase tracking-[0.2em] text-[#6C63FF] block">Bring Your Own Keys</span>
+              <h3 className="text-5xl font-display font-extrabold text-[#3D4852] mt-4">
+                $2 <span className="text-sm font-bold text-[#6B7280]">/ month</span>
+              </h3>
             </div>
 
             <p className="text-[#6B7280] mb-8 leading-relaxed font-body">
-              Our initial launch special. Get your first 4 resume optimizations for the price of one. Limited to the first 100 users.
+              Use your own Gemini API key and get full access to every feature at a fraction of the cost. Perfect for developers and power users.
             </p>
 
-            <ul className="space-y-5 mb-12 flex-1">
-              {[
-                "4 Credits Included",
-                "AI Resume Optimization",
-                "AI Cover Letter Generator",
-                "Job Application Pipeline",
-                "Format-Perfect PDF Export"
-              ].map((f, i) => (
+            <ul className="space-y-4 mb-12 flex-1">
+              {starterFeatures.map((f, i) => (
                 <li key={i} className="flex items-center gap-4 text-sm font-bold text-[#3D4852]">
-                  <div className="h-6 w-6 rounded-full shadow-inset-sm flex items-center justify-center shrink-0">
-                    <Check className="h-3 w-3 text-[#38B2AC]" />
+                  <div className="h-7 w-7 rounded-full shadow-inset-sm flex items-center justify-center shrink-0 text-[#6C63FF]">
+                    {f.icon}
                   </div>
-                  {f}
+                  {f.label}
                 </li>
               ))}
             </ul>
 
-            <Link href="/dashboard" className="w-full py-5 bg-[#E0E5EC] shadow-extruded hover:shadow-inset text-[#38B2AC] rounded-2xl font-display font-black text-[11px] uppercase tracking-[0.2em] text-center transition-all active:scale-95">Claim For $1</Link>
+            <Link href="/auth/login" className="w-full py-5 bg-[#E0E5EC] shadow-extruded hover:shadow-inset text-[#6C63FF] rounded-2xl font-display font-black text-[11px] uppercase tracking-[0.2em] text-center transition-all active:scale-95 block">
+              Start for $2/mo
+            </Link>
           </motion.div>
 
-          {/* Flexible Pack */}
-          <motion.div 
-            whileHover={{ y: -8 }} 
-            className="bg-[#E0E5EC] p-12 rounded-[32px] shadow-extruded flex flex-col h-full transition-all duration-500 relative overflow-hidden group border border-[#6C63FF]/10"
+          {/* Pro — $7/mo Unlimited */}
+          <motion.div
+            variants={fadeUp}
+            whileHover={{ y: -8 }}
+            className="bg-[#E0E5EC] p-12 rounded-[32px] shadow-extruded flex flex-col h-full transition-all duration-500 relative overflow-hidden group border border-[#6C63FF]/20"
           >
+            <div className="absolute top-0 right-0 bg-[#6C63FF] text-white text-[9px] font-display font-black uppercase tracking-widest px-6 py-2 rounded-bl-3xl shadow-lg">Most Popular</div>
+
             <div className="absolute top-0 right-0 p-10 opacity-5 -rotate-12 group-hover:rotate-0 transition-transform duration-700">
-              <Zap className="h-48 w-48 text-[#6C63FF]" />
+              <Crown className="h-48 w-48 text-[#6C63FF]" />
             </div>
 
-            <div className="mb-8 relative z-10">
+            <div className="mb-10 mt-2 relative z-10">
               <div className="inline-block p-4 rounded-2xl shadow-inset-deep mb-6">
-                <TrendingUp className="h-8 w-8 text-[#6C63FF]" />
+                <Zap className="h-8 w-8 text-[#38B2AC]" />
               </div>
-              <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full shadow-inset-sm text-[#6C63FF] text-[9px] font-display font-black uppercase tracking-widest mb-4">Pay When You Want</div>
-              <h3 className="text-3xl lg:text-4xl font-display font-extrabold text-[#3D4852] mt-2 leading-tight">
-                "I don't mind paying <br />$1 for 1 resume"
+              <span className="text-[10px] font-display font-black uppercase tracking-[0.2em] text-[#38B2AC] block">Unlimited & Managed</span>
+              <h3 className="text-5xl font-display font-extrabold text-[#3D4852] mt-4">
+                $7 <span className="text-sm font-bold text-[#6B7280]">/ month</span>
               </h3>
-              <span className="text-[11px] font-display font-black text-[#6B7280] block mt-3 uppercase tracking-widest">No Subscriptions required</span>
             </div>
 
-            <p className="text-[#6B7280] mb-8 leading-relaxed relative z-10 text-sm font-body">
-              Buy a token precisely when you need to land that interview. 1 token = 1 Resume or Cover Letter optimization.
+            <p className="text-[#6B7280] mb-8 leading-relaxed font-body relative z-10">
+              Unlimited AI generations with zero setup. We handle the infrastructure — you focus on landing interviews. No API key needed.
             </p>
 
-            <ul className="space-y-5 mb-12 flex-1 relative z-10">
-              {[
-                "1 Credit = 1 AI Task",
-                "Job Application Pipeline Included",
-                "Advanced Resume & Cover Letters",
-                "History & Saved Files",
-                "No Expiry on Credits"
-              ].map((f, i) => (
+            <ul className="space-y-4 mb-12 flex-1 relative z-10">
+              {proFeatures.map((f, i) => (
                 <li key={i} className="flex items-center gap-4 text-sm font-bold text-[#3D4852]">
-                  <div className="h-6 w-6 rounded-full shadow-inset-sm flex items-center justify-center shrink-0">
-                    <Check className="h-3 w-3 text-[#6C63FF]" />
+                  <div className="h-7 w-7 rounded-full shadow-inset-sm flex items-center justify-center shrink-0 text-[#38B2AC]">
+                    {f.icon}
                   </div>
-                  {f}
+                  {f.label}
                 </li>
               ))}
             </ul>
 
-            <Link href="/dashboard" className="w-full py-5 bg-[#6C63FF] text-white rounded-2xl font-display font-black text-[11px] uppercase tracking-[0.2em] text-center hover:bg-[#8B84FF] transition-all shadow-[8px_8px_16px_rgba(108,99,255,0.3),-8px_-8px_16px_rgba(255,255,255,0.3)] active:scale-95">Buy Tokens</Link>
+            <Link href="/auth/login" className="w-full py-5 bg-[#6C63FF] text-white rounded-2xl font-display font-black text-[11px] uppercase tracking-[0.2em] text-center hover:bg-[#8B84FF] transition-all shadow-[8px_8px_16px_rgba(108,99,255,0.3),-8px_-8px_16px_rgba(255,255,255,0.3)] active:scale-95 block">
+              Go Unlimited — $7/mo
+            </Link>
           </motion.div>
-        </div>
+        </motion.div>
 
-        {/* Enterprise/Coach section */}
-        <div className="mt-32 max-w-3xl mx-auto text-center p-16 rounded-[40px] shadow-inset">
-          <div className="p-6 rounded-full shadow-extruded-sm inline-block mb-8">
-            <Calculator className="h-10 w-10 text-[#6B7280]" />
+        {/* Comparison strip */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-20 max-w-3xl mx-auto"
+        >
+          <div className="bg-[#E0E5EC] rounded-[32px] shadow-inset p-10">
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <p className="text-[10px] font-display font-black text-[#6B7280] uppercase tracking-widest mb-3">Feature</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-display font-black text-[#6C63FF] uppercase tracking-widest mb-3">Starter $2</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-display font-black text-[#38B2AC] uppercase tracking-widest mb-3">Pro $7</p>
+              </div>
+              {[
+                ["AI Generations", "Your API Key", "Unlimited"],
+                ["Resume Optimizer", "✓", "✓"],
+                ["Cover Letters", "✓", "✓"],
+                ["Job Pipeline", "✓", "✓"],
+                ["PDF Export", "✓", "✓"],
+                ["API Key Required", "Yes", "No"],
+                ["Priority Support", "—", "✓"],
+              ].map(([feature, starter, pro], i) => (
+                <div key={i} className="contents">
+                  <div className={`py-3 text-sm font-bold text-[#3D4852] text-left ${i > 0 ? 'border-t border-[#A3B1C6]/20' : ''}`}>{feature}</div>
+                  <div className={`py-3 text-sm font-medium text-[#6B7280] ${i > 0 ? 'border-t border-[#A3B1C6]/20' : ''}`}>{starter}</div>
+                  <div className={`py-3 text-sm font-bold text-[#38B2AC] ${i > 0 ? 'border-t border-[#A3B1C6]/20' : ''}`}>{pro}</div>
+                </div>
+              ))}
+            </div>
           </div>
-          <h2 className="text-3xl font-display font-black text-[#3D4852] uppercase tracking-tight mb-6">Career Coaches & Universities</h2>
-          <p className="text-[#6B7280] leading-relaxed mb-10 font-body text-lg">
-            We offer specialized enterprise packages with bulk credits and custom branding for organizations helping multiple candidates land their dream roles.
-          </p>
-          <a href="mailto:sales@hireready.com" className="inline-flex py-5 px-10 bg-[#E0E5EC] shadow-extruded hover:shadow-inset text-[#3D4852] rounded-2xl font-display font-black text-[11px] uppercase tracking-[0.2em] transition-all active:scale-95">
-            Contact Sales Team
-          </a>
-        </div>
+        </motion.div>
+
+        {/* FAQ mini */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-24 max-w-3xl mx-auto text-center"
+        >
+          <div className="bg-[#E0E5EC] rounded-[40px] shadow-extruded p-16 border border-white/20">
+            <div className="p-5 rounded-2xl shadow-inset-deep inline-block mb-8">
+              <ShieldCheck className="h-8 w-8 text-[#38B2AC]" />
+            </div>
+            <h2 className="text-2xl font-display font-black text-[#3D4852] uppercase tracking-tight mb-4">Cancel Anytime. No Contracts.</h2>
+            <p className="text-[#6B7280] leading-relaxed font-body text-lg max-w-xl mx-auto mb-10">
+              Both plans are month-to-month with no commitments. Your data stays encrypted and private. Switch plans or cancel whenever you want.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-6 justify-center">
+              <Link href="/auth/login" className="px-10 py-5 bg-[#6C63FF] text-white rounded-2xl font-display font-black text-[11px] uppercase tracking-[0.2em] hover:bg-[#8B84FF] transition-all shadow-[6px_6px_15px_rgba(108,99,255,0.3)] active:scale-95 flex items-center justify-center gap-3">
+                <Sparkles className="h-4 w-4" />
+                Get Started Now
+              </Link>
+              <Link href="/" className="px-10 py-5 bg-[#E0E5EC] text-[#3D4852] shadow-extruded hover:shadow-inset rounded-2xl font-display font-black text-[11px] uppercase tracking-[0.2em] transition-all active:scale-95 flex items-center justify-center">
+                Learn More
+              </Link>
+            </div>
+          </div>
+        </motion.div>
       </main>
       <Footer />
     </div>

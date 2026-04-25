@@ -33,8 +33,8 @@ export default function Workspace({ params }: { params: Promise<{ id: string }> 
       const { data: { user } } = await supabase.auth.getUser();
       if (user?.email === 'khatriadil044@gmail.com') { setHasAccess(true); return; }
       if (user) {
-        const { data: profile } = await supabase.from('profiles').select('tokens').eq('id', user.id).single();
-        if (profile && profile.tokens > 0) setHasAccess(true);
+        const { data: profile } = await supabase.from('profiles').select('api_key, subscription_tier').eq('id', user.id).single();
+        if (profile && (profile.api_key || profile.subscription_tier)) setHasAccess(true);
       }
     };
     checkAccess();
@@ -107,10 +107,10 @@ export default function Workspace({ params }: { params: Promise<{ id: string }> 
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-[#E0E5EC]/90 backdrop-blur-md">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-[#E0E5EC] rounded-[40px] shadow-extruded p-16 max-w-xl text-center border border-white/20">
               <div className="p-8 rounded-[32px] shadow-inset-deep inline-block mb-10"><Lock className="h-8 w-8 text-[#6C63FF]" /></div>
-              <h2 className="text-4xl font-display font-extrabold text-[#3D4852] tracking-tighter uppercase mb-6 leading-tight italic">Resource Restricted</h2>
-              <p className="text-[#6B7280] mb-12 font-body leading-relaxed">This optimization vector requires active credits. Sync your account to unlock full AI precision.</p>
+              <h2 className="text-4xl font-display font-extrabold text-[#3D4852] tracking-tighter uppercase mb-6 leading-tight italic">Access Required</h2>
+              <p className="text-[#6B7280] mb-12 font-body leading-relaxed">Add your Gemini API key ($2/mo) or upgrade to the Pro plan ($7/mo) to unlock full AI optimization.</p>
               <div className="space-y-4">
-                <Link href="/dashboard" className="block w-full py-6 bg-[#6C63FF] text-white rounded-2xl font-display font-black text-xs uppercase tracking-widest hover:bg-[#8B84FF] transition-all shadow-lg text-center">Buy Tokens</Link>
+                <Link href="/dashboard" className="block w-full py-6 bg-[#6C63FF] text-white rounded-2xl font-display font-black text-xs uppercase tracking-widest hover:bg-[#8B84FF] transition-all shadow-lg text-center">Add API Key</Link>
                 <button onClick={() => setShowPaywall(false)} className="w-full py-4 text-[#6B7280] font-display font-black text-[9px] uppercase tracking-widest hover:text-[#3D4852]">Dismiss</button>
               </div>
             </motion.div>
