@@ -6,9 +6,10 @@ import {
   Upload, FileText, ArrowRight, Loader2, 
   ShieldCheck, Zap, Bot, Target, Lock,
   BrainCircuit, Rocket, Fingerprint, Activity, Terminal,
-  HelpCircle, ChevronDown, Mail, User, MessageSquare, Coins,
+  HelpCircle, ChevronDown, Mail, User, MessageSquare,
   CheckCircle2, Star, Quote, TrendingUp, Users, Award, Sparkles,
-  Play, ChevronRight, BarChart2, Search, Check, Briefcase, X
+  Play, ChevronRight, BarChart2, Search, Check, Briefcase, X,
+  Heart, TrendingDown, Globe
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Scene3D from '@/components/Scene3D';
@@ -129,8 +130,8 @@ const howItWorks = [
 const faqData = [
   { question: "Will this actually improve my chances?", answer: "Yes. Most applicant tracking systems filter out resumes that don't match the job description. By adding the exact skills they are looking for in the right context, you bypass the filter and get your resume in front of a human recruiter." },
   { question: "How is this different from Jobscan?", answer: "Competitors just give you a raw list of missing keywords and leave you to figure out how to add them. HireReady's AI actually analyzes your experience and shows you exactly how to incorporate those missing skills credibly and naturally into your bullet points." },
-  { question: "How much does it cost?", answer: "We offer two simple plans: $2/month if you bring your own API key (Gemini), or $7/month for unlimited AI generations with zero setup. Cancel anytime — no contracts, no hidden fees." },
-  { question: "What if I upload my resume and it doesn't help?", answer: "If your resume is already perfectly optimized for the job, our system will tell you that you have a 95%+ match score and you're good to apply! You only pay per scan, so there are no wasted subscriptions if you don't need us right now." },
+  { question: "Is it really free? What's the catch?", answer: "There is no catch. The job market is brutal right now — layoffs are widespread and competition for each role is fierce. We believe every job seeker deserves a fair shot, so we made every feature completely free. No credit card, no trial period, no hidden fees. Forever." },
+  { question: "Why are you doing this for free?", answer: "Because we know how hard the job market is right now. 75% of resumes get filtered by ATS bots before a human ever reads them. We built HireReady to level the playing field. Charging people who are already struggling to find work felt wrong. Our mission is to help everyone achieve a 100% ATS match score." },
   { question: "Is my resume data safe?", answer: "Yes. Your data is encrypted and stored securely. We never share or sell your personal information. You can delete your data at any time." }
 ];
 
@@ -218,6 +219,328 @@ function TestimonialCard({ t }: { t: typeof testimonials[0] }) {
   );
 }
 
+/* ─── Workflow Demo ─── */
+const workflowSteps = [
+  {
+    id: 0,
+    label: 'Upload Resume',
+    sublabel: 'PDF or DOCX',
+    icon: <Upload className="h-8 w-8" />,
+    color: '#6C63FF',
+    bg: 'bg-[#6C63FF]',
+    screen: (
+      <div className="flex flex-col items-center justify-center h-full gap-6 text-center">
+        <motion.div
+          animate={{ y: [0, -8, 0] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+          className="p-8 rounded-3xl bg-[#E0E5EC] shadow-extruded"
+        >
+          <FileText className="h-16 w-16 text-[#6C63FF]" />
+        </motion.div>
+        <div>
+          <p className="text-[#3D4852] font-display font-black text-xl mb-2">resume_2024.pdf</p>
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: '100%' }}
+            transition={{ duration: 1.5, ease: 'easeOut' }}
+            className="h-2 rounded-full bg-[#6C63FF] shadow-[0_0_12px_rgba(108,99,255,0.4)]"
+          />
+          <p className="text-[#6B7280] text-xs font-display font-bold uppercase tracking-widest mt-2">Uploading...</p>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 1,
+    label: 'Paste Job Description',
+    sublabel: 'Any job listing',
+    icon: <Search className="h-8 w-8" />,
+    color: '#38B2AC',
+    bg: 'bg-[#38B2AC]',
+    screen: (
+      <div className="flex flex-col gap-4 h-full">
+        <div className="p-4 rounded-2xl shadow-inset bg-[#E0E5EC]">
+          <p className="text-[10px] font-display font-black text-[#6B7280] uppercase tracking-widest mb-2">Job Description</p>
+          <motion.div className="space-y-2" initial="hidden" animate="show" variants={{ show: { transition: { staggerChildren: 0.08 } } }}>
+            {['Senior Software Engineer', 'React · TypeScript · Node.js', '5+ years experience required', 'AWS, Docker, Kubernetes', 'Agile, CI/CD, REST APIs'].map((line, i) => (
+              <motion.div key={i} variants={{ hidden: { opacity: 0, x: -10 }, show: { opacity: 1, x: 0 } }}
+                className="h-3 rounded-full bg-[#A3B1C6]/40" style={{ width: `${[80, 65, 70, 55, 60][i]}%` }}
+              >
+                <div className="h-full rounded-full" style={{ width: '100%', background: i === 0 ? '#38B2AC' : undefined }} />
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+        <div className="flex items-center gap-2 px-4 py-2 rounded-xl shadow-inset-sm bg-[#E0E5EC]">
+          <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#38B2AC] opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-[#38B2AC]" /></span>
+          <p className="text-[10px] font-display font-black text-[#38B2AC] uppercase tracking-widest">Analyzing keywords...</p>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 2,
+    label: 'See Your Score',
+    sublabel: 'Instant results',
+    icon: <BarChart2 className="h-8 w-8" />,
+    color: '#fbbf24',
+    bg: 'bg-[#fbbf24]',
+    screen: (
+      <div className="flex flex-col items-center gap-6 h-full justify-center">
+        <div className="relative">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 80, delay: 0.2 }}
+            className="w-32 h-32 rounded-full shadow-inset-deep flex items-center justify-center"
+          >
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="text-5xl font-display font-black text-[#fbbf24]"
+            >42</motion.span>
+          </motion.div>
+          <p className="text-center text-[10px] font-display font-black text-[#6B7280] uppercase tracking-widest mt-2">Initial Score</p>
+        </div>
+        <div className="w-full space-y-3">
+          {[['Missing Keywords', '18', '#fb7185'], ['Matched Skills', '12', '#4ade80'], ['Format Issues', '3', '#fbbf24']].map(([label, val, color]) => (
+            <div key={label} className="flex items-center justify-between px-4 py-2 rounded-xl shadow-inset-sm">
+              <span className="text-[10px] font-display font-bold text-[#6B7280] uppercase tracking-wider">{label}</span>
+              <span className="text-sm font-display font-black" style={{ color }}>{val}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: 3,
+    label: 'AI Optimizes',
+    sublabel: '95%+ match score',
+    icon: <Rocket className="h-8 w-8" />,
+    color: '#4ade80',
+    bg: 'bg-[#4ade80]',
+    screen: (
+      <div className="flex flex-col items-center gap-6 h-full justify-center">
+        <div className="relative flex items-center justify-center">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+            className="absolute w-40 h-40 rounded-full border-4 border-dashed border-[#4ade80]/30"
+          />
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 80, delay: 0.3 }}
+            className="w-32 h-32 rounded-full shadow-inset-deep flex flex-col items-center justify-center gap-1"
+          >
+            <motion.span
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="text-4xl font-display font-black text-[#4ade80]"
+            >96</motion.span>
+            <span className="text-[9px] font-display font-black text-[#6B7280] uppercase tracking-widest">ATS Match</span>
+          </motion.div>
+        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+          className="flex items-center gap-3 px-6 py-3 rounded-full bg-[#4ade80]/10 border border-[#4ade80]/20"
+        >
+          <CheckCircle2 className="h-5 w-5 text-[#4ade80]" />
+          <span className="text-[11px] font-display font-black text-[#3D4852] uppercase tracking-wider">Resume Optimized!</span>
+        </motion.div>
+        <p className="text-[10px] font-display font-bold text-[#6B7280] uppercase tracking-widest text-center">
+          100% Free · No Credit Card
+        </p>
+      </div>
+    ),
+  },
+];
+
+function WorkflowDemo() {
+  const [activeStep, setActiveStep] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: false, margin: '-100px' });
+
+  useEffect(() => {
+    if (!inView) return;
+    const timer = setInterval(() => {
+      setActiveStep(prev => (prev + 1) % workflowSteps.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, [inView]);
+
+  const step = workflowSteps[activeStep];
+
+  return (
+    <section ref={ref} className="py-32 px-6 lg:px-12 relative overflow-hidden border-t border-[#A3B1C6]/10">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-[20%] right-[-8%] w-[400px] h-[400px] rounded-full shadow-extruded opacity-20" />
+        <div className="absolute bottom-[10%] left-[-5%] w-[300px] h-[300px] rounded-full shadow-inset opacity-15" />
+      </div>
+
+      <div className="max-w-[1200px] mx-auto relative z-10">
+        <motion.div
+          initial="hidden" whileInView="show" viewport={{ once: true }}
+          variants={stagger}
+          className="text-center mb-20"
+        >
+          <motion.div variants={fadeUp} className="inline-flex items-center gap-3 px-6 py-2 rounded-full shadow-extruded-sm text-[#6C63FF] text-[10px] font-display font-black uppercase tracking-[0.4em] mb-8">
+            <Play className="h-4 w-4" />
+            Live Demo
+          </motion.div>
+          <motion.h2 variants={fadeUp} className="text-5xl md:text-8xl font-display font-extrabold text-[#3D4852] tracking-tighter uppercase leading-[0.8] italic">
+            Watch It<br /><span className="text-[#6C63FF] not-italic">Work.</span>
+          </motion.h2>
+          <motion.p variants={fadeUp} className="text-xl text-[#6B7280] max-w-2xl mx-auto leading-relaxed mt-6 font-body">
+            See the full optimization journey — from raw resume to ATS-perfect document. All of it, completely free.
+          </motion.p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          {/* Step Nav */}
+          <div className="lg:col-span-4 space-y-4">
+            {workflowSteps.map((s, i) => (
+              <motion.button
+                key={s.id}
+                onClick={() => setActiveStep(i)}
+                whileHover={{ x: 4 }}
+                className={`w-full text-left p-6 rounded-[24px] transition-all duration-300 flex items-center gap-5 ${
+                  activeStep === i
+                    ? 'bg-[#E0E5EC] shadow-inset border-l-4'
+                    : 'bg-[#E0E5EC] shadow-extruded-sm hover:shadow-extruded'
+                }`}
+                style={activeStep === i ? { borderLeftColor: s.color } : {}}
+              >
+                <div
+                  className={`p-3 rounded-xl flex-shrink-0 transition-all duration-300 ${
+                    activeStep === i ? `text-white shadow-lg` : 'shadow-inset-sm text-[#6B7280]'
+                  }`}
+                  style={activeStep === i ? { background: s.color } : {}}
+                >
+                  {s.icon}
+                </div>
+                <div>
+                  <p className={`font-display font-black text-sm uppercase tracking-tight transition-colors ${activeStep === i ? 'text-[#3D4852]' : 'text-[#6B7280]'}`}>
+                    {s.label}
+                  </p>
+                  <p className="text-[10px] font-display font-bold text-[#A3B1C6] uppercase tracking-widest mt-1">{s.sublabel}</p>
+                </div>
+                {activeStep === i && (
+                  <motion.div layoutId="activeIndicator" className="ml-auto w-2 h-2 rounded-full" style={{ background: s.color }} />
+                )}
+              </motion.button>
+            ))}
+
+            {/* Progress dots */}
+            <div className="flex items-center gap-3 justify-center pt-4">
+              {workflowSteps.map((s, i) => (
+                <button key={i} onClick={() => setActiveStep(i)}
+                  className="transition-all duration-300 rounded-full"
+                  style={{
+                    width: activeStep === i ? 24 : 8,
+                    height: 8,
+                    background: activeStep === i ? s.color : '#A3B1C6'
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Screen Preview */}
+          <div className="lg:col-span-8">
+            <motion.div
+              key="demo-card"
+              initial={{ opacity: 0, scale: 0.97 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-[#E0E5EC] rounded-[40px] shadow-extruded p-4 border border-white/30"
+            >
+              {/* Browser chrome bar */}
+              <div className="flex items-center gap-3 px-6 py-4 border-b border-[#A3B1C6]/20 mb-2">
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 rounded-full bg-[#fb7185]" />
+                  <div className="w-3 h-3 rounded-full bg-[#fbbf24]" />
+                  <div className="w-3 h-3 rounded-full bg-[#4ade80]" />
+                </div>
+                <div className="flex-1 mx-4 h-7 rounded-lg shadow-inset-sm flex items-center px-4 gap-2">
+                  <span className="w-2 h-2 rounded-full" style={{ background: step.color }} />
+                  <span className="text-[10px] font-display font-bold text-[#A3B1C6] uppercase tracking-widest">hireready.app/workspace</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full shadow-inset-sm">
+                  <Heart className="h-3 w-3 text-[#fb7185] fill-[#fb7185]" />
+                  <span className="text-[9px] font-display font-black text-[#4ade80] uppercase tracking-widest">FREE</span>
+                </div>
+              </div>
+
+              {/* Demo screen */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeStep}
+                  initial={{ opacity: 0, y: 16, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -16, scale: 0.98 }}
+                  transition={{ duration: 0.4, ease: 'easeOut' }}
+                  className="bg-[#E0E5EC] rounded-[28px] shadow-inset p-10 min-h-[340px] relative overflow-hidden"
+                >
+                  {/* Step header */}
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="p-3 rounded-xl text-white shadow-lg" style={{ background: step.color }}>
+                      {step.icon}
+                    </div>
+                    <div>
+                      <p className="font-display font-black text-lg text-[#3D4852] uppercase tracking-tight">{step.label}</p>
+                      <p className="text-[10px] font-display font-bold text-[#A3B1C6] uppercase tracking-widest">Step {activeStep + 1} of {workflowSteps.length}</p>
+                    </div>
+                    {/* Progress bar */}
+                    <div className="ml-auto w-24 h-2 rounded-full shadow-inset-sm overflow-hidden">
+                      <motion.div
+                        className="h-full rounded-full"
+                        style={{ background: step.color }}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${((activeStep + 1) / workflowSteps.length) * 100}%` }}
+                        transition={{ duration: 0.6, ease: 'easeOut' }}
+                      />
+                    </div>
+                  </div>
+
+                  {step.screen}
+
+                  {/* Decorative bg number */}
+                  <span className="absolute bottom-4 right-8 text-[8rem] font-display font-black text-[#A3B1C6]/10 select-none leading-none">
+                    {String(activeStep + 1).padStart(2, '0')}
+                  </span>
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Bottom toolbar */}
+              <div className="flex items-center justify-between px-6 py-4 border-t border-[#A3B1C6]/20 mt-2">
+                <p className="text-[10px] font-display font-black text-[#A3B1C6] uppercase tracking-widest">
+                  Auto-playing demo
+                </p>
+                <div className="flex items-center gap-2">
+                  {workflowSteps.map((s, i) => (
+                    <button key={i} onClick={() => setActiveStep(i)}
+                      className="h-2 rounded-full transition-all duration-300"
+                      style={{ width: activeStep === i ? 20 : 8, background: activeStep === i ? s.color : '#A3B1C6' }}
+                    />
+                  ))}
+                </div>
+                <Link href="/auth/login" className="flex items-center gap-2 px-4 py-2 bg-[#6C63FF] text-white text-[10px] font-display font-black uppercase tracking-widest rounded-xl hover:bg-[#8B84FF] transition-all">
+                  Try Free <ChevronRight className="h-3 w-3" />
+                </Link>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ─── Main Component ─── */
 export default function Home() {
   const router = useRouter();
@@ -278,7 +601,7 @@ export default function Home() {
             animate="show"
             className="max-w-5xl z-10 relative"
           >
-            <motion.div variants={kineticItem} className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full shadow-extruded-sm text-[#6C63FF] text-[10px] font-display font-black uppercase tracking-[0.4em] mb-12">
+            <motion.div variants={kineticItem} className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full shadow-extruded-sm text-[#6C63FF] text-[10px] font-display font-black uppercase tracking-[0.4em] mb-8">
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#6C63FF] opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#6C63FF]"></span>
@@ -286,24 +609,39 @@ export default function Home() {
               AI-Powered Career Engine
             </motion.div>
 
+            {/* Free Forever Banner */}
+            <motion.div
+              variants={kineticItem}
+              className="inline-flex items-center gap-3 px-8 py-3 rounded-full shadow-inset bg-[#E0E5EC] mb-10 mx-auto"
+            >
+              <Heart className="h-5 w-5 text-[#fb7185] fill-[#fb7185] animate-pulse" />
+              <span className="text-lg font-display font-black text-[#3D4852] uppercase tracking-tight">100% Free — Forever</span>
+              <Heart className="h-5 w-5 text-[#fb7185] fill-[#fb7185] animate-pulse" />
+            </motion.div>
+
             <motion.h1 variants={kineticItem} className="text-6xl md:text-8xl lg:text-[10rem] font-display font-extrabold text-[#3D4852] leading-[0.8] tracking-tighter mb-10 uppercase italic">
               Stop Getting <br />
               <span className="text-[#6C63FF] not-italic">Ghosted by ATS.</span>
             </motion.h1>
 
-            <motion.p variants={kineticItem} className="text-xl md:text-2xl text-[#6B7280] max-w-2xl mx-auto leading-relaxed mb-12 font-body font-medium">
+            <motion.p variants={kineticItem} className="text-xl md:text-2xl text-[#6B7280] max-w-2xl mx-auto leading-relaxed mb-6 font-body font-medium">
               Your resume gets rejected by robots before a human ever sees it. Our AI rewrites it to score{' '}
               <span className="text-[#3D4852] font-black underline decoration-[#6C63FF]/30">95%+ ATS match</span> — so you get interviews, not silence.
+            </motion.p>
+
+            <motion.p variants={kineticItem} className="text-sm text-[#fb7185] font-display font-black uppercase tracking-widest mb-12">
+              Because the job market is tough — we're here to help everyone. No cost. No limits.
             </motion.p>
 
             <motion.div variants={kineticItem} className="flex flex-col sm:flex-row gap-6 justify-center">
               <Link href="/auth/login" className="px-12 py-6 bg-[#6C63FF] text-white rounded-[2rem] font-display font-black text-sm uppercase tracking-widest hover:bg-[#8B84FF] transition-all shadow-[8px_8px_20px_rgba(108,99,255,0.3)] active:scale-95 flex items-center gap-3 justify-center">
                 <Rocket className="h-5 w-5" />
-                Optimize Your Resume Free
+                Optimize Your Resume — Free
                 <ChevronRight className="h-5 w-5 opacity-50" />
               </Link>
-              <Link href="/pricing" className="px-12 py-6 bg-[#E0E5EC] text-[#3D4852] rounded-[2rem] font-display font-black text-sm uppercase tracking-widest shadow-extruded hover:shadow-inset transition-all flex items-center justify-center">
-                See Plans from $2/mo
+              <Link href="/pricing" className="px-12 py-6 bg-[#E0E5EC] text-[#3D4852] rounded-[2rem] font-display font-black text-sm uppercase tracking-widest shadow-extruded hover:shadow-inset transition-all flex items-center gap-3 justify-center">
+                <Heart className="h-5 w-5 text-[#fb7185]" />
+                Why It&apos;s Free
               </Link>
             </motion.div>
           </motion.div>
@@ -336,14 +674,14 @@ export default function Home() {
               className="grid grid-cols-2 md:grid-cols-4 gap-12 p-12 rounded-[40px] shadow-inset bg-[#E0E5EC]"
             >
               {[
-                { value: 30, suffix: '+', label: 'Optimized', color: 'text-[#6C63FF]' },
-                { value: 95,    suffix: '%', label: 'Match Rate', color: 'text-[#38B2AC]' },
-                { value: 3,  suffix: '', label: 'Reviews',     color: 'text-[#fbbf24]' },
-                { value: 2,     suffix: '$', label: 'Starting At',     color: 'text-[#3D4852]', prefix: true },
+                { value: 30, suffix: '+', label: 'Resumes Optimized', color: 'text-[#6C63FF]' },
+                { value: 95, suffix: '%', label: 'ATS Match Rate',    color: 'text-[#38B2AC]' },
+                { value: 0,  suffix: '$', label: 'Cost Forever',      color: 'text-[#4ade80]' },
+                { value: 100,suffix: '%', label: 'Free Features',     color: 'text-[#fb7185]' },
               ].map((s, i) => (
                 <motion.div key={i} variants={fadeUp} className="flex flex-col items-center gap-2">
                   <p className={`text-5xl font-display font-extrabold tracking-tight ${s.color}`}>
-                    {s.prefix && '$'}<Counter to={s.value} suffix={s.prefix ? '' : s.suffix} />
+                    {s.suffix === '$' && '$'}<Counter to={s.value} suffix={s.suffix !== '$' ? s.suffix : ''} />
                   </p>
                   <p className="text-[10px] font-display font-black text-[#6B7280] uppercase tracking-[0.3em]">{s.label}</p>
                 </motion.div>
@@ -391,6 +729,9 @@ export default function Home() {
             </motion.div>
           </div>
         </section>
+
+        {/* ── ANIMATED WORKFLOW DEMO ── */}
+        <WorkflowDemo />
 
         {/* LIVE ANALYZER */}
         <section id="analyzer" className="py-32 px-6 lg:px-12 relative overflow-hidden">
@@ -487,7 +828,9 @@ export default function Home() {
                       <><Zap className="h-5 w-5" /><span>Analyze Match Score</span><ChevronRight className="h-5 w-5 opacity-50" /></>
                     )}
                   </button>
-                  <p className="text-center text-[#6B7280] text-[10px] font-display font-bold uppercase tracking-widest">Plans from $2/mo · Try your first scan free</p>
+                  <p className="text-center text-[#4ade80] text-[10px] font-display font-bold uppercase tracking-widest flex items-center justify-center gap-2">
+                    <Heart className="h-3 w-3 fill-[#4ade80]" /> 100% Free · No credit card · No limits
+                  </p>
                 </div>
               </motion.div>
             </div>
@@ -524,7 +867,7 @@ export default function Home() {
                 { title: "Safe & Private", desc: "Your data is bank-level encrypted and never shared. You own your profile.", icon: <ShieldCheck className="h-7 w-7" />, accent: "#4ade80" },
                 { title: "ATS-Ready Format", desc: "Clean, machine-readable formatting that passes any ATS filter with ease.", icon: <FileText className="h-7 w-7" />, accent: "#A3B1C6" },
                 { title: "Instant Analysis", desc: "Get keyword match scores and AI recommendations in under 30 seconds.", icon: <Zap className="h-7 w-7" />, accent: "#fbbf24" },
-                { title: "Plans from $2/mo", desc: "Bring your own API key for $2/mo, or go unlimited at $7/mo. Cancel anytime.", icon: <Coins className="h-7 w-7" />, accent: "#6C63FF" }
+                { title: "100% Free Forever", desc: "The job market is tough. Every feature is free — no paywall, no subscription, no credit card needed.", icon: <Heart className="h-7 w-7" />, accent: "#fb7185" }
               ].map((card, i) => (
                 <motion.div
                   key={i}
@@ -663,26 +1006,31 @@ export default function Home() {
           </div>
         </section>
 
-        {/* FINAL CTA */}
+        {/* FREE FOREVER CTA */}
         <section className="py-32 px-6 relative overflow-hidden bg-[#E0E5EC]">
            <div className="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full shadow-extruded opacity-30 pointer-events-none" />
            <div className="max-w-4xl mx-auto text-center relative z-10">
             <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+              <div className="inline-flex items-center gap-3 mb-10 px-6 py-2 rounded-full shadow-extruded-sm text-[#fb7185] text-[10px] font-display font-black uppercase tracking-[0.4em]">
+                <Heart className="h-4 w-4 fill-[#fb7185]" />
+                Free — Because You Deserve It
+              </div>
               <h2 className="text-5xl md:text-8xl font-display font-extrabold text-[#3D4852] tracking-tighter uppercase leading-[0.8] italic mb-10">
                 Ready to <span className="text-[#6C63FF] not-italic">Get Hired?</span>
               </h2>
               <p className="text-xl text-[#6B7280] mb-12 max-w-2xl mx-auto leading-relaxed font-body">
-                Start optimizing your resume today. Plans from <strong className="text-[#3D4852]">$2/month</strong> — or go unlimited at <strong className="text-[#3D4852]">$7/month</strong> with zero setup.
+                Start optimizing your resume today — completely free. No credit card, no trial, no limits.
+                The job market is hard enough already.
               </p>
               <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
                 <Link href="/auth/login" className="px-12 py-6 bg-[#6C63FF] text-white rounded-[2rem] font-display font-black text-sm uppercase tracking-widest hover:bg-[#8B84FF] transition-all shadow-[8px_8px_20px_rgba(108,99,255,0.3)] active:scale-95 flex items-center gap-3">
-                  Get Started Now <ArrowRight className="h-5 w-5 opacity-50" />
+                  <Rocket className="h-5 w-5" />
+                  Get Started — Free
+                  <ArrowRight className="h-5 w-5 opacity-50" />
                 </Link>
-                <div className="flex items-center gap-3 text-[#6B7280] text-[10px] font-display font-black uppercase tracking-widest">
-                  <div className="h-4 w-4 rounded-full bg-[#38B2AC] flex items-center justify-center">
-                    <Check className="h-2.5 w-2.5 text-white" />
-                  </div>
-                  Cancel Anytime · No Contracts
+                <div className="flex items-center gap-3 text-[#4ade80] text-[10px] font-display font-black uppercase tracking-widest">
+                  <Heart className="h-4 w-4 fill-[#4ade80]" />
+                  100% Free · No Credit Card · Forever
                 </div>
               </div>
             </motion.div>
@@ -711,16 +1059,16 @@ export default function Home() {
               </div>
 
               <h2 className="text-4xl font-display font-extrabold text-[#3D4852] tracking-tighter uppercase mb-6 leading-tight">
-                Unlock Your <br />Full Profile Analysis
+                See Your <br />Full Profile Analysis
               </h2>
               <p className="text-[#6B7280] mb-10 font-body leading-relaxed">
-                You've got a baseline. Now see exactly where the gaps are and let our AI optimize your resume for a <strong className="text-[#3D4852]">95%+ match.</strong>
+                You've got a baseline. Now see exactly where the gaps are and let our AI optimize your resume for a <strong className="text-[#3D4852]">95%+ match.</strong> Completely free.
               </p>
 
               <Link href="/auth/login" className="block w-full py-5 bg-[#6C63FF] text-white rounded-2xl font-display font-black text-sm uppercase tracking-widest hover:bg-[#8B84FF] transition-all shadow-[6px_6px_15px_rgba(108,99,255,0.3)] active:scale-95">
-                Start Optimizing Now
+                Start Optimizing — Free
               </Link>
-              <p className="text-[10px] font-display font-bold text-[#6B7280] mt-6 uppercase tracking-widest">Plans from $2/mo · Cancel anytime</p>
+              <p className="text-[10px] font-display font-bold text-[#4ade80] mt-6 uppercase tracking-widest flex items-center justify-center gap-2"><Heart className="h-3 w-3 fill-[#4ade80]" /> 100% Free · No credit card needed</p>
             </motion.div>
           </div>
         )}

@@ -3,278 +3,292 @@
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { motion, Variants } from 'framer-motion';
-import { Check, Zap, Key, Sparkles, Crown, ShieldCheck, FileText, Briefcase, BarChart2, Mail, Clock, Download, Brain, Lock, Loader2 } from 'lucide-react';
+import {
+  Heart, Sparkles, Zap, Brain, Mail, Briefcase, BarChart2,
+  Download, Clock, Lock, Check, ShieldCheck, Users, TrendingDown,
+  Globe, Rocket, Target, FileText, ChevronRight
+} from 'lucide-react';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
-import { useRouter } from 'next/navigation';
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 30 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } }
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' as const } }
 };
-
 const stagger: Variants = {
   hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.15, delayChildren: 0.1 } }
+  show: { opacity: 1, transition: { staggerChildren: 0.12, delayChildren: 0.1 } }
 };
 
-const starterFeatures = [
-  { label: "AI Resume Optimization", icon: <Brain className="h-3.5 w-3.5" /> },
-  { label: "AI Cover Letter Generator", icon: <Mail className="h-3.5 w-3.5" /> },
-  { label: "Job Application Pipeline", icon: <Briefcase className="h-3.5 w-3.5" /> },
-  { label: "Real-time ATS Scoring", icon: <BarChart2 className="h-3.5 w-3.5" /> },
-  { label: "ATS Bypass Engine", icon: <Zap className="h-3.5 w-3.5" /> },
-  { label: "Format-Perfect PDF Export", icon: <Download className="h-3.5 w-3.5" /> },
-  { label: "History & Saved Files", icon: <Clock className="h-3.5 w-3.5" /> },
-  { label: "Secure Data Encryption", icon: <Lock className="h-3.5 w-3.5" /> },
+const allFeatures = [
+  { label: 'AI Resume Optimization', icon: <Brain className="h-4 w-4" />, color: '#6C63FF' },
+  { label: 'AI Cover Letter Generator', icon: <Mail className="h-4 w-4" />, color: '#fb7185' },
+  { label: 'Job Application Pipeline', icon: <Briefcase className="h-4 w-4" />, color: '#4f46e5' },
+  { label: 'Real-time ATS Scoring', icon: <BarChart2 className="h-4 w-4" />, color: '#38B2AC' },
+  { label: 'ATS Bypass Engine', icon: <Zap className="h-4 w-4" />, color: '#fbbf24' },
+  { label: 'Format-Perfect PDF Export', icon: <Download className="h-4 w-4" />, color: '#6C63FF' },
+  { label: 'History & Saved Files', icon: <Clock className="h-4 w-4" />, color: '#38B2AC' },
+  { label: 'Secure Data Encryption', icon: <Lock className="h-4 w-4" />, color: '#4ade80' },
+  { label: 'Bridge The Gap AI Tool', icon: <Target className="h-4 w-4" />, color: '#6C63FF' },
+  { label: 'Unlimited Optimizations', icon: <Sparkles className="h-4 w-4" />, color: '#fb7185' },
 ];
 
-const proFeatures = [
-  { label: "Everything in Starter", icon: <Check className="h-3.5 w-3.5" /> },
-  { label: "Unlimited AI Generations", icon: <Sparkles className="h-3.5 w-3.5" /> },
-  { label: "Managed AI Infrastructure", icon: <Brain className="h-3.5 w-3.5" /> },
-  { label: "No API Key Setup Required", icon: <Key className="h-3.5 w-3.5" /> },
-  { label: "AI Cover Letter Generator", icon: <Mail className="h-3.5 w-3.5" /> },
-  { label: "Job Application Pipeline", icon: <Briefcase className="h-3.5 w-3.5" /> },
-  { label: "Format-Perfect PDF Export", icon: <Download className="h-3.5 w-3.5" /> },
-  { label: "Priority Support", icon: <Crown className="h-3.5 w-3.5" /> },
+const stats = [
+  { value: '1 in 4', label: 'Workers face layoffs', icon: <TrendingDown className="h-6 w-6" /> },
+  { value: '75%', label: 'Resumes filtered by ATS', icon: <FileText className="h-6 w-6" /> },
+  { value: '250+', label: 'Applicants per job post', icon: <Users className="h-6 w-6" /> },
+  { value: '100%', label: 'Free — forever', icon: <Heart className="h-6 w-6" /> },
 ];
 
 export default function PricingPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState<string | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
-    });
-  }, []);
-
-  const handleSubscribe = async (planType: 'starter' | 'pro') => {
-    if (!user) {
-      router.push('/auth/login');
-      return;
-    }
-
-    setLoading(planType);
-    try {
-      const response = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, planType }),
-      });
-
-      const data = await response.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert(data.error || 'Failed to create checkout session');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Something went wrong');
-    } finally {
-      setLoading(null);
-    }
-  };
   return (
-    <div className="min-h-screen bg-[#E0E5EC] font-body selection:bg-[#6C63FF]/20 selection:text-[#6C63FF]">
+    <div className="min-h-screen bg-[#E0E5EC] font-body selection:bg-[#6C63FF]/20 selection:text-[#6C63FF] overflow-x-hidden">
       <Navbar />
-      
-      <main className="max-w-[1200px] mx-auto px-6 lg:px-12 py-32 relative z-10">
-        {/* Decorative background shapes */}
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
-          <div className="absolute top-[10%] left-[-5%] w-64 h-64 rounded-full shadow-extruded opacity-50" />
-          <div className="absolute bottom-[20%] right-[-10%] w-96 h-96 rounded-full shadow-inset opacity-40" />
-          <div className="absolute top-[40%] right-[15%] w-24 h-24 rounded-full shadow-extruded-sm opacity-60" />
-        </div>
 
-        {/* Header */}
-        <motion.div
-          initial="hidden"
-          animate="show"
-          variants={stagger}
-          className="text-center space-y-6 mb-24 relative z-10"
-        >
+      <main className="relative">
+        {/* ── HERO ── */}
+        <section className="relative py-32 px-6 text-center overflow-hidden">
+          {/* Ambient orbs */}
+          <div className="absolute top-[-5%] left-[-10%] w-[500px] h-[500px] rounded-full shadow-extruded opacity-30 pointer-events-none" />
+          <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] rounded-full shadow-inset opacity-20 pointer-events-none" />
+
           <motion.div
-            variants={fadeUp}
-            className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-[#E0E5EC] shadow-extruded-sm text-[#6C63FF] text-[10px] font-display font-black uppercase tracking-[0.3em] mb-4"
+            initial="hidden" animate="show"
+            variants={stagger}
+            className="max-w-5xl mx-auto relative z-10"
           >
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Simple Pricing</span>
-          </motion.div>
-          <motion.h1 variants={fadeUp} className="text-5xl lg:text-7xl font-display font-extrabold text-[#3D4852] tracking-tighter leading-[1.1]">
-            Choose Your <br /><span className="text-[#6C63FF]">Career Engine.</span>
-          </motion.h1>
-          <motion.p variants={fadeUp} className="text-xl text-[#6B7280] font-medium max-w-2xl mx-auto leading-relaxed">
-            Two plans. Full access to every feature. Pick the one that fits your workflow — bring your own keys, or let us handle everything.
-          </motion.p>
-        </motion.div>
+            {/* Badge */}
+            <motion.div variants={fadeUp} className="inline-flex items-center gap-3 px-6 py-2.5 rounded-full shadow-extruded-sm text-[#6C63FF] text-[10px] font-display font-black uppercase tracking-[0.4em] mb-10">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#6C63FF] opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#6C63FF]" />
+              </span>
+              Mission: Free for Everyone
+            </motion.div>
 
-        {/* Pricing Cards */}
-        <motion.div
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true }}
-          variants={stagger}
-          className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto relative z-10"
-        >
-          {/* Starter — $2/mo BYOK */}
-          <motion.div
-            variants={fadeUp}
-            whileHover={{ y: -8 }}
-            className="bg-[#E0E5EC] p-12 rounded-[32px] shadow-extruded flex flex-col h-full transition-all duration-500 relative overflow-hidden group border border-white/20"
-          >
-            <div className="mb-10 mt-2">
-              <div className="inline-block p-4 rounded-2xl shadow-inset-deep mb-6">
-                <Key className="h-8 w-8 text-[#6C63FF]" />
-              </div>
-              <span className="text-[10px] font-display font-black uppercase tracking-[0.2em] text-[#6C63FF] block">Bring Your Own Keys</span>
-              <h3 className="text-5xl font-display font-extrabold text-[#3D4852] mt-4">
-                $2 <span className="text-sm font-bold text-[#6B7280]">/ month</span>
-              </h3>
-            </div>
-
-            <p className="text-[#6B7280] mb-8 leading-relaxed font-body">
-              Use your own Gemini API key and get full access to every feature at a fraction of the cost. Perfect for developers and power users.
-            </p>
-
-            <ul className="space-y-4 mb-12 flex-1">
-              {starterFeatures.map((f, i) => (
-                <li key={i} className="flex items-center gap-4 text-sm font-bold text-[#3D4852]">
-                  <div className="h-7 w-7 rounded-full shadow-inset-sm flex items-center justify-center shrink-0 text-[#6C63FF]">
-                    {f.icon}
-                  </div>
-                  {f.label}
-                </li>
-              ))}
-            </ul>
-
-            <button 
-              onClick={() => handleSubscribe('starter')}
-              disabled={loading !== null}
-              className="w-full py-5 bg-[#E0E5EC] shadow-extruded hover:shadow-inset text-[#6C63FF] rounded-2xl font-display font-black text-[11px] uppercase tracking-[0.2em] text-center transition-all active:scale-95 flex items-center justify-center gap-2"
+            {/* Giant Free Forever pill */}
+            <motion.div
+              variants={fadeUp}
+              className="inline-flex items-center gap-4 px-10 py-5 rounded-[2rem] shadow-inset bg-[#E0E5EC] mb-10 mx-auto"
             >
-              {loading === 'starter' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Start for $2/mo'}
-            </button>
-          </motion.div>
+              <Heart className="h-8 w-8 text-[#fb7185] fill-[#fb7185]" />
+              <span className="text-4xl md:text-5xl font-display font-black text-[#3D4852] tracking-tighter uppercase">
+                FREE. Forever.
+              </span>
+              <Heart className="h-8 w-8 text-[#fb7185] fill-[#fb7185]" />
+            </motion.div>
 
-          {/* Pro — $7/mo Unlimited */}
-          <motion.div
-            variants={fadeUp}
-            whileHover={{ y: -8 }}
-            className="bg-[#E0E5EC] p-12 rounded-[32px] shadow-extruded flex flex-col h-full transition-all duration-500 relative overflow-hidden group border border-[#6C63FF]/20"
-          >
-            <div className="absolute top-0 right-0 bg-[#6C63FF] text-white text-[9px] font-display font-black uppercase tracking-widest px-6 py-2 rounded-bl-3xl shadow-lg">Most Popular</div>
+            <motion.h1 variants={fadeUp} className="text-5xl md:text-7xl font-display font-extrabold text-[#3D4852] tracking-tighter leading-[0.85] uppercase italic mb-8">
+              No Plans. No Paywalls.<br />
+              <span className="text-[#6C63FF] not-italic">No Credit Card.</span>
+            </motion.h1>
 
-            <div className="absolute top-0 right-0 p-10 opacity-5 -rotate-12 group-hover:rotate-0 transition-transform duration-700">
-              <Crown className="h-48 w-48 text-[#6C63FF]" />
-            </div>
+            <motion.p variants={fadeUp} className="text-xl md:text-2xl text-[#6B7280] max-w-3xl mx-auto leading-relaxed mb-12 font-body">
+              Every feature. Every tool. Completely free — not a trial, not a freemium trick.
+              This is our commitment to every job seeker.
+            </motion.p>
 
-            <div className="mb-10 mt-2 relative z-10">
-              <div className="inline-block p-4 rounded-2xl shadow-inset-deep mb-6">
-                <Zap className="h-8 w-8 text-[#38B2AC]" />
-              </div>
-              <span className="text-[10px] font-display font-black uppercase tracking-[0.2em] text-[#38B2AC] block">Unlimited & Managed</span>
-              <h3 className="text-5xl font-display font-extrabold text-[#3D4852] mt-4">
-                $7 <span className="text-sm font-bold text-[#6B7280]">/ month</span>
-              </h3>
-            </div>
-
-            <p className="text-[#6B7280] mb-8 leading-relaxed font-body relative z-10">
-              Unlimited AI generations with zero setup. We handle the infrastructure — you focus on landing interviews. No API key needed.
-            </p>
-
-            <ul className="space-y-4 mb-12 flex-1 relative z-10">
-              {proFeatures.map((f, i) => (
-                <li key={i} className="flex items-center gap-4 text-sm font-bold text-[#3D4852]">
-                  <div className="h-7 w-7 rounded-full shadow-inset-sm flex items-center justify-center shrink-0 text-[#38B2AC]">
-                    {f.icon}
-                  </div>
-                  {f.label}
-                </li>
-              ))}
-            </ul>
-
-            <button 
-              onClick={() => handleSubscribe('pro')}
-              disabled={loading !== null}
-              className="w-full py-5 bg-[#6C63FF] text-white rounded-2xl font-display font-black text-[11px] uppercase tracking-[0.2em] text-center hover:bg-[#8B84FF] transition-all shadow-[8px_8px_16px_rgba(108,99,255,0.3),-8px_-8px_16px_rgba(255,255,255,0.3)] active:scale-95 flex items-center justify-center gap-2 relative z-10"
-            >
-              {loading === 'pro' ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Go Unlimited — $7/mo'}
-            </button>
-          </motion.div>
-        </motion.div>
-
-        {/* Comparison strip */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mt-20 max-w-3xl mx-auto"
-        >
-          <div className="bg-[#E0E5EC] rounded-[32px] shadow-inset p-10">
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <p className="text-[10px] font-display font-black text-[#6B7280] uppercase tracking-widest mb-3">Feature</p>
-              </div>
-              <div>
-                <p className="text-[10px] font-display font-black text-[#6C63FF] uppercase tracking-widest mb-3">Starter $2</p>
-              </div>
-              <div>
-                <p className="text-[10px] font-display font-black text-[#38B2AC] uppercase tracking-widest mb-3">Pro $7</p>
-              </div>
-              {[
-                ["AI Generations", "Your API Key", "Unlimited"],
-                ["Resume Optimizer", "✓", "✓"],
-                ["Cover Letters", "✓", "✓"],
-                ["Job Pipeline", "✓", "✓"],
-                ["PDF Export", "✓", "✓"],
-                ["API Key Required", "Yes", "No"],
-                ["Priority Support", "—", "✓"],
-              ].map(([feature, starter, pro], i) => (
-                <div key={i} className="contents">
-                  <div className={`py-3 text-sm font-bold text-[#3D4852] text-left ${i > 0 ? 'border-t border-[#A3B1C6]/20' : ''}`}>{feature}</div>
-                  <div className={`py-3 text-sm font-medium text-[#6B7280] ${i > 0 ? 'border-t border-[#A3B1C6]/20' : ''}`}>{starter}</div>
-                  <div className={`py-3 text-sm font-bold text-[#38B2AC] ${i > 0 ? 'border-t border-[#A3B1C6]/20' : ''}`}>{pro}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* FAQ mini */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="mt-24 max-w-3xl mx-auto text-center"
-        >
-          <div className="bg-[#E0E5EC] rounded-[40px] shadow-extruded p-16 border border-white/20">
-            <div className="p-5 rounded-2xl shadow-inset-deep inline-block mb-8">
-              <ShieldCheck className="h-8 w-8 text-[#38B2AC]" />
-            </div>
-            <h2 className="text-2xl font-display font-black text-[#3D4852] uppercase tracking-tight mb-4">Cancel Anytime. No Contracts.</h2>
-            <p className="text-[#6B7280] leading-relaxed font-body text-lg max-w-xl mx-auto mb-10">
-              Both plans are month-to-month with no commitments. Your data stays encrypted and private. Switch plans or cancel whenever you want.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <button 
-                onClick={() => handleSubscribe('pro')}
-                disabled={loading !== null}
-                className="px-10 py-5 bg-[#6C63FF] text-white rounded-2xl font-display font-black text-[11px] uppercase tracking-[0.2em] hover:bg-[#8B84FF] transition-all shadow-[6px_6px_15px_rgba(108,99,255,0.3)] active:scale-95 flex items-center justify-center gap-3"
-              >
-                {loading === 'pro' ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Sparkles className="h-4 w-4" /> Get Started Now</>}
-              </button>
-              <Link href="/" className="px-10 py-5 bg-[#E0E5EC] text-[#3D4852] shadow-extruded hover:shadow-inset rounded-2xl font-display font-black text-[11px] uppercase tracking-[0.2em] transition-all active:scale-95 flex items-center justify-center">
-                Learn More
+            <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-6 justify-center">
+              <Link href="/auth/login" className="px-12 py-6 bg-[#6C63FF] text-white rounded-[2rem] font-display font-black text-sm uppercase tracking-widest hover:bg-[#8B84FF] transition-all shadow-[8px_8px_20px_rgba(108,99,255,0.3)] active:scale-95 flex items-center gap-3 justify-center">
+                <Rocket className="h-5 w-5" />
+                Start Optimizing — Free
+                <ChevronRight className="h-5 w-5 opacity-50" />
               </Link>
-            </div>
+            </motion.div>
+          </motion.div>
+        </section>
+
+        {/* ── WHY FREE ── */}
+        <section className="py-32 px-6 lg:px-12 relative">
+          <div className="max-w-5xl mx-auto">
+            <motion.div
+              initial="hidden" whileInView="show" viewport={{ once: true }}
+              variants={stagger}
+              className="text-center mb-20"
+            >
+              <motion.div variants={fadeUp} className="inline-flex items-center gap-3 px-6 py-2 rounded-full shadow-extruded-sm text-[#fb7185] text-[10px] font-display font-black uppercase tracking-[0.4em] mb-8">
+                <Heart className="h-4 w-4" />
+                Our Reason
+              </motion.div>
+              <motion.h2 variants={fadeUp} className="text-5xl md:text-7xl font-display font-extrabold text-[#3D4852] tracking-tighter uppercase leading-[0.8] italic">
+                The Job Market<br /><span className="text-[#6C63FF] not-italic">Is Brutal Right Now.</span>
+              </motion.h2>
+            </motion.div>
+
+            {/* Stat strip */}
+            <motion.div
+              initial="hidden" whileInView="show" viewport={{ once: true }}
+              variants={stagger}
+              className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-20"
+            >
+              {stats.map((s, i) => (
+                <motion.div
+                  key={i}
+                  variants={fadeUp}
+                  className="bg-[#E0E5EC] rounded-[28px] p-8 shadow-extruded text-center flex flex-col items-center gap-4"
+                >
+                  <div className="p-4 rounded-2xl shadow-inset-sm text-[#6C63FF]">{s.icon}</div>
+                  <p className="text-3xl font-display font-extrabold text-[#3D4852]">{s.value}</p>
+                  <p className="text-[10px] font-display font-black text-[#6B7280] uppercase tracking-widest">{s.label}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* Long-form why */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="bg-[#E0E5EC] rounded-[40px] p-12 md:p-16 shadow-inset border border-white/10 relative overflow-hidden"
+            >
+              <div className="absolute top-8 right-8 opacity-5">
+                <Globe className="h-64 w-64 text-[#6C63FF]" />
+              </div>
+
+              <div className="flex items-start gap-6 mb-10">
+                <div className="p-5 rounded-2xl shadow-extruded-sm flex-shrink-0">
+                  <Heart className="h-8 w-8 text-[#fb7185] fill-[#fb7185]" />
+                </div>
+                <div>
+                  <h3 className="text-3xl font-display font-extrabold text-[#3D4852] tracking-tight uppercase mb-3">
+                    We See You. We Built This for You.
+                  </h3>
+                  <div className="space-y-5 text-[#6B7280] leading-relaxed font-body text-lg">
+                    <p>
+                      The job market right now is one of the hardest in a generation. Layoffs are sweeping every industry — tech, finance, healthcare, marketing. Companies that were hiring aggressively two years ago are now posting hiring freezes. Good people are sending hundreds of applications and hearing nothing back.
+                    </p>
+                    <p>
+                      It's not because they aren't qualified. It's because <strong className="text-[#3D4852]">75% of resumes never reach a human</strong> — they're filtered out by Applicant Tracking Systems (ATS) before a recruiter even sees them. Your resume gets rejected by a robot for missing three keywords. That's the reality.
+                    </p>
+                    <p>
+                      We built HireReady to fix exactly this problem. And then we asked ourselves: <em className="text-[#3D4852] font-semibold">should we charge people who are already struggling to find a job?</em>
+                    </p>
+                    <p className="text-xl text-[#3D4852] font-display font-bold">
+                      The answer was simple: No.
+                    </p>
+                    <p>
+                      Until the job market stabilizes and people have real opportunities again, <strong className="text-[#3D4852]">HireReady is completely free</strong>. Every feature. Every AI optimization. Every cover letter. Every tool we build. Zero paywalls. Zero subscriptions. Zero credit cards.
+                    </p>
+                    <p>
+                      Our mission is straightforward: <strong className="text-[#6C63FF]">help every single person achieve a 100% ATS match score</strong> so they have the best possible chance at getting the job they deserve.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-8 border-t border-[#A3B1C6]/20">
+                <p className="text-[10px] font-display font-black text-[#6B7280] uppercase tracking-widest text-center">
+                  — The HireReady Team &nbsp;·&nbsp; Because your career shouldn't cost you money when you don't have any.
+                </p>
+              </div>
+            </motion.div>
           </div>
-        </motion.div>
+        </section>
+
+        {/* ── EVERYTHING FREE ── */}
+        <section className="py-32 px-6 lg:px-12 relative">
+          <div className="max-w-[1200px] mx-auto">
+            <motion.div
+              initial="hidden" whileInView="show" viewport={{ once: true }}
+              variants={stagger}
+              className="text-center mb-20"
+            >
+              <motion.div variants={fadeUp} className="inline-flex items-center gap-3 px-6 py-2 rounded-full shadow-extruded-sm text-[#38B2AC] text-[10px] font-display font-black uppercase tracking-[0.4em] mb-8">
+                <Sparkles className="h-4 w-4" />
+                What's Included
+              </motion.div>
+              <motion.h2 variants={fadeUp} className="text-5xl md:text-7xl font-display font-extrabold text-[#3D4852] tracking-tighter uppercase leading-[0.8] italic">
+                Everything.<br /><span className="text-[#6C63FF] not-italic">Yours. Free.</span>
+              </motion.h2>
+            </motion.div>
+
+            <motion.div
+              initial="hidden" whileInView="show" viewport={{ once: true }}
+              variants={stagger}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-16"
+            >
+              {allFeatures.map((f, i) => (
+                <motion.div
+                  key={i}
+                  variants={fadeUp}
+                  whileHover={{ y: -6, scale: 1.02 }}
+                  className="bg-[#E0E5EC] rounded-[24px] p-7 shadow-extruded flex flex-col gap-4 border border-white/20 group"
+                >
+                  <div className="p-3 rounded-xl shadow-inset-sm w-fit" style={{ color: f.color }}>
+                    {f.icon}
+                  </div>
+                  <p className="text-sm font-display font-black text-[#3D4852] leading-tight">{f.label}</p>
+                  <div className="flex items-center gap-2 mt-auto">
+                    <div className="h-5 w-5 rounded-full bg-[#4ade80]/10 flex items-center justify-center flex-shrink-0">
+                      <Check className="h-3 w-3 text-[#4ade80]" />
+                    </div>
+                    <span className="text-[9px] font-display font-black uppercase tracking-widest text-[#4ade80]">Free Forever</span>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* Single "Free" CTA card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.97 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="max-w-2xl mx-auto bg-[#E0E5EC] rounded-[40px] shadow-extruded p-14 text-center border border-[#6C63FF]/20 relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 p-8 opacity-5 -rotate-12">
+                <Heart className="h-48 w-48 text-[#fb7185]" />
+              </div>
+
+              <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full shadow-inset mb-8">
+                <ShieldCheck className="h-5 w-5 text-[#38B2AC]" />
+                <span className="text-[10px] font-display font-black uppercase tracking-widest text-[#38B2AC]">No payment info required · Ever</span>
+              </div>
+
+              <div className="text-7xl font-display font-black text-[#6C63FF] mb-2">$0</div>
+              <div className="text-[10px] font-display font-black text-[#6B7280] uppercase tracking-widest mb-8">/ month · forever</div>
+
+              <p className="text-[#6B7280] mb-10 leading-relaxed font-body text-lg">
+                Sign up with your email. Get instant access to every feature. No credit card, no trial, no expiry.
+              </p>
+
+              <Link
+                href="/auth/login"
+                className="block w-full py-6 bg-[#6C63FF] text-white rounded-2xl font-display font-black text-sm uppercase tracking-widest hover:bg-[#8B84FF] transition-all shadow-[6px_6px_15px_rgba(108,99,255,0.3)] active:scale-95"
+              >
+                Get Full Access — Free
+              </Link>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ── FINAL MESSAGE ── */}
+        <section className="py-32 px-6 relative overflow-hidden border-t border-[#A3B1C6]/20">
+          <div className="max-w-4xl mx-auto text-center relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              <div className="inline-flex items-center gap-3 mb-10 px-6 py-2 rounded-full shadow-extruded-sm text-[#fb7185] text-[10px] font-display font-black uppercase tracking-[0.4em]">
+                <Heart className="h-4 w-4 fill-[#fb7185]" />
+                From us, to you
+              </div>
+              <h2 className="text-5xl md:text-7xl font-display font-extrabold text-[#3D4852] tracking-tighter uppercase leading-[0.8] italic mb-10">
+                You Deserve a<br /><span className="text-[#6C63FF] not-italic">Fighting Chance.</span>
+              </h2>
+              <p className="text-xl text-[#6B7280] mb-12 max-w-2xl mx-auto leading-relaxed font-body">
+                The system is already stacked against job seekers. We're not going to be another barrier.
+                Use every tool, optimize every application, and land the role you deserve.
+              </p>
+              <Link href="/auth/login" className="inline-flex items-center gap-3 px-12 py-6 bg-[#6C63FF] text-white rounded-[2rem] font-display font-black text-sm uppercase tracking-widest hover:bg-[#8B84FF] transition-all shadow-[8px_8px_20px_rgba(108,99,255,0.3)] active:scale-95">
+                <Rocket className="h-5 w-5" />
+                Start Your Free Journey
+                <ChevronRight className="h-5 w-5 opacity-50" />
+              </Link>
+            </motion.div>
+          </div>
+        </section>
       </main>
+
       <Footer />
     </div>
   );
