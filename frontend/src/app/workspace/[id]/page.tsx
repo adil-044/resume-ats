@@ -24,21 +24,7 @@ export default function Workspace({ params }: { params: Promise<{ id: string }> 
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [activePane, setActivePane] = useState<'editor' | 'preview' | 'split'>('split');
   const [isGapModalOpen, setIsGapModalOpen] = useState(false);
-  const [showPaywall, setShowPaywall] = useState(false);
   const [showJobDescription, setShowJobDescription] = useState(false);
-  const [hasAccess, setHasAccess] = useState(false);
-
-  useEffect(() => {
-    const checkAccess = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user?.email === 'khatriadil044@gmail.com') { setHasAccess(true); return; }
-      if (user) {
-        const { data: profile } = await supabase.from('profiles').select('api_key, subscription_tier').eq('id', user.id).single();
-        if (profile && (profile.api_key || profile.subscription_tier)) setHasAccess(true);
-      }
-    };
-    checkAccess();
-  }, []);
 
   useEffect(() => {
     const fetchAnalysis = async () => {
@@ -70,7 +56,6 @@ export default function Workspace({ params }: { params: Promise<{ id: string }> 
   }, [id, analysisResult, setAnalysisResult]);
 
   const handleAIRephrase = async () => {
-    if (!hasAccess) { setShowPaywall(true); return; }
     setIsOptimizing(true);
     try {
       const result = await optimizeResume(markdown, jobDescription);
@@ -102,22 +87,6 @@ export default function Workspace({ params }: { params: Promise<{ id: string }> 
       
       <BridgeGapModal isOpen={isGapModalOpen} onClose={() => setIsGapModalOpen(false)} taskId={id} onComplete={(newMd) => setMarkdown(newMd)} />
 
-      <AnimatePresence>
-        {showPaywall && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-[#E0E5EC]/90 backdrop-blur-md">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="relative bg-[#E0E5EC] rounded-[40px] shadow-extruded p-16 max-w-xl text-center border border-white/20">
-              <div className="p-8 rounded-[32px] shadow-inset-deep inline-block mb-10"><Lock className="h-8 w-8 text-[#6C63FF]" /></div>
-              <h2 className="text-4xl font-display font-extrabold text-[#3D4852] tracking-tighter uppercase mb-6 leading-tight italic">Access Required</h2>
-              <p className="text-[#6B7280] mb-12 font-body leading-relaxed">Add your Gemini API key ($2/mo) or upgrade to the Pro plan ($7/mo) to unlock full AI optimization.</p>
-              <div className="space-y-4">
-                <Link href="/dashboard" className="block w-full py-6 bg-[#6C63FF] text-white rounded-2xl font-display font-black text-xs uppercase tracking-widest hover:bg-[#8B84FF] transition-all shadow-lg text-center">Add API Key</Link>
-                <button onClick={() => setShowPaywall(false)} className="w-full py-4 text-[#6B7280] font-display font-black text-[9px] uppercase tracking-widest hover:text-[#3D4852]">Dismiss</button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-      
       <header className="bg-[#E0E5EC] border-b border-[#A3B1C6]/30 px-8 py-4 flex items-center justify-between z-30 shadow-md">
         <div className="flex items-center gap-6">
           <Link href="/dashboard" className="p-3 shadow-extruded-sm rounded-2xl transition-all text-[#6B7280] hover:text-[#6C63FF] hover:shadow-inset-sm"><ChevronLeft className="h-5 w-5" /></Link>
@@ -193,7 +162,7 @@ export default function Workspace({ params }: { params: Promise<{ id: string }> 
                   <Zap className="h-4 w-4 text-[#6C63FF]" /> Keywords
                 </h3>
                 {analysisResult.missing_keywords.length > 0 && (
-                  <button onClick={() => hasAccess ? setIsGapModalOpen(true) : setShowPaywall(true)} className="text-[9px] font-display font-black text-[#6C63FF] uppercase tracking-widest shadow-extruded-sm px-3 py-1.5 rounded-xl hover:shadow-inset-sm transition-all active:scale-95">
+                  <button onClick={() => setIsGapModalOpen(true)} className="text-[9px] font-display font-black text-[#6C63FF] uppercase tracking-widest shadow-extruded-sm px-3 py-1.5 rounded-xl hover:shadow-inset-sm transition-all active:scale-95">
                     Fix Gaps
                   </button>
                 )}
@@ -205,21 +174,14 @@ export default function Workspace({ params }: { params: Promise<{ id: string }> 
                     <CheckCircle2 className="h-3 w-3 text-[#38B2AC]" />
                   </div>
                 ))}
-                {hasAccess ? (
-                  <div className="space-y-3">
-                    {analysisResult.missing_keywords.map((kw, i) => (
-                      <div key={i} className="flex items-center justify-between p-4 shadow-inset-sm rounded-2xl text-[#6B7280]">
-                        <span className="text-[10px] font-display font-bold uppercase tracking-widest">{kw}</span>
-                        <XCircle className="h-3 w-3 opacity-30" />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="relative group p-4 shadow-inset rounded-2xl text-center">
-                    <Lock className="h-5 w-5 text-[#A3B1C6] mx-auto mb-2 opacity-50" />
-                    <button onClick={() => setShowPaywall(true)} className="text-[9px] font-display font-black text-[#6C63FF] uppercase tracking-widest">Unlock Missing</button>
-                  </div>
-                )}
+                <div className="space-y-3">
+                  {analysisResult.missing_keywords.map((kw, i) => (
+                    <div key={i} className="flex items-center justify-between p-4 shadow-inset-sm rounded-2xl text-[#6B7280]">
+                      <span className="text-[10px] font-display font-bold uppercase tracking-widest">{kw}</span>
+                      <XCircle className="h-3 w-3 opacity-30" />
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

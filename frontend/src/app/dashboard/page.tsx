@@ -34,18 +34,13 @@ export default function Dashboard() {
 
   const [dragActive, setDragActive] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'scan' | 'history' | 'apikeys' | 'coverletter' | 'pipeline'>('scan');
+  const [activeTab, setActiveTab] = useState<'scan' | 'history' | 'coverletter' | 'pipeline'>('scan');
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isGapModalOpen, setIsGapModalOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [analysisStep, setAnalysisStep] = useState<string>('Getting ready...');
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [apiKey, setApiKey] = useState('');
-  const [savedApiKey, setSavedApiKey] = useState('');
-  const [showApiKey, setShowApiKey] = useState(false);
-  const [isSavingKey, setIsSavingKey] = useState(false);
-  const [subscriptionTier, setSubscriptionTier] = useState<string | null>(null);
-  const [hasAccess, setHasAccess] = useState(false);
+
   const [clFile, setClFile] = useState<File | null>(null);
   const [clJobDescription, setClJobDescription] = useState('');
   const [isGeneratingCL, setIsGeneratingCL] = useState(false);
@@ -53,34 +48,7 @@ export default function Dashboard() {
   const [showAddJob, setShowAddJob] = useState(false);
   const [newJob, setNewJob] = useState({ company: '', job_title: '', job_url: '', notes: '' });
 
-  const handleSaveApiKey = async () => {
-    if (!user?.id || !apiKey.trim()) return;
-    setIsSavingKey(true);
-    try {
-      await supabase.from('profiles').update({ api_key: apiKey.trim() }).eq('id', user.id);
-      setSavedApiKey(apiKey.trim());
-      setHasAccess(true);
-    } catch (err: any) {
-      alert(`Error saving API key: ${err.message}`);
-    } finally {
-      setIsSavingKey(false);
-    }
-  };
 
-  const handleRemoveApiKey = async () => {
-    if (!user?.id) return;
-    setIsSavingKey(true);
-    try {
-      await supabase.from('profiles').update({ api_key: null }).eq('id', user.id);
-      setApiKey('');
-      setSavedApiKey('');
-      setHasAccess(!!subscriptionTier);
-    } catch (err: any) {
-      alert(`Error removing API key: ${err.message}`);
-    } finally {
-      setIsSavingKey(false);
-    }
-  };
 
   useEffect(() => {
     const getUser = async () => {
@@ -91,12 +59,7 @@ export default function Dashboard() {
         setUser(user);
         fetchHistory(user.id);
         fetchPipeline(user.id);
-        const { data: profile } = await supabase.from('profiles').select('api_key, subscription_tier').eq('id', user.id).single();
-        if (profile) {
-          if (profile.api_key) { setApiKey(profile.api_key); setSavedApiKey(profile.api_key); }
-          if (profile.subscription_tier) setSubscriptionTier(profile.subscription_tier);
-          setHasAccess(!!(profile.api_key || profile.subscription_tier));
-        }
+
       }
     };
     getUser();
@@ -147,7 +110,7 @@ export default function Dashboard() {
   };
 
   const handleAnalyze = async () => {
-    if (!resumeFile || !jobDescription || !hasAccess) return;
+    if (!resumeFile || !jobDescription) return;
     setIsAnalyzing(true);
     setAnalysisStep('Mapping semantic delta...');
     try {
@@ -202,8 +165,7 @@ export default function Dashboard() {
               { id: 'scan', label: 'New Analysis', icon: <LayoutGrid className="h-4 w-4" /> },
               { id: 'history', label: 'My Resumes', icon: <FileText className="h-4 w-4" /> },
               { id: 'coverletter', label: 'Cover Letter', icon: <Mail className="h-4 w-4" /> },
-              { id: 'pipeline', label: 'Job Pipeline', icon: <Briefcase className="h-4 w-4" /> },
-              { id: 'apikeys', label: 'API Keys', icon: <Key className="h-4 w-4" /> }
+              { id: 'pipeline', label: 'Job Pipeline', icon: <Briefcase className="h-4 w-4" /> }
             ].map(tab => (
               <button 
                 key={tab.id}
@@ -249,21 +211,7 @@ export default function Dashboard() {
                   <p className="text-[#6B7280] font-medium text-xl font-body">Optimize your profile with tactile AI precision.</p>
                 </div>
 
-                {!hasAccess && (
-                  <div className="bg-[#E0E5EC] p-8 rounded-[32px] shadow-inset border-2 border-[#f59e0b]/20 mb-12 flex flex-col sm:flex-row items-center gap-6">
-                    <div className="p-4 rounded-2xl shadow-extruded-sm text-[#f59e0b] shrink-0">
-                      <AlertTriangle className="h-6 w-6" />
-                    </div>
-                    <div className="flex-1 text-center sm:text-left">
-                      <p className="text-[#3D4852] font-display font-black text-sm uppercase tracking-tight mb-1">Setup Required</p>
-                      <p className="text-[#6B7280] text-sm font-body">Add your Gemini API key ($2/mo plan) or upgrade to Pro ($7/mo) to start analyzing resumes.</p>
-                    </div>
-                    <div className="flex gap-3 shrink-0">
-                      <button onClick={() => setActiveTab('apikeys')} className="px-6 py-3 bg-[#6C63FF] text-white rounded-xl font-display font-black text-[10px] uppercase tracking-widest hover:bg-[#8B84FF] transition-all shadow-lg active:scale-95">Add API Key</button>
-                      <a href="/pricing" className="px-6 py-3 bg-[#E0E5EC] text-[#3D4852] shadow-extruded-sm rounded-xl font-display font-black text-[10px] uppercase tracking-widest hover:shadow-inset-sm transition-all">View Plans</a>
-                    </div>
-                  </div>
-                )}
+
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                   <div className="lg:col-span-8 space-y-10">
                     <div className="bg-[#E0E5EC] p-10 rounded-[40px] shadow-extruded border border-white/20">
@@ -288,16 +236,14 @@ export default function Dashboard() {
 
                     <button 
                       onClick={handleAnalyze} 
-                      disabled={!resumeFile || !jobDescription || isAnalyzing || !hasAccess}
-                      className={`w-full py-8 rounded-[32px] font-display font-black text-2xl flex items-center justify-center gap-6 transition-all duration-500 shadow-extruded active:scale-[0.98] uppercase tracking-tighter italic ${!resumeFile || !jobDescription || isAnalyzing || !hasAccess ? 'text-[#A3B1C6] cursor-not-allowed' : 'bg-[#6C63FF] text-white hover:bg-[#8B84FF]'}`}
+                      disabled={!resumeFile || !jobDescription || isAnalyzing}
+                      className={`w-full py-8 rounded-[32px] font-display font-black text-2xl flex items-center justify-center gap-6 transition-all duration-500 shadow-extruded active:scale-[0.98] uppercase tracking-tighter italic ${!resumeFile || !jobDescription || isAnalyzing ? 'text-[#A3B1C6] cursor-not-allowed' : 'bg-[#6C63FF] text-white hover:bg-[#8B84FF]'}`}
                     >
                       {isAnalyzing ? (
                         <div className="flex items-center gap-4">
                           <Loader2 className="h-8 w-8 animate-spin" />
                           <span className="text-xl">Processing...</span>
                         </div>
-                      ) : !hasAccess ? (
-                        <><Key className="h-8 w-8" /><span>Add API Key to Analyze</span></>
                       ) : (
                         <><Rocket className="h-8 w-8" /><span>Analyze Profile</span><ChevronRight className="h-8 w-8 opacity-40" /></>
                       )}
@@ -373,97 +319,7 @@ export default function Dashboard() {
               </motion.div>
             )}
 
-            {activeTab === 'apikeys' && (
-              <motion.div key="apikeys" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto relative z-10">
-                <div className="mb-16">
-                   <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full shadow-extruded-sm text-[#6C63FF] text-[10px] font-display font-black uppercase tracking-[0.4em] mb-8">
-                    <Key className="h-3 w-3" /> Configuration
-                  </div>
-                  <h1 className="text-5xl md:text-7xl font-display font-extrabold text-[#3D4852] tracking-tighter uppercase leading-none italic mb-6">API Keys.</h1>
-                  <p className="text-[#6B7280] font-medium text-xl font-body">Add your Gemini API key to use HireReady, or upgrade for unlimited access.</p>
-                </div>
 
-                {/* Status Card */}
-                <div className="bg-[#E0E5EC] p-12 rounded-[40px] shadow-inset border border-white/20 mb-12 flex items-center gap-10">
-                   <div className={`p-8 rounded-[32px] shadow-extruded ${savedApiKey ? 'text-[#38B2AC]' : 'text-[#A3B1C6]'}`}>
-                      <Key className="h-12 w-12" />
-                   </div>
-                   <div>
-                      <p className="text-[10px] font-display font-black text-[#6B7280] uppercase tracking-[0.4em] mb-2">Access Status</p>
-                      {hasAccess ? (
-                        <div className="flex items-center gap-3">
-                          <div className="h-3 w-3 bg-[#38B2AC] rounded-full animate-pulse shadow-[0_0_8px_rgba(56,178,172,0.6)]" />
-                          <p className="text-3xl font-display font-black text-[#38B2AC] tracking-tighter">Active</p>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-3">
-                          <div className="h-3 w-3 bg-[#f59e0b] rounded-full" />
-                          <p className="text-3xl font-display font-black text-[#f59e0b] tracking-tighter">Setup Required</p>
-                        </div>
-                      )}
-                   </div>
-                </div>
-
-                {/* API Key Input */}
-                <div className="bg-[#E0E5EC] p-12 rounded-[40px] shadow-extruded border border-white/20 mb-12 space-y-8">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[10px] font-display font-black text-[#6B7280] uppercase tracking-[0.4em]">Gemini API Key</label>
-                    {savedApiKey && (
-                      <div className="flex items-center gap-2 px-4 py-1.5 rounded-full shadow-inset-sm text-[10px] font-display font-black text-[#38B2AC] uppercase tracking-widest">
-                        <CheckCircle className="h-3 w-3" /> Connected
-                      </div>
-                    )}
-                  </div>
-                  <div className="relative p-1 bg-[#E0E5EC] rounded-2xl shadow-inset">
-                    <Key className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A3B1C6]" />
-                    <input
-                      type={showApiKey ? 'text' : 'password'}
-                      value={apiKey}
-                      onChange={(e) => setApiKey(e.target.value)}
-                      placeholder="AIzaSy..."
-                      className="w-full bg-transparent py-5 pl-12 pr-14 text-[#3D4852] text-sm font-medium font-body outline-none placeholder:text-[#A3B1C6]"
-                    />
-                    <button onClick={() => setShowApiKey(!showApiKey)} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-[#A3B1C6] hover:text-[#3D4852] transition-colors">
-                      {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
-                  <div className="flex gap-4">
-                    <button
-                      onClick={handleSaveApiKey}
-                      disabled={isSavingKey || !apiKey.trim()}
-                      className={`flex-1 py-5 rounded-2xl font-display font-black text-[11px] uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-3 ${!apiKey.trim() || isSavingKey ? 'bg-[#E0E5EC] text-[#A3B1C6] shadow-inset-sm cursor-not-allowed' : 'bg-[#6C63FF] text-white shadow-lg hover:bg-[#8B84FF]'}`}
-                    >
-                      {isSavingKey ? <Loader2 className="h-4 w-4 animate-spin" /> : <Key className="h-4 w-4" />}
-                      {savedApiKey ? 'Update Key' : 'Save Key'}
-                    </button>
-                    {savedApiKey && (
-                      <button
-                        onClick={handleRemoveApiKey}
-                        disabled={isSavingKey}
-                        className="px-8 py-5 rounded-2xl font-display font-black text-[11px] uppercase tracking-widest bg-[#E0E5EC] text-red-500/70 shadow-extruded-sm hover:shadow-inset-sm transition-all active:scale-95"
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                  <p className="text-[10px] font-display font-bold text-[#6B7280] uppercase tracking-widest text-center">Your key is stored encrypted and never shared</p>
-                </div>
-
-                {/* Upgrade to Pro */}
-                <div className="bg-[#E0E5EC] p-12 rounded-[40px] shadow-extruded border border-[#6C63FF]/10 text-center">
-                  <div className="p-5 rounded-2xl shadow-inset-deep inline-block mb-6 text-[#6C63FF]">
-                    <Zap className="h-8 w-8" />
-                  </div>
-                  <h3 className="text-2xl font-display font-black text-[#3D4852] uppercase tracking-tight mb-3">Skip the setup. Go unlimited.</h3>
-                  <p className="text-[#6B7280] font-body text-lg mb-8 max-w-lg mx-auto leading-relaxed">
-                    Upgrade to our <strong className="text-[#3D4852]">$7/month Pro plan</strong> for unlimited AI generations — no API key needed. We handle everything.
-                  </p>
-                  <a href="/pricing" className="inline-flex py-5 px-10 bg-[#6C63FF] text-white rounded-2xl font-display font-black text-[11px] uppercase tracking-[0.2em] hover:bg-[#8B84FF] transition-all shadow-[6px_6px_15px_rgba(108,99,255,0.3)] active:scale-95 items-center gap-3">
-                    <Sparkles className="h-4 w-4" /> View Pro Plan <ChevronRight className="h-4 w-4 opacity-50" />
-                  </a>
-                </div>
-              </motion.div>
-            )}
 
             {activeTab === 'coverletter' && (
               <motion.div key="coverletter" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto relative z-10">
@@ -505,7 +361,7 @@ export default function Dashboard() {
 
                   <button
                     onClick={async () => {
-                      if (!clFile || !clJobDescription.trim() || !hasAccess) return;
+                      if (!clFile || !clJobDescription.trim()) return;
                       setIsGeneratingCL(true);
                       try {
                         const result = await generateCoverLetter(clFile, clJobDescription);
@@ -520,11 +376,11 @@ export default function Dashboard() {
                         setIsGeneratingCL(false);
                       }
                     }}
-                    disabled={isGeneratingCL || !clFile || !clJobDescription.trim() || !hasAccess}
-                    className={`w-full py-8 rounded-[32px] font-display font-black text-xl uppercase tracking-widest transition-all active:scale-[0.98] shadow-extruded flex items-center justify-center gap-4 ${isGeneratingCL || !hasAccess ? 'text-[#A3B1C6]' : 'bg-[#fb7185] text-white hover:bg-[#ff8a9a]'}`}
+                    disabled={isGeneratingCL || !clFile || !clJobDescription.trim()}
+                    className={`w-full py-8 rounded-[32px] font-display font-black text-xl uppercase tracking-widest transition-all active:scale-[0.98] shadow-extruded flex items-center justify-center gap-4 ${isGeneratingCL ? 'text-[#A3B1C6]' : 'bg-[#fb7185] text-white hover:bg-[#ff8a9a]'}`}
                   >
                     {isGeneratingCL ? <Loader2 className="h-6 w-6 animate-spin" /> : <Sparkles className="h-6 w-6" />}
-                    {isGeneratingCL ? 'Generating...' : !hasAccess ? 'Add API Key to Generate' : 'Generate Cover Letter'}
+                    {isGeneratingCL ? 'Generating...' : 'Generate Cover Letter'}
                   </button>
                 </div>
               </motion.div>
