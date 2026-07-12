@@ -55,10 +55,10 @@ function Reveal({ children, delay = 0, className = '' }: { children: React.React
    STATS DATA
 ═══════════════════════════════════════════════════════════════ */
 const stats = [
-  { value: '73%', label: 'Resumes filtered before human review', color: '#F97316' },
-  { value: '200+', label: 'Applications sent per interview', color: '#7C3AED' },
+  { value: '73%', label: 'Resumes filtered before human review¹', color: '#F97316' },
+  { value: '200+', label: 'Applications sent per interview²', color: '#7C3AED' },
   { value: '0', label: 'Credit card ever required', color: '#10B981' },
-  { value: '100%', label: 'Free, forever', color: '#22D3EE' },
+  { value: '100%', label: 'Core features permanently free', color: '#22D3EE' },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
@@ -262,23 +262,23 @@ const testimonials = [
 const faqItems = [
   {
     q: 'How is this different from Jobscan or Resumatic?',
-    a: 'Most tools give you a keyword checklist and leave you to figure out the rest. HireReady actually rewrites your bullet points to incorporate those keywords credibly — and flags formatting issues that cause silent rejections.',
+    a: 'Jobscan and Resumatic give you a keyword score and a list of missing keywords — then leave you to rewrite everything yourself. HireReady does the rewriting: our AI rewrites your bullet points to incorporate the keywords credibly, flags formatting issues that cause silent ATS rejections, and generates a matching cover letter. One click, fully optimized. Free during beta, core features free forever.',
   },
   {
     q: 'Is it really free? What\'s the catch?',
-    a: 'No catch. The job market is brutal right now. We built HireReady because every job seeker deserves a fair shot at the ATS filter, regardless of their budget. All features are free, forever.',
+    a: 'Core features — resume analysis, gap scoring, AI rewrite, cover letter generation — are permanently free. We\'re exploring optional premium features for power users in the future, but the ATS optimization toolkit will never be paywalled.',
   },
   {
     q: 'Will this actually help me get hired?',
-    a: 'It will help you get your resume in front of a human recruiter. After that, your interview skills and experience take over. We fix the ATS problem — the rest is on you.',
+    a: 'It helps your resume reach a human recruiter. After that, your interview skills and experience take over. We fix the ATS problem — the rest is on you.',
   },
   {
     q: 'Is my resume data safe?',
-    a: 'Yes. Your data is encrypted at rest and in transit. We never sell or share your personal information. You can request deletion of all your data at any time.',
+    a: 'Yes. Your data is encrypted in transit and at rest. We never sell, share, or leak your personal information. You can request deletion of all data at any time.',
   },
   {
     q: 'How accurate is the ATS scoring?',
-    a: 'Our scoring is based on the same keyword-matching logic used by major ATS platforms (Workday, Greenhouse, Lever). It\'s an approximation, not a guarantee — but it\'s the closest you can get without buying enterprise software.',
+    a: 'Our scoring is based on the same keyword-matching logic used by major ATS platforms (Workday, Greenhouse, Lever). It\'s an approximation of real-world ATS behavior — not a direct integration — and we publish our methodology on the docs page.',
   },
 ];
 
@@ -440,10 +440,10 @@ function LiveDemo() {
    MARQUEE FEATURES
 ═══════════════════════════════════════════════════════════════ */
 const marqueeItems = [
-  'AI Keyword Optimization', 'ATS Bypass Engine', 'Semantic Gap Analysis',
+  'AI Keyword Optimization', 'Keyword Match Engine', 'Semantic Gap Analysis',
   'Format-Perfect PDF Export', 'Cover Letter Generator', 'Job Pipeline Tracker',
   'Real-time Scoring', '100% Machine Readable', 'Zero Data Selling',
-  'AI Keyword Optimization', 'ATS Bypass Engine', 'Semantic Gap Analysis',
+  'AI Keyword Optimization', 'Keyword Match Engine', 'Semantic Gap Analysis',
 ];
 
 /* ═══════════════════════════════════════════════════════════════
@@ -565,7 +565,7 @@ export default function Home() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#7C3AED] opacity-75" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-[#7C3AED]" />
             </span>
-            100% Free — No Credit Card Required
+            100% Free Core — No Credit Card Required
           </motion.div>
 
           {/* Headline */}
@@ -630,6 +630,9 @@ export default function Home() {
               </Reveal>
             ))}
           </div>
+          <p className="text-center text-[9px] text-[#52525E] font-dm-sans mt-6 leading-relaxed max-w-[700px] mx-auto">
+            <sup>1</sup> Source: Jobiwa ATS Industry Report 2024 · <sup>2</sup> Aggregate beta user data, HireReady 2024–2025. Results vary by individual and market.
+          </p>
         </div>
       </section>
 
@@ -820,7 +823,7 @@ export default function Home() {
 
               <p className="text-center text-xs text-[#52525E] font-dm-sans flex items-center justify-center gap-2">
                 <ShieldCheck className="h-3.5 w-3.5 text-[#10B981]" />
-                100% Free · No account required · Results in 30 seconds
+                100% Free Core · No account required · Results in 30 seconds
               </p>
             </div>
           </Reveal>
@@ -977,7 +980,7 @@ export default function Home() {
                 Analyze My Resume — Free
               </a>
             </div>
-            <p className="mt-6 text-xs text-[#52525E] font-dm-sans">No credit card. No account. No catch.</p>
+            <p className="mt-6 text-xs text-[#52525E] font-dm-sans">No credit card. No account. Core features are free forever.</p>
           </Reveal>
         </div>
       </section>
