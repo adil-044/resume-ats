@@ -18,19 +18,26 @@ def _get_client() -> OpenAI:
 
 def _call_model(prompt: str) -> str:
     """Make an OpenRouter API call, handling errors consistently."""
+    print(f"--- AI STATUS: _call_model called, prompt length = {len(prompt)} chars ---")
     try:
         client = _get_client()
+        print(f"--- AI STATUS: OpenRouter client initialized, calling API... ---")
         response = client.chat.completions.create(
             model=MODEL_ID,
             messages=[{"role": "user", "content": prompt}]
         )
+        print(f"--- AI STATUS: API response received, {len(response.choices[0].message.content)} chars ---")
         return response.choices[0].message.content
     except Exception as e:
+        print(f"--- AI ERROR: _call_model exception: {str(e)} ---")
         raise RuntimeError(f"OpenRouter API error: {str(e)}")
 
 
 def optimize_resume_text(resume_markdown: str, job_description: str, missing_keywords: List[str] = []) -> str:
     """Use Tencent Hy3 via OpenRouter to rewrite the resume for maximum ATS compatibility."""
+    print(f"--- AI STATUS: optimize_resume_text called ---")
+    print(f"Resume length: {len(resume_markdown)} chars, JD length: {len(job_description)} chars")
+    
     prompt = f"""
 ROLE: Elite Executive Resume Architect & ATS Logic Expert.
 TASK: Transform the 'NOISY RAW TEXT' into a world-class, deduplicated, 95%+ ATS-optimized Executive Resume.
