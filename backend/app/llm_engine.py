@@ -4,28 +4,33 @@ from openai import OpenAI
 from typing import List
 
 # OpenRouter configuration
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_BASE = "https://openrouter.ai/api/v1"
-
-# Model: Tencent Hyten (Hy3) — free on OpenRouter
 MODEL_ID = "tencent/hy3:free"
 
-if OPENROUTER_API_KEY:
-    print(f"--- AI STATUS: OpenRouter API Key found ({OPENROUTER_API_KEY[:4]}...{OPENROUTER_API_KEY[-4:]}) ---")
-    client = OpenAI(
-        api_key=OPENROUTER_API_KEY,
-        base_url=OPENROUTER_BASE,
-    )
-else:
-    print("--- AI STATUS: ERROR - No OPENROUTER_API_KEY found in environment ---")
-    client = None
+
+def _get_client() -> OpenAI:
+    """Lazily initialize OpenRouter client — reads key at call time, not import time."""
+    api_key = os.getenv("OPENROUTER_API_KEY")
+    if not api_key:
+        raise RuntimeError("OPENROUTER_API_KEY environment variable not set")
+    return OpenAI(api_key=api_key, base_url=OPENROUTER_BASE)
+
+
+def _call_model(prompt: str) -> str:
+    """Make an OpenRouter API call, handling errors consistently."""
+    try:
+        client = _get_client()
+        response = client.chat.completions.create(
+            model=MODEL_ID,
+            messages=[{"role": "user", "content": prompt}]
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        raise RuntimeError(f"OpenRouter API error: {str(e)}")
 
 
 def optimize_resume_text(resume_markdown: str, job_description: str, missing_keywords: List[str] = []) -> str:
     """Use Tencent Hy3 via OpenRouter to rewrite the resume for maximum ATS compatibility."""
-    if not client:
-        return f"# ERROR: AI KEY NOT FOUND\n\nPlease set your OPENROUTER_API_KEY environment variable.\n\nRAW TEXT PREVIEW:\n{resume_markdown[:500]}..."
-
     prompt = f"""
 ROLE: Elite Executive Resume Architect & ATS Logic Expert.
 TASK: Transform the 'NOISY RAW TEXT' into a world-class, deduplicated, 95%+ ATS-optimized Executive Resume.
@@ -80,11 +85,7 @@ OUTPUT FINAL EXECUTIVE MARKDOWN:
 """
 
     try:
-        response = client.chat.completions.create(
-            model=MODEL_ID,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        text = response.choices[0].message.content
+        text = _call_model(prompt)
         text = text.replace('```markdown', '').replace('```', '').strip()
         return text
     except Exception as e:
@@ -95,9 +96,6 @@ OUTPUT FINAL EXECUTIVE MARKDOWN:
 
 def generate_gap_questions(missing_keywords: List[str], job_description: str, resume_content: str = "") -> List[str]:
     """Perform a deep delta analysis to generate high-signal questions."""
-    if not client:
-        return ["Could you describe your technical experience relevant to this role?"]
-
     prompt = f"""
 ROLE: Expert Technical Recruiter & ATS Analyst.
 TASK: Analyze the 'GAP' between the Candidate's Resume and the Job Description.
@@ -116,11 +114,8 @@ OUTPUT FORMAT: ["Question 1", "Question 2", "Question 3", "Question 4", "Questio
 """
 
     try:
-        response = client.chat.completions.create(
-            model=MODEL_ID,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        text = response.choices[0].message.content.replace('```json', '').replace('```', '').strip()
+        text = _call_model(prompt)
+        text = text.replace('```json', '').replace('```', '').strip()
         if '[' in text and ']' in text:
             text = text[text.find('['):text.rfind(']')+1]
         return json.loads(text)
@@ -131,9 +126,6 @@ OUTPUT FORMAT: ["Question 1", "Question 2", "Question 3", "Question 4", "Questio
 
 def optimize_with_context(resume_markdown: str, job_description: str, user_answers: str) -> str:
     """Aggressive 90%+ optimization pass integrating user answers."""
-    if not client:
-        return resume_markdown
-
     prompt = f"""
 ROLE: Expert Resume Architect.
 GOAL: Achieve a 95%+ ATS match score.
@@ -155,11 +147,8 @@ OUTPUT: ONLY the optimized Markdown.
 """
 
     try:
-        response = client.chat.completions.create(
-            model=MODEL_ID,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        text = response.choices[0].message.content.replace('```markdown', '').replace('```', '').strip()
+        text = _call_model(prompt)
+        text = text.replace('```markdown', '').replace('```', '').strip()
         return text
     except Exception as e:
         print(f"Final Optimization Error: {e}")
@@ -168,9 +157,6 @@ OUTPUT: ONLY the optimized Markdown.
 
 def generate_cover_letter(resume_text: str, job_description: str) -> str:
     """Use Tencent Hy3 via OpenRouter to generate a tailored, professional cover letter."""
-    if not client:
-        return "# ERROR: AI KEY NOT FOUND\n\nPlease set your OPENROUTER_API_KEY environment variable."
-
     prompt = f"""
 ROLE: Professional Career Writer & Cover Letter Specialist.
 TASK: Write a compelling, personalized cover letter for the candidate below.
@@ -214,11 +200,8 @@ OUTPUT THE COVER LETTER IN MARKDOWN:
 """
 
     try:
-        response = client.chat.completions.create(
-            model=MODEL_ID,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        text = response.choices[0].message.content.replace('```markdown', '').replace('```', '').strip()
+        text = _call_model(prompt)
+        text = text.replace('```markdown', '').replace('```', '').strip()
         return text
     except Exception as e:
         print(f"Cover Letter Generation Error: {e}")
