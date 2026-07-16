@@ -9,8 +9,21 @@ import traceback
 import re
 from .parser import parse_file
 from .nlp import get_match_score
-from .llm_engine import optimize_resume_text, generate_gap_questions, optimize_with_context, generate_cover_letter
+from .llm_engine import optimize_resume_text, generate_gap_questions, optimize_with_context, generate_cover_letter, _get_client
 from .pdf_gen import generate_ats_pdf
+
+@app.get("/api/v1/test-ai")
+async def test_ai():
+    """Direct test of OpenRouter AI call — bypasses all parsing. Use to diagnose AI issues."""
+    try:
+        client = _get_client()
+        response = client.chat.completions.create(
+            model="tencent/hy3:free",
+            messages=[{"role": "user", "content": "Say 'AI works' in exactly those 2 words."}]
+        )
+        return {"status": "ok", "model": response.model, "response": response.choices[0].message.content}
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
 
 class ExportRequest(BaseModel):
     markdown: str
