@@ -30,10 +30,26 @@ export default function Workspace({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     const fetchAnalysis = async () => {
+      // Guard against undefined/invalid id
+      if (!id || id === 'undefined' || id === 'null') {
+        console.error('Invalid workspace ID:', id);
+        setLoading(false);
+        return;
+      }
+
       if (!analysisResult || analysisResult.id !== id) {
         try {
           const { data, error } = await supabase.from('resumes').select('*').eq('id', id).single();
-          if (error) throw error;
+          if (error) {
+            console.error('Failed to fetch analysis:', error);
+            setLoading(false);
+            return;
+          }
+          if (!data) {
+            console.error('No data returned for id:', id);
+            setLoading(false);
+            return;
+          }
           const result = {
             id: data.id,
             overall_score: data.after_score || data.before_score,
@@ -49,7 +65,9 @@ export default function Workspace({ params }: { params: { id: string } }) {
           };
           setAnalysisResult(result);
           setMarkdown(result.optimized_content.raw_text);
-        } catch (error) { console.error('Failed to fetch analysis', error); }
+        } catch (error) {
+          console.error('Failed to fetch analysis', error);
+        }
       } else {
         setMarkdown(analysisResult.optimized_content.raw_text);
       }

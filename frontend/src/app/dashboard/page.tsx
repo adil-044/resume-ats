@@ -124,14 +124,20 @@ export default function Dashboard() {
       }).select().single();
 
       if (insertError || !data) {
-        console.error('Supabase insert error:', insertError);
+        console.error('Supabase insert error:', insertError, 'data:', data);
         alert(`Error saving result: ${insertError?.message || 'No data returned'}`);
         setIsAnalyzing(false);
         return;
       }
 
       setAnalysisResult(result);
-      router.push(`/workspace/${data.id}`);
+      if (data?.id) {
+        router.push(`/workspace/${data.id}`);
+      } else {
+        console.error('Insert succeeded but data.id is missing:', data);
+        alert('Resume saved but could not open workspace. Check History tab.');
+        setIsAnalyzing(false);
+      }
     } catch (error: any) {
       alert(`Error: ${error.message}`);
     } finally {
