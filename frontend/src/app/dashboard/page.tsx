@@ -109,7 +109,7 @@ export default function Dashboard() {
     setIsAnalyzing(true);
     try {
       const result = await analyzeResume(resumeFile, jobDescription);
-      const { data } = await supabase.from('resumes').insert({
+      const { data, error: insertError } = await supabase.from('resumes').insert({
         user_id: user.id,
         job_title: result.optimized_content.raw_text.split('\n')[0].replace('# ', '').slice(0, 50) || 'Untitled',
         original_text: result.original_text || '',
@@ -122,6 +122,14 @@ export default function Dashboard() {
         breakdown: result.breakdown,
         formatting_issues: result.formatting_issues
       }).select().single();
+
+      if (insertError || !data) {
+        console.error('Supabase insert error:', insertError);
+        alert(`Error saving result: ${insertError?.message || 'No data returned'}`);
+        setIsAnalyzing(false);
+        return;
+      }
+
       setAnalysisResult(result);
       router.push(`/workspace/${data.id}`);
     } catch (error: any) {
