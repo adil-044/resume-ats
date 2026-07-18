@@ -26,8 +26,11 @@ def _call_model(prompt: str) -> str:
             model=MODEL_ID,
             messages=[{"role": "user", "content": prompt}]
         )
-        print(f"--- AI STATUS: API response received, {len(response.choices[0].message.content)} chars ---")
-        return response.choices[0].message.content
+        content = (response.choices[0].message.content or "").strip()
+        print(f"--- AI STATUS: API response received, {len(content)} chars ---")
+        if not content:
+            raise RuntimeError("OpenRouter returned empty content")
+        return content
     except Exception as e:
         print(f"--- AI ERROR: _call_model exception: {str(e)} ---")
         raise RuntimeError(f"OpenRouter API error: {str(e)}")

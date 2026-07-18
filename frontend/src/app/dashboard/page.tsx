@@ -109,11 +109,25 @@ export default function Dashboard() {
     setIsAnalyzing(true);
     try {
       const result = await analyzeResume(resumeFile, jobDescription);
+      const optimizedText = (result.optimized_content?.raw_text || '').trim();
+
+      if (!optimizedText) {
+        alert('AI returned empty resume content. Try again in a moment.');
+        setIsAnalyzing(false);
+        return;
+      }
+
+      if (optimizedText.includes('AI OPTIMIZATION ERROR') || optimizedText.includes('AI KEY NOT FOUND')) {
+        alert('AI optimization failed on the server. Check backend API key / model, then retry.');
+        setIsAnalyzing(false);
+        return;
+      }
+
       const { data, error: insertError } = await supabase.from('resumes').insert({
         user_id: user.id,
-        job_title: result.optimized_content.raw_text.split('\n')[0].replace('# ', '').slice(0, 50) || 'Untitled',
+        job_title: optimizedText.split('\n')[0].replace(/^#\s*/, '').slice(0, 50) || 'Untitled',
         original_text: result.original_text || '',
-        optimized_text: result.optimized_content.raw_text,
+        optimized_text: optimizedText,
         before_score: result.initial_score,
         after_score: result.overall_score,
         job_description: jobDescription,
@@ -123,21 +137,20 @@ export default function Dashboard() {
         formatting_issues: result.formatting_issues
       }).select().single();
 
-      if (insertError || !data) {
+      if (insertError || !data?.id) {
         console.error('Supabase insert error:', insertError, 'data:', data);
         alert(`Error saving result: ${insertError?.message || 'No data returned'}`);
         setIsAnalyzing(false);
         return;
       }
 
-      setAnalysisResult(result);
-      if (data?.id) {
-        router.push(`/workspace/${data.id}`);
-      } else {
-        console.error('Insert succeeded but data.id is missing:', data);
-        alert('Resume saved but could not open workspace. Check History tab.');
-        setIsAnalyzing(false);
-      }
+      // Store must use Supabase row id (not Railway task UUID) so workspace URL matches
+      setAnalysisResult({
+        ...result,
+        id: data.id,
+        optimized_content: { ...result.optimized_content, raw_text: optimizedText },
+      });
+      router.push(`/workspace/${data.id}`);
     } catch (error: any) {
       alert(`Error: ${error.message}`);
     } finally {

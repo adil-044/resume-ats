@@ -86,6 +86,12 @@ async def upload_resume(
         task_id = str(uuid.uuid4())
         optimized_markdown = optimize_resume_text(cleaned_text, job_description, analysis['missing_keywords'])
 
+        if not (optimized_markdown or "").strip():
+            raise HTTPException(status_code=502, detail="AI returned empty resume content. Retry shortly.")
+
+        if "AI OPTIMIZATION ERROR" in optimized_markdown or "AI KEY NOT FOUND" in optimized_markdown:
+            raise HTTPException(status_code=502, detail="AI optimization failed. Check OPENROUTER_API_KEY / model availability.")
+
         analysis_result = {
             "id": task_id,
             "initial_score": analysis["overall_score"],

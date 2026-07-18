@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { exportCoverLetter } from '@/lib/api';
 import {
@@ -13,8 +14,9 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 
-export default function CoverLetterWorkspace({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function CoverLetterWorkspace() {
+  const routeParams = useParams<{ id: string }>();
+  const id = typeof routeParams?.id === 'string' ? routeParams.id : Array.isArray(routeParams?.id) ? routeParams.id[0] : '';
   const [markdown, setMarkdown] = useState('');
   const [jobTitle, setJobTitle] = useState('');
   const [loading, setLoading] = useState(true);

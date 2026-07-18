@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import { useResumeStore } from '@/store/useResumeStore';
 import { optimizeResume, exportResume } from '@/lib/api';
 import { supabase } from '@/lib/supabase';
@@ -16,7 +17,7 @@ import Link from 'next/link';
 import ReactMarkdown from 'react-markdown';
 import BridgeGapModal from '@/components/BridgeGapModal';
 
-export default function Workspace({ params }: { params: { id: string } }) {
+export default function Workspace() {
   const { analysisResult, setAnalysisResult, jobDescription } = useResumeStore();
   const [markdown, setMarkdown] = useState('');
   const [isOptimizing, setIsOptimizing] = useState(false);
@@ -24,57 +25,81 @@ export default function Workspace({ params }: { params: { id: string } }) {
   const [isGapModalOpen, setIsGapModalOpen] = useState(false);
   const [showJobDescription, setShowJobDescription] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const id = params.id;
+  // Next.js 15+/16: route params are async — never read params.id from props in client pages
+  const routeParams = useParams<{ id: string }>();
+  const id = typeof routeParams?.id === 'string' ? routeParams.id : Array.isArray(routeParams?.id) ? routeParams.id[0] : '';
 
   useEffect(() => {
     const fetchAnalysis = async () => {
-      // Guard against undefined/invalid id
+      setLoadError(null);
+
+      // Guard against undefined/invalid id (Next.js async params bug surface)
       if (!id || id === 'undefined' || id === 'null') {
         console.error('Invalid workspace ID:', id);
+        setLoadError('Invalid workspace link. Open the resume from History again.');
         setLoading(false);
         return;
       }
 
-      if (!analysisResult || analysisResult.id !== id) {
-        try {
-          const { data, error } = await supabase.from('resumes').select('*').eq('id', id).single();
-          if (error) {
-            console.error('Failed to fetch analysis:', error);
-            setLoading(false);
-            return;
-          }
-          if (!data) {
-            console.error('No data returned for id:', id);
-            setLoading(false);
-            return;
-          }
-          const result = {
-            id: data.id,
-            overall_score: data.after_score || data.before_score,
-            initial_score: data.before_score,
-            breakdown: data.breakdown || { keyword_match: 0, semantic_alignment: 0, section_integrity: 0 },
-            missing_keywords: data.missing_keywords || [],
-            matched_keywords: data.matched_keywords || [],
-            formatting_issues: data.formatting_issues || [],
-            optimized_content: { format: 'markdown', raw_text: data.optimized_text || data.original_text },
-            job_title: data.job_title,
-            job_description: data.job_description,
-            original_text: data.original_text
-          };
-          setAnalysisResult(result);
-          setMarkdown(result.optimized_content.raw_text);
-        } catch (error) {
-          console.error('Failed to fetch analysis', error);
+      // Prefer fresh Supabase row keyed by URL id (store may still hold Railway task UUID)
+      const storeMatches =
+        analysisResult &&
+        analysisResult.id === id &&
+        Boolean(analysisResult.optimized_content?.raw_text?.trim());
+
+      if (storeMatches) {
+        setMarkdown(analysisResult!.optimized_content.raw_text);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.from('resumes').select('*').eq('id', id).single();
+        if (error) {
+          console.error('Failed to fetch analysis:', error);
+          setLoadError(error.message || 'Could not load resume from database.');
+          setLoading(false);
+          return;
         }
-      } else {
-        setMarkdown(analysisResult.optimized_content.raw_text);
+        if (!data) {
+          setLoadError('Resume not found.');
+          setLoading(false);
+          return;
+        }
+
+        const rawText = (data.optimized_text || data.original_text || '').trim();
+        if (!rawText) {
+          setLoadError('Resume content is empty. Re-run analysis from the dashboard.');
+        }
+
+        const result = {
+          id: data.id,
+          overall_score: data.after_score || data.before_score,
+          initial_score: data.before_score,
+          breakdown: data.breakdown || { keyword_match: 0, semantic_alignment: 0, section_integrity: 0 },
+          missing_keywords: data.missing_keywords || [],
+          matched_keywords: data.matched_keywords || [],
+          formatting_issues: data.formatting_issues || [],
+          optimized_content: { format: 'markdown', raw_text: rawText },
+          job_title: data.job_title,
+          job_description: data.job_description,
+          original_text: data.original_text
+        };
+        setAnalysisResult(result);
+        setMarkdown(rawText);
+      } catch (error) {
+        console.error('Failed to fetch analysis', error);
+        setLoadError('Unexpected error loading workspace.');
       }
       setLoading(false);
     };
     fetchAnalysis();
-  }, [id, analysisResult, setAnalysisResult]);
+    // Intentionally depend on id only — avoid re-fetch loops when setAnalysisResult updates store
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   const handleAIRephrase = async () => {
     setIsOptimizing(true);
@@ -106,10 +131,12 @@ export default function Workspace({ params }: { params: { id: string } }) {
     );
   }
 
-  if (!analysisResult) {
+  if (!analysisResult || loadError) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center bg-[#0B0B12] gap-8">
-        <p className="text-[#52525E] font-syne text-sm">Analysis not found.</p>
+      <div className="h-screen flex flex-col items-center justify-center bg-[#0B0B12] gap-8 px-6 text-center">
+        <p className="text-[#9090A8] font-syne text-sm max-w-md">
+          {loadError || 'Analysis not found.'}
+        </p>
         <Link href="/dashboard" className="px-6 py-3 bg-[#7C3AED] text-white rounded-xl font-syne font-bold text-xs uppercase tracking-widest">
           Back to Dashboard
         </Link>
