@@ -122,22 +122,22 @@ export default function Workspace() {
 
   if (loading) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center bg-[#0B0B12] gap-8">
-        <div className="w-16 h-16 rounded-2xl border border-[#1E1E30] flex items-center justify-center">
-          <Loader2 className="h-7 w-7 text-[#7C3AED] animate-spin" />
+      <div className="h-screen flex flex-col items-center justify-center bg-[#0C0C0B] gap-8">
+        <div className="w-16 h-16 rounded-2xl border border-[#2A2824] flex items-center justify-center">
+          <Loader2 className="h-7 w-7 text-[#C4A574] animate-spin" />
         </div>
-        <p className="text-[#52525E] font-syne font-bold uppercase tracking-widest text-xs">Loading...</p>
+        <p className="text-[#6B675F] font-display font-bold uppercase tracking-widest text-xs">Loading...</p>
       </div>
     );
   }
 
   if (!analysisResult || loadError) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center bg-[#0B0B12] gap-8 px-6 text-center">
-        <p className="text-[#9090A8] font-syne text-sm max-w-md">
+      <div className="h-screen flex flex-col items-center justify-center bg-[#0C0C0B] gap-8 px-6 text-center">
+        <p className="text-[#A39E93] font-display text-sm max-w-md">
           {loadError || 'Analysis not found.'}
         </p>
-        <Link href="/dashboard" className="px-6 py-3 bg-[#7C3AED] text-white rounded-xl font-syne font-bold text-xs uppercase tracking-widest">
+        <Link href="/dashboard" className="px-6 py-3 bg-[#C4A574] text-white rounded-xl font-display font-bold text-xs uppercase tracking-widest">
           Back to Dashboard
         </Link>
       </div>
@@ -153,23 +153,23 @@ export default function Workspace() {
   ];
 
   return (
-    <div className="h-screen flex flex-col bg-[#0B0B12] overflow-hidden">
+    <div className="h-screen flex flex-col bg-[#0C0C0B] overflow-hidden">
       {/* ─── TOPBAR ─── */}
-      <header className="h-16 bg-[#0B0B12]/95 backdrop-blur-xl border-b border-[#1E1E30] px-4 lg:px-6 flex items-center justify-between shrink-0 z-30">
+      <header className="h-16 bg-[#0C0C0B]/95 backdrop-blur-xl border-b border-[#2A2824] px-4 lg:px-6 flex items-center justify-between shrink-0 z-30">
         {/* Left: back + title */}
         <div className="flex items-center gap-4">
           <Link
             href="/dashboard"
-            className="p-2.5 rounded-xl bg-[#12121C] border border-[#1E1E30] text-[#9090A8] hover:text-[#F1F0F5] hover:border-[#7C3AED]/30 transition-all"
+            className="p-2.5 rounded-xl bg-[#161614] border border-[#2A2824] text-[#A39E93] hover:text-[#F2EFE8] hover:border-[#C4A574]/30 transition-all"
           >
             <ChevronLeft className="h-5 w-5" />
           </Link>
-          <div className="h-6 w-px bg-[#1E1E30] hidden sm:block" />
+          <div className="h-6 w-px bg-[#2A2824] hidden sm:block" />
           <div className="flex flex-col">
-            <span className="text-[9px] font-syne font-bold uppercase tracking-widest text-[#52525E]">Active Profile</span>
+            <span className="text-[9px] font-display font-bold uppercase tracking-widest text-[#6B675F]">Active Profile</span>
             <div className="flex items-center gap-2">
-              <FileText className="h-3.5 w-3.5 text-[#7C3AED]/60" />
-              <span className="font-syne font-bold text-[#F1F0F5] text-sm truncate max-w-[160px] sm:max-w-[240px]">
+              <FileText className="h-3.5 w-3.5 text-[#C4A574]/60" />
+              <span className="font-display font-bold text-[#F2EFE8] text-sm truncate max-w-[160px] sm:max-w-[240px]">
                 {analysisResult.job_title || 'Untitled'}
               </span>
             </div>
@@ -177,15 +177,15 @@ export default function Workspace() {
         </div>
 
         {/* Center: pane toggles */}
-        <div className="hidden md:flex items-center gap-1 p-1 bg-[#12121C] border border-[#1E1E30] rounded-xl">
+        <div className="hidden md:flex items-center gap-1 p-1 bg-[#161614] border border-[#2A2824] rounded-xl">
           {paneButtons.map(pane => (
             <button
               key={pane.id}
               onClick={() => setActivePane(pane.id as any)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-syne font-bold text-[10px] uppercase tracking-widest transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-display font-bold text-[10px] uppercase tracking-widest transition-all ${
                 activePane === pane.id
-                  ? 'bg-[#7C3AED] text-white'
-                  : 'text-[#9090A8] hover:text-[#F1F0F5]'
+                  ? 'bg-[#C4A574] text-white'
+                  : 'text-[#A39E93] hover:text-[#F2EFE8]'
               }`}
             >
               {pane.icon} {pane.label}
@@ -198,18 +198,18 @@ export default function Workspace() {
           <button
             onClick={handleAIRephrase}
             disabled={isOptimizing}
-            className="hidden sm:flex items-center gap-2 px-4 py-2.5 bg-[#12121C] border border-[#1E1E30] rounded-xl text-[#F1F0F5] font-syne font-bold text-xs uppercase tracking-widest hover:border-[#7C3AED]/30 transition-all disabled:opacity-50"
+            className="hidden sm:flex items-center gap-2 px-4 py-2.5 bg-[#161614] border border-[#2A2824] rounded-xl text-[#F2EFE8] font-display font-bold text-xs uppercase tracking-widest hover:border-[#C4A574]/30 transition-all disabled:opacity-50"
           >
             {isOptimizing ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <Sparkles className="h-4 w-4 text-[#7C3AED]" />
+              <Sparkles className="h-4 w-4 text-[#C4A574]" />
             )}
             Optimize
           </button>
           <button
             onClick={async () => { try { await exportResume(markdown); } catch (e) { alert('Export failed'); } }}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#7C3AED] text-white rounded-xl font-syne font-bold text-xs uppercase tracking-widest hover:bg-[#9D6FFF] transition-all shadow-[0_0_15px_rgba(124,58,237,0.3)]"
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#C4A574] text-white rounded-xl font-display font-bold text-xs uppercase tracking-widest hover:bg-[#D4B88A] transition-all "
           >
             <DownloadCloud className="h-4 w-4" /> Export PDF
           </button>
@@ -218,25 +218,25 @@ export default function Workspace() {
 
       <div className="flex-1 flex overflow-hidden">
         {/* ─── LEFT SIDEBAR: SCORE + KEYWORDS ─── */}
-        <aside className="w-72 bg-[#0B0B12] border-r border-[#1E1E30] overflow-y-auto hidden lg:flex flex-col shrink-0">
+        <aside className="w-72 bg-[#0C0C0B] border-r border-[#2A2824] overflow-y-auto hidden lg:flex flex-col shrink-0">
           <div className="p-6 space-y-8 flex-1">
 
             {/* Score */}
             <div>
               <div className="flex justify-between items-end mb-4">
-                <h3 className="text-[10px] font-syne font-bold uppercase tracking-widest text-[#52525E]">Match Score</h3>
-                <span className="text-[9px] font-syne font-bold text-[#52525E]">Base: {analysisResult.initial_score}%</span>
+                <h3 className="text-[10px] font-display font-bold uppercase tracking-widest text-[#6B675F]">Match Score</h3>
+                <span className="text-[9px] font-display font-bold text-[#6B675F]">Base: {analysisResult.initial_score}%</span>
               </div>
               <div className="card p-6 text-center">
-                <span className="text-5xl font-syne font-extrabold text-[#F1F0F5] tracking-tighter">
+                <span className="text-5xl font-display font-extrabold text-[#F2EFE8] tracking-tighter">
                   {analysisResult.overall_score}
-                  <span className="text-lg text-[#52525E]">%</span>
+                  <span className="text-lg text-[#6B675F]">%</span>
                 </span>
-                <div className="w-full h-1.5 bg-[#12121C] rounded-full mt-4 overflow-hidden">
+                <div className="w-full h-1.5 bg-[#161614] rounded-full mt-4 overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${analysisResult.overall_score}%` }}
-                    className="h-full bg-gradient-to-r from-[#7C3AED] to-[#22D3EE] rounded-full"
+                    className="h-full bg-gradient-to-r from-[#C4A574] to-[#A39E93] rounded-full"
                   />
                 </div>
               </div>
@@ -247,13 +247,13 @@ export default function Workspace() {
               <div>
                 <button
                   onClick={() => setShowJobDescription(!showJobDescription)}
-                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-[#12121C] border border-[#1E1E30] text-[#F1F0F5] hover:border-[#7C3AED]/20 transition-all mb-3"
+                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-[#161614] border border-[#2A2824] text-[#F2EFE8] hover:border-[#C4A574]/20 transition-all mb-3"
                 >
                   <div className="flex items-center gap-2.5">
-                    <Briefcase className="h-4 w-4 text-[#7C3AED]" />
-                    <span className="text-[10px] font-syne font-bold uppercase tracking-widest">Target JD</span>
+                    <Briefcase className="h-4 w-4 text-[#C4A574]" />
+                    <span className="text-[10px] font-display font-bold uppercase tracking-widest">Target JD</span>
                   </div>
-                  <span className="text-[#52525E]">{showJobDescription ? '−' : '+'}</span>
+                  <span className="text-[#6B675F]">{showJobDescription ? '−' : '+'}</span>
                 </button>
                 <AnimatePresence>
                   {showJobDescription && (
@@ -263,7 +263,7 @@ export default function Workspace() {
                       exit={{ height: 0, opacity: 0 }}
                       className="overflow-hidden"
                     >
-                      <div className="bg-[#12121C] border border-[#1E1E30] rounded-xl p-4 max-h-40 overflow-y-auto text-[#9090A8] text-xs leading-relaxed font-dm-sans">
+                      <div className="bg-[#161614] border border-[#2A2824] rounded-xl p-4 max-h-40 overflow-y-auto text-[#A39E93] text-xs leading-relaxed font-body">
                         {jdText}
                       </div>
                     </motion.div>
@@ -275,13 +275,13 @@ export default function Workspace() {
             {/* Keywords */}
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-[10px] font-syne font-bold uppercase tracking-widest text-[#52525E] flex items-center gap-2">
-                  <Zap className="h-4 w-4 text-[#7C3AED]" /> Keywords
+                <h3 className="text-[10px] font-display font-bold uppercase tracking-widest text-[#6B675F] flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-[#C4A574]" /> Keywords
                 </h3>
                 {analysisResult.missing_keywords.length > 0 && (
                   <button
                     onClick={() => setIsGapModalOpen(true)}
-                    className="text-[9px] font-syne font-bold text-[#7C3AED] uppercase tracking-widest bg-[#7C3AED]/10 border border-[#7C3AED]/20 px-3 py-1.5 rounded-lg hover:bg-[#7C3AED]/20 transition-all"
+                    className="text-[9px] font-display font-bold text-[#C4A574] uppercase tracking-widest bg-[#C4A574]/10 border border-[#C4A574]/20 px-3 py-1.5 rounded-lg hover:bg-[#C4A574]/20 transition-all"
                   >
                     Fix Gaps
                   </button>
@@ -289,15 +289,15 @@ export default function Workspace() {
               </div>
               <div className="space-y-2">
                 {analysisResult.matched_keywords?.map((kw: string, i: number) => (
-                  <div key={i} className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#12121C] border border-[#1E1E30]">
-                    <span className="text-[11px] font-dm-sans font-semibold text-[#10B981]">{kw}</span>
+                  <div key={i} className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#161614] border border-[#2A2824]">
+                    <span className="text-[11px] font-body font-semibold text-[#10B981]">{kw}</span>
                     <CheckCircle2 className="h-3.5 w-3.5 text-[#10B981]" />
                   </div>
                 ))}
                 {analysisResult.missing_keywords.map((kw: string, i: number) => (
-                  <div key={i} className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#12121C] border border-[#1E1E30]/50 opacity-60">
-                    <span className="text-[11px] font-dm-sans text-[#9090A8]">{kw}</span>
-                    <XCircle className="h-3.5 w-3.5 text-[#52525E]" />
+                  <div key={i} className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-[#161614] border border-[#2A2824]/50 opacity-60">
+                    <span className="text-[11px] font-body text-[#A39E93]">{kw}</span>
+                    <XCircle className="h-3.5 w-3.5 text-[#6B675F]" />
                   </div>
                 ))}
               </div>
@@ -309,25 +309,25 @@ export default function Workspace() {
         {/* ─── MAIN: EDITOR / PREVIEW ─── */}
         <main className="flex-1 flex overflow-hidden">
           {(activePane === 'editor' || activePane === 'split') && (
-            <div className={`flex flex-col bg-[#0B0B12] ${activePane === 'split' ? 'border-r border-[#1E1E30]' : ''}`}>
+            <div className={`flex flex-col bg-[#0C0C0B] ${activePane === 'split' ? 'border-r border-[#2A2824]' : ''}`}>
               <textarea
                 value={markdown}
                 onChange={(e) => setMarkdown(e.target.value)}
                 spellCheck={false}
                 placeholder="Your optimized resume will appear here..."
-                className="flex-1 p-8 lg:p-12 font-mono text-sm leading-relaxed text-[#F1F0F5] bg-transparent outline-none resize-none placeholder-[#52525E]"
+                className="flex-1 p-8 lg:p-12 font-mono text-sm leading-relaxed text-[#F2EFE8] bg-transparent outline-none resize-none placeholder-[#6B675F]"
               />
             </div>
           )}
 
           {(activePane === 'preview' || activePane === 'split') && (
-            <div className="flex-1 bg-[#0B0B12] overflow-y-auto p-6 lg:p-12">
+            <div className="flex-1 bg-[#0C0C0B] overflow-y-auto p-6 lg:p-12">
               <div className="max-w-[850px] mx-auto bg-white min-h-[1100px] shadow-2xl rounded-sm p-16 lg:p-20">
                 <style>{`
                   .resume-prose h1 { font-weight: 900; text-transform: uppercase; font-size: 2.5rem; margin-bottom: 0.5rem; letter-spacing: -0.04em; color: #000; border-bottom: 4px solid #f1f5f9; padding-bottom: 0.5rem; }
                   .resume-prose h2 { border-bottom: 1.5px solid #f1f5f9; padding-bottom: 0.4rem; text-transform: uppercase; font-weight: 900; letter-spacing: 0.1em; color: #1e293b; margin-top: 2rem; font-size: 0.8rem; }
                   .resume-prose p, .resume-prose li { line-height: 1.7; color: #475569; font-size: 0.9rem; }
-                  .resume-prose b, .resume-prose strong { color: #7C3AED; font-weight: 800; }
+                  .resume-prose b, .resume-prose strong { color: #C4A574; font-weight: 800; }
                 `}</style>
                 <div className="resume-prose">
                   <ReactMarkdown>{markdown}</ReactMarkdown>

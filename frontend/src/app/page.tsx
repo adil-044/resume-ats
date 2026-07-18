@@ -5,6 +5,7 @@ import Footer from '@/components/Footer';
 import Hero from '@/components/landing/Hero';
 import Problem from '@/components/landing/Problem';
 import HowItWorks from '@/components/landing/HowItWorks';
+import AmbientScrub from '@/components/landing/AmbientScrub';
 import Proof from '@/components/landing/Proof';
 import Social from '@/components/landing/Social';
 import FAQ from '@/components/landing/FAQ';
@@ -18,6 +19,7 @@ export default function Home() {
         <Hero />
         <Problem />
         <HowItWorks />
+        <AmbientScrub />
         <Proof />
         <Social />
         <FAQ />

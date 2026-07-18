@@ -1,9 +1,14 @@
 'use client';
 
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useHeroTimeline } from './useLandingGsap';
+import {
+  CinematicMedia,
+  resolveHeroMedia,
+  type MediaSources,
+} from '@/components/cinematic/CinematicMedia';
 
 const HeroCanvas = dynamic(() => import('@/components/HeroCanvas'), {
   ssr: false,
@@ -15,13 +20,26 @@ const HEADLINE = ['Stop getting', 'ghosted by ATS.'];
 export default function Hero() {
   const root = useRef<HTMLElement>(null);
   useHeroTimeline(root);
+  const [media, setMedia] = useState<MediaSources>({});
+
+  useEffect(() => {
+    resolveHeroMedia().then(setMedia);
+  }, []);
+
+  const hasFilm = Boolean(media.video || media.poster);
 
   return (
     <section
       ref={root}
       className="relative min-h-screen flex flex-col justify-end md:justify-center px-6 pt-28 pb-20 overflow-hidden"
     >
-      <HeroCanvas />
+      {hasFilm ? (
+        <div className="absolute inset-0 -z-10">
+          <CinematicMedia sources={media} intensity={1.1} />
+        </div>
+      ) : (
+        <HeroCanvas />
+      )}
 
       <div className="relative z-10 max-w-[1200px] mx-auto w-full">
         <p
