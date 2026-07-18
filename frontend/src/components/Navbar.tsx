@@ -32,8 +32,12 @@ export default function Navbar() {
       >
         <div className="max-w-[1200px] mx-auto px-6">
           <div className="flex items-center justify-between py-5">
-            <Link href="/" className="font-display text-xl text-[#F2EFE8] tracking-tight">
-              HireReady
+            <Link href="/" className="flex items-center gap-3 group">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/media/svg/mark.svg" alt="" className="w-9 h-9 rounded-[10px]" />
+              <span className="font-display text-xl text-[#F2EFE8] tracking-tight">
+                HireReady
+              </span>
             </Link>
 
             <div className="hidden md:flex items-center gap-8">

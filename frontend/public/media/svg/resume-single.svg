@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-120 -140 240 280" fill="none" role="img" aria-label="Isometric resume">
+  <defs>
+    <filter id="soft2" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <g filter="url(#soft2)">
+    
+  <g>
+    <polygon points="-31.52,-105.00 26.67,-71.40 29.10,-72.80 -29.10,-106.40" fill="#F5F0E6" stroke="#1A1814" stroke-width="0.8"/>
+    <polygon points="26.67,18.20 29.10,16.80 29.10,-72.80 26.67,-71.40" fill="#D4CBB8" stroke="#1A1814" stroke-width="0.8"/>
+    <polygon points="-31.52,-15.40 26.67,18.20 26.67,-71.40 -31.52,-105.00" fill="#EDE6D9" stroke="#1A1814" stroke-width="0.8"/>
+    <line x1="-25.46" y1="-86.10" x2="20.61" y2="-59.50" stroke="#1A1814" stroke-width="3" stroke-linecap="round" opacity="0.55"/>
+    <line x1="-25.46" y1="-91.70" x2="20.61" y2="-65.10" stroke="#1A1814" stroke-width="1.2" stroke-linecap="round" opacity="0.35"/>
+<line x1="-25.46" y1="-85.54" x2="10.91" y2="-64.54" stroke="#1A1814" stroke-width="1.2" stroke-linecap="round" opacity="0.31"/>
+<line x1="-25.46" y1="-79.38" x2="20.61" y2="-52.78" stroke="#1A1814" stroke-width="1.2" stroke-linecap="round" opacity="0.26999999999999996"/>
+<line x1="-25.46" y1="-73.22" x2="10.91" y2="-52.22" stroke="#1A1814" stroke-width="1.2" stroke-linecap="round" opacity="0.22999999999999998"/>
+<line x1="-25.46" y1="-67.06" x2="20.61" y2="-40.46" stroke="#1A1814" stroke-width="1.2" stroke-linecap="round" opacity="0.18999999999999997"/>
+  </g>
+  </g>
+</svg>

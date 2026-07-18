@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-220 -180 440 360" fill="none" role="img" aria-label="HireReady isometric scene">
+  <defs>
+    <filter id="s3" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity="0.45"/>
+    </filter>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#161614" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#0C0C0B" stop-opacity="0.9"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="0" cy="110" rx="160" ry="28" fill="#000" opacity="0.35"/>
+  <g filter="url(#s3)">
+    
+  <g>
+    <polygon points="-74.69,-127.68 -21.34,-96.88 -19.40,-98.00 -72.75,-128.80" fill="#F5F0E6" stroke="#1A1814" stroke-width="0.8"/>
+    <polygon points="-21.34,-15.68 -19.40,-16.80 -19.40,-98.00 -21.34,-96.88" fill="#D4CBB8" stroke="#1A1814" stroke-width="0.8"/>
+    <polygon points="-74.69,-46.48 -21.34,-15.68 -21.34,-96.88 -74.69,-127.68" fill="#EDE6D9" stroke="#1A1814" stroke-width="0.8"/>
+    <line x1="-68.62" y1="-108.78" x2="-27.40" y2="-84.98" stroke="#1A1814" stroke-width="3" stroke-linecap="round" opacity="0.55"/>
+    <line x1="-68.62" y1="-114.38" x2="-27.40" y2="-90.58" stroke="#1A1814" stroke-width="1.2" stroke-linecap="round" opacity="0.35"/>
+<line x1="-68.62" y1="-108.22" x2="-37.10" y2="-90.02" stroke="#1A1814" stroke-width="1.2" stroke-linecap="round" opacity="0.31"/>
+<line x1="-68.62" y1="-102.06" x2="-27.40" y2="-78.26" stroke="#1A1814" stroke-width="1.2" stroke-linecap="round" opacity="0.26999999999999996"/>
+<line x1="-68.62" y1="-95.90" x2="-37.10" y2="-77.70" stroke="#1A1814" stroke-width="1.2" stroke-linecap="round" opacity="0.22999999999999998"/>
+<line x1="-68.62" y1="-89.74" x2="-27.40" y2="-65.94" stroke="#1A1814" stroke-width="1.2" stroke-linecap="round" opacity="0.18999999999999997"/>
+  </g>
+    
+  <g>
+    <polygon points="-40.74,-85.68 12.61,-54.88 14.55,-56.00 -38.80,-86.80" fill="#F5F0E6" stroke="#1A1814" stroke-width="0.8"/>
+    <polygon points="12.61,26.32 14.55,25.20 14.55,-56.00 12.61,-54.88" fill="#D4CBB8" stroke="#1A1814" stroke-width="0.8"/>
+    <polygon points="-40.74,-4.48 12.61,26.32 12.61,-54.88 -40.74,-85.68" fill="#EDE6D9" stroke="#1A1814" stroke-width="0.8"/>
+    <line x1="-34.68" y1="-66.78" x2="6.55" y2="-42.98" stroke="#1A1814" stroke-width="3" stroke-linecap="round" opacity="0.55"/>
+    <line x1="-34.68" y1="-72.38" x2="6.55" y2="-48.58" stroke="#1A1814" stroke-width="1.2" stroke-linecap="round" opacity="0.35"/>
+<line x1="-34.68" y1="-66.22" x2="-3.15" y2="-48.02" stroke="#1A1814" stroke-width="1.2" stroke-linecap="round" opacity="0.31"/>
+<line x1="-34.68" y1="-60.06" x2="6.55" y2="-36.26" stroke="#1A1814" stroke-width="1.2" stroke-linecap="round" opacity="0.26999999999999996"/>
+<line x1="-34.68" y1="-53.90" x2="-3.15" y2="-35.70" stroke="#1A1814" stroke-width="1.2" stroke-linecap="round" opacity="0.22999999999999998"/>
+<line x1="-34.68" y1="-47.74" x2="6.55" y2="-23.94" stroke="#1A1814" stroke-width="1.2" stroke-linecap="round" opacity="0.18999999999999997"/>
+  </g>
+    
+  <g>
+    <polygon points="56.26,-61.88 104.75,-33.88 106.69,-35.00 58.20,-63.00" fill="#F5F0E6" stroke="#1A1814" stroke-width="0.8"/>
+    <polygon points="104.75,38.92 106.69,37.80 106.69,-35.00 104.75,-33.88" fill="#D4CBB8" stroke="#1A1814" stroke-width="0.8"/>
+    <polygon points="56.26,10.92 104.75,38.92 104.75,-33.88 56.26,-61.88" fill="#F2EDE3" stroke="#1A1814" stroke-width="0.8"/>
+    <line x1="62.32" y1="-42.98" x2="98.69" y2="-21.98" stroke="#1A1814" stroke-width="3" stroke-linecap="round" opacity="0.55"/>
+    <line x1="62.32" y1="-48.58" x2="98.69" y2="-27.58" stroke="#1A1814" stroke-width="1.2" stroke-linecap="round" opacity="0.35"/>
+<line x1="62.32" y1="-42.42" x2="88.99" y2="-27.02" stroke="#1A1814" stroke-width="1.2" stroke-linecap="round" opacity="0.31"/>
+<line x1="62.32" y1="-36.26" x2="98.69" y2="-15.26" stroke="#1A1814" stroke-width="1.2" stroke-linecap="round" opacity="0.26999999999999996"/>
+<line x1="62.32" y1="-30.10" x2="88.99" y2="-14.70" stroke="#1A1814" stroke-width="1.2" stroke-linecap="round" opacity="0.22999999999999998"/>
+<line x1="62.32" y1="-23.94" x2="98.69" y2="-2.94" stroke="#1A1814" stroke-width="1.2" stroke-linecap="round" opacity="0.18999999999999997"/>
+  </g>
+  </g>
+  <!-- copper accent chip -->
+  <g transform="translate(90,-40)">
+    <rect x="-28" y="-18" width="56" height="36" rx="4" fill="#C4A574"/>
+    <text x="0" y="2" text-anchor="middle" dominant-baseline="central" fill="#0C0C0B" font-family="ui-sans-serif,system-ui" font-size="14" font-weight="700">95%</text>
+  </g>
+</svg>

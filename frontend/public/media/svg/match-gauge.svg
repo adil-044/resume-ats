@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" role="img" aria-label="Match score">
+  <rect width="200" height="200" rx="12" fill="#161614"/>
+  
+  <g transform="translate(100,100)">
+    <circle r="58" fill="none" stroke="#2A2824" stroke-width="8"/>
+    <circle r="58" fill="none" stroke="#C4A574" stroke-width="8" stroke-linecap="round"
+      stroke-dasharray="364.42" stroke-dashoffset="18.22"
+      transform="rotate(-90)"/>
+    <text text-anchor="middle" dominant-baseline="central" fill="#F2EFE8" font-family="ui-sans-serif,system-ui" font-size="28" font-weight="600">95</text>
+  </g>
+  <text x="100" y="168" text-anchor="middle" fill="#A39E93" font-family="ui-sans-serif,system-ui" font-size="11" letter-spacing="0.12em">MATCH</text>
+</svg>

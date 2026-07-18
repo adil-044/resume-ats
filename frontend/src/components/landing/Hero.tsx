@@ -9,6 +9,7 @@ import {
   resolveHeroMedia,
   type MediaSources,
 } from '@/components/cinematic/CinematicMedia';
+import SvgHeroScene from '@/components/assets/SvgHeroScene';
 
 const HeroCanvas = dynamic(() => import('@/components/HeroCanvas'), {
   ssr: false,
@@ -21,9 +22,13 @@ export default function Hero() {
   const root = useRef<HTMLElement>(null);
   useHeroTimeline(root);
   const [media, setMedia] = useState<MediaSources>({});
+  const [prefer3d, setPrefer3d] = useState(false);
 
   useEffect(() => {
     resolveHeroMedia().then(setMedia);
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    // Prefer SVG isometric scene by default (craft + light); 3D opt-in via ?hero=3d
+    setPrefer3d(new URLSearchParams(window.location.search).get('hero') === '3d' && !mq.matches);
   }, []);
 
   const hasFilm = Boolean(media.video || media.poster);
@@ -37,8 +42,10 @@ export default function Hero() {
         <div className="absolute inset-0 -z-10">
           <CinematicMedia sources={media} intensity={1.1} />
         </div>
-      ) : (
+      ) : prefer3d ? (
         <HeroCanvas />
+      ) : (
+        <SvgHeroScene />
       )}
 
       <div className="relative z-10 max-w-[1200px] mx-auto w-full">
@@ -49,7 +56,7 @@ export default function Hero() {
           HireReady
         </p>
 
-        <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-[#F2EFE8] leading-[0.95] tracking-tight max-w-4xl mb-8">
+        <h1 className="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl text-[#F2EFE8] leading-[0.95] tracking-tight max-w-4xl mb-8 text-balance">
           {HEADLINE.map((line, li) => (
             <span key={li} className="block">
               {line.split(' ').map((word, wi) => (
@@ -68,7 +75,7 @@ export default function Hero() {
 
         <p
           data-hero="sub"
-          className="font-body text-base md:text-lg text-[#A39E93] max-w-xl leading-relaxed mb-10 opacity-0"
+          className="font-body text-base md:text-lg text-[#A39E93] max-w-xl leading-relaxed mb-10 opacity-0 text-pretty"
         >
           73% of resumes never reach a human. Match yours to the job, see the gaps, fix them —
           before the algorithm decides.

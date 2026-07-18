@@ -116,14 +116,18 @@ export default function Proof() {
 
           {showUpsell && teaserScore !== null && (
             <div className="lg:col-span-2 paper-panel p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div>
-                <p className="font-body text-xs uppercase tracking-widest text-[#1A1814]/50 mb-2">
-                  Teaser match
-                </p>
-                <p className="font-display text-5xl text-[#1A1814]">{Math.round(teaserScore)}</p>
-                <p className="font-body text-sm text-[#1A1814]/70 mt-2">
-                  Sign in to unlock the full rewrite and workspace.
-                </p>
+              <div className="flex items-center gap-6">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/media/svg/match-gauge.svg" alt="" className="w-20 h-20 shrink-0" />
+                <div>
+                  <p className="font-body text-xs uppercase tracking-widest text-[#1A1814]/50 mb-2">
+                    Teaser match
+                  </p>
+                  <p className="font-display text-5xl text-[#1A1814]">{Math.round(teaserScore)}</p>
+                  <p className="font-body text-sm text-[#1A1814]/70 mt-2">
+                    Sign in to unlock the full rewrite and workspace.
+                  </p>
+                </div>
               </div>
               <Link
                 href="/auth/login"
