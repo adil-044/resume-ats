@@ -1,10 +1,9 @@
 'use client';
 
-import { FileText, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { AnimatePresence, motion } from 'framer-motion';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -25,47 +24,37 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
+        className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-300 ${
           isScrolled
-            ? 'bg-[#0B0B12]/90 backdrop-blur-xl border-b border-[#1E1E30] shadow-[0_4px_30px_rgba(0,0,0,0.5)]'
+            ? 'bg-[#0C0C0B]/92 backdrop-blur-md border-b border-[#2A2824]'
             : 'bg-transparent'
         }`}
       >
         <div className="max-w-[1200px] mx-auto px-6">
-          <div className="flex items-center justify-between h-18 py-4">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="relative">
-                <div className="w-10 h-10 rounded-xl bg-[#7C3AED] flex items-center justify-center shadow-[0_0_20px_rgba(124,58,237,0.4)] group-hover:shadow-[0_0_30px_rgba(124,58,237,0.6)] transition-all duration-300">
-                  <FileText className="h-5 w-5 text-white" />
-                </div>
-                <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-[#22D3EE] animate-pulse" />
-              </div>
-              <span className="text-lg font-syne font-extrabold text-[#F1F0F5] tracking-tight">
-                HIRE<span className="text-[#7C3AED]">READY</span>
-              </span>
+          <div className="flex items-center justify-between py-5">
+            <Link href="/" className="font-display text-xl text-[#F2EFE8] tracking-tight">
+              HireReady
             </Link>
 
-            {/* Desktop: only Login + CTA */}
-            <div className="hidden md:flex items-center gap-4">
+            <div className="hidden md:flex items-center gap-8">
               <Link
                 href="/auth/login"
-                className="text-sm font-dm-sans font-medium text-[#9090A8] hover:text-[#F1F0F5] transition-colors px-4 py-2"
+                className="font-body text-sm text-[#A39E93] hover:text-[#F2EFE8] transition-colors"
               >
-                Log In
+                Log in
               </Link>
               <Link
                 href="#analyzer"
-                className="px-5 py-2.5 bg-[#7C3AED] text-white text-sm font-dm-sans font-semibold rounded-xl hover:bg-[#9D6FFF] transition-all duration-200 shadow-[0_0_20px_rgba(124,58,237,0.3)] hover:shadow-[0_0_30px_rgba(124,58,237,0.5)]"
+                className="btn-signal px-5 py-2.5 rounded-md text-sm"
               >
-                Analyze Free
+                Analyze free
               </Link>
             </div>
 
-            {/* Mobile toggle */}
             <button
+              type="button"
               onClick={() => setIsMobileOpen(!isMobileOpen)}
-              className="md:hidden p-2.5 rounded-xl bg-[#12121C] border border-[#1E1E30] text-[#9090A8] hover:text-[#F1F0F5] transition-colors"
+              className="md:hidden p-2 text-[#A39E93] hover:text-[#F2EFE8]"
               aria-label="Toggle menu"
             >
               {isMobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -74,40 +63,32 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* Mobile overlay */}
-      <AnimatePresence>
-        {isMobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[99] bg-[#0B0B12]/95 backdrop-blur-xl flex flex-col items-center justify-center gap-6 md:hidden"
+      {isMobileOpen && (
+        <div className="fixed inset-0 z-[99] bg-[#0C0C0B] flex flex-col items-center justify-center gap-8 md:hidden">
+          <button
+            type="button"
+            className="absolute top-6 right-6 p-2 text-[#A39E93]"
+            onClick={() => setIsMobileOpen(false)}
+            aria-label="Close menu"
           >
-            <Link
-              href="/"
-              onClick={() => setIsMobileOpen(false)}
-              className="text-[#9090A8] hover:text-[#F1F0F5] text-sm font-dm-sans font-medium transition-colors py-3"
-            >
-              Home
-            </Link>
-            <Link
-              href="/auth/login"
-              onClick={() => setIsMobileOpen(false)}
-              className="text-[#9090A8] hover:text-[#F1F0F5] text-sm font-dm-sans font-medium transition-colors py-3"
-            >
-              Log In
-            </Link>
-            <Link
-              href="#analyzer"
-              onClick={() => setIsMobileOpen(false)}
-              className="mt-2 px-8 py-4 bg-[#7C3AED] text-white text-sm font-dm-sans font-semibold rounded-xl shadow-[0_0_20px_rgba(124,58,237,0.4)]"
-            >
-              Analyze Free
-            </Link>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <X className="h-5 w-5" />
+          </button>
+          <Link
+            href="/auth/login"
+            onClick={() => setIsMobileOpen(false)}
+            className="font-body text-lg text-[#A39E93]"
+          >
+            Log in
+          </Link>
+          <Link
+            href="#analyzer"
+            onClick={() => setIsMobileOpen(false)}
+            className="btn-signal px-8 py-3.5 rounded-md text-sm"
+          >
+            Analyze free
+          </Link>
+        </div>
+      )}
     </>
   );
 }

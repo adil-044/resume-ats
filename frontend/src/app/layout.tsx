@@ -1,7 +1,27 @@
 import type { Metadata } from "next";
-import { Syne, DM_Sans, JetBrains_Mono } from "next/font/google";
+import { Instrument_Serif, Source_Sans_3, JetBrains_Mono, Syne, DM_Sans } from "next/font/google";
 import "./globals.css";
 
+const instrument = Instrument_Serif({
+  variable: "--font-instrument",
+  subsets: ["latin"],
+  weight: ["400"],
+  style: ["normal", "italic"],
+});
+
+const sourceSans = Source_Sans_3({
+  variable: "--font-source",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains",
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+});
+
+/* Kept for dashboard / legacy pages until pass 2 */
 const syne = Syne({
   variable: "--font-syne",
   subsets: ["latin"],
@@ -12,12 +32,6 @@ const dmSans = DM_Sans({
   variable: "--font-dm-sans",
   subsets: ["latin"],
   weight: ["400", "500", "600"],
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains",
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
 });
 
 export const metadata: Metadata = {
@@ -53,10 +67,10 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <meta name="theme-color" content="#0B0B12" />
+        <meta name="theme-color" content="#0C0C0B" />
       </head>
       <body
-        className={`${syne.variable} ${dmSans.variable} ${jetbrainsMono.variable} antialiased`}
+        className={`${instrument.variable} ${sourceSans.variable} ${jetbrainsMono.variable} ${syne.variable} ${dmSans.variable} antialiased`}
       >
         {children}
       </body>
