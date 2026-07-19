@@ -2,3 +2,8 @@
 # local venv
 backend/.venv/
 .venv/
+
+# SEO agent
+seo-agent/.venv/
+seo-agent/.env
+seo-agent/logs/

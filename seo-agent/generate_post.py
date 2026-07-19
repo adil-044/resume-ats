@@ -172,6 +172,10 @@ Run your resume against the posting with [HireReady](https://hireready.app/#anal
 """
 
 
+def already_published_today(published: dict, today: str) -> bool:
+    return any(p.get("date") == today for p in published.get("published", []))
+
+
 def main() -> int:
     dry = "--dry-run" in sys.argv or os.getenv("SEO_DRY_RUN") == "1"
     force_fallback = "--fallback" in sys.argv
@@ -181,6 +185,10 @@ def main() -> int:
     published = load_json(PUBLISHED_PATH)
     today = date.today().isoformat()
 
+    if "--once-per-day" in sys.argv and already_published_today(published, today):
+        print(f"Already published today ({today}) — skip.")
+        return 0
+
     topic = next_topic(queue, published)
     if not topic:
         print("Queue empty — nothing to publish.")
@@ -189,7 +197,8 @@ def main() -> int:
     model = cfg.get("model", DEFAULT_MODEL)
     print(f"Topic: {topic['keyword']}")
 
-    if force_fallback or dry and not os.getenv("OPENROUTER_API_KEY"):
+    use_fallback = force_fallback or not os.getenv("OPENROUTER_API_KEY")
+    if use_fallback:
         markdown = fallback_post(topic, today)
         print("Using fallback template (no API / --fallback).")
     else:

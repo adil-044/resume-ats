@@ -25,16 +25,24 @@ No key / offline:
 python seo-agent/generate_post.py --fallback
 ```
 
-## Daily automation
+## Local daily cron (this machine)
 
-GitHub Action: `.github/workflows/seo-daily.yml`
+Script: `seo-agent/run_daily.sh`  
+Cron: `0 13 * * *` (09:00 America/Toronto / 13:00 UTC)
 
-- Cron: `0 14 * * *` (14:00 UTC)
-- Needs repo secrets:
-  - `OPENROUTER_API_KEY`
-  - `GITHUB_TOKEN` is built-in for commit push
+```bash
+# put key for AI posts (optional — without it uses --fallback)
+cp seo-agent/.env.example seo-agent/.env
+# edit: OPENROUTER_API_KEY=...
 
-After the Action commits, Vercel rebuilds and the new post is live.
+# manual run
+seo-agent/run_daily.sh
+
+# logs
+tail -f seo-agent/logs/daily.log
+```
+
+GitHub Action file still optional; local cron is the primary daily publisher here.
 
 ## Files
 
