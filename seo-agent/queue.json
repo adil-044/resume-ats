@@ -1,21 +1,6 @@
 {
   "queue": [
     {
-      "keyword": "Greenhouse ATS resume tips",
-      "angle": "What Greenhouse parses vs what recruiters see",
-      "pillar": "Greenhouse ATS resume tips"
-    },
-    {
-      "keyword": "resume parse errors ATS",
-      "angle": "Debug checklist when contact/experience fields come back empty",
-      "pillar": "resume parse errors ATS"
-    },
-    {
-      "keyword": "job application rejection reasons",
-      "angle": "Silent ATS rejection vs human rejection \u2014 how to tell",
-      "pillar": "job application rejection reasons"
-    },
-    {
       "keyword": "ATS friendly resume format",
       "angle": "Single-column rules that still look professional to humans",
       "pillar": "how ATS resume screening works"
@@ -37,8 +22,18 @@
     },
     {
       "keyword": "how to beat applicant tracking system",
-      "angle": "Ethical matching \u2014 not keyword spam",
+      "angle": "Ethical matching — not keyword spam",
       "pillar": "how ATS resume screening works"
+    },
+    {
+      "keyword": "ATS resume checker",
+      "angle": "What a real checker must show vs vanity scores",
+      "pillar": "free ATS resume scanner"
+    },
+    {
+      "keyword": "resume keyword optimizer",
+      "angle": "Optimize phrases in bullets without stuffing",
+      "pillar": "ATS keyword matching"
     }
   ]
 }

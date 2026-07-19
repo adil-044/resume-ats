@@ -32,4 +32,6 @@ You wrote for a hiring manager. The first reader is a tokenizer. "Grew revenue w
 3. Mirror vocabulary in real bullets — never fabricate.
 4. Re-export as clean, single-column PDF or DOCX.
 
-[HireReady](/#analyzer) scores that gap and rewrites framing so the ATS and the human both get a usable document.
+Deep dives that pair with this pillar: [ATS keyword matching](/blog/ats-keyword-matching-complete-guide-2026), [resume parse errors](/blog/resume-parse-errors-ats-fix-checklist), and [silent ATS vs human rejection](/blog/job-application-rejection-reasons-ats-vs-human).
+
+[HireReady](https://hire-ready.app/#analyzer) scores that gap and rewrites framing so the ATS and the human both get a usable document.

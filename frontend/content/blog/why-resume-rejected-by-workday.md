@@ -28,4 +28,6 @@ Workday is unforgiving about structure. A beautiful two-column PDF can look empt
 
 A clean parse with weak keyword overlap still ranks low. Match the requisition language in bullets that reflect work you actually did.
 
-Run the fixed file through an [ATS match check](/#analyzer) before you hit apply. Format gets you parsed; keywords get you ranked.
+Same structural traps show up on [Greenhouse](/blog/greenhouse-ats-resume-tips-2026). Full debug steps: [resume parse errors checklist](/blog/resume-parse-errors-ats-fix-checklist).
+
+Run the fixed file through an [ATS match check on HireReady](https://hire-ready.app/#analyzer) before you hit apply. Format gets you parsed; keywords get you ranked.

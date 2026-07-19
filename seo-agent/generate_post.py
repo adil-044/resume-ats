@@ -104,13 +104,15 @@ def call_openrouter(prompt: str, models: list[str]) -> tuple[str, str]:
 def build_prompt(topic: dict, cfg: dict, today: str) -> str:
     keyword = topic["keyword"]
     angle = topic.get("angle", "")
-    return f"""You write SEO blog posts for HireReady (hireready.app), an ATS resume analyzer.
+    return f"""You write SEO blog posts for HireReady (https://hire-ready.app), an ATS resume analyzer.
 
 GENRE: job seekers, ATS filters, resume keywords, Workday/Greenhouse/Lever — NOT restaurants, NOT generic AI hype.
 
-VOICE: confrontational clarity, practical, terse. No career-coach fluff. No fake testimonials with invented names.
-Do not fabricate statistics; if you cite a number, qualify it as industry-reported or illustrative.
-Soft CTA once at the end linking to https://hireready.app/#analyzer
+VOICE: human, direct, slightly confrontational. Short paragraphs. Sound like a sharp hiring-tech operator, not a content farm.
+- No career-coach fluff, no "In today's competitive landscape"
+- No fake testimonials or invented names/stats
+- Use "you" and concrete failure modes (empty parse, ghosted after Apply)
+- Soft CTA once at the end only
 
 TARGET KEYWORD: {keyword}
 ANGLE: {angle}
@@ -133,7 +135,13 @@ Requirements:
 - 900–1400 words
 - H2/H3 structure, short paragraphs, at least one checklist or table in markdown
 - Primary keyword in title, first 100 words, and one H2
-- Internal link markdown: [HireReady](https://hireready.app/#analyzer)
+- Include 2–4 internal links to existing HireReady posts when relevant, e.g.
+  [/blog/how-ats-resume-screening-works-2026], [/blog/ats-keyword-matching-complete-guide-2026],
+  [/blog/why-resume-rejected-by-workday], [/blog/greenhouse-ats-resume-tips-2026],
+  [/blog/resume-parse-errors-ats-fix-checklist], [/blog/job-application-rejection-reasons-ats-vs-human],
+  [/blog/free-ats-resume-scanner-20260719], [/blog/tailor-resume-to-job-description-20260718]
+- Soft CTA: [HireReady](https://hire-ready.app/#analyzer)
+- Optional: one outbound link to an authority source (BLS, SHRM, or vendor docs) — no spam directories
 - No frontmatter keys beyond those listed
 """
 
@@ -198,7 +206,7 @@ Most applications die in software before a recruiter reads them. **{keyword}** i
 
 ## Next step
 
-Run your resume against the posting with [HireReady](https://hireready.app/#analyzer) — free match score, gaps, and rewrite framing without fabricating experience.
+Run your resume against the posting with [HireReady](https://hire-ready.app/#analyzer) — free match score, gaps, and rewrite framing without fabricating experience.
 """
 
 

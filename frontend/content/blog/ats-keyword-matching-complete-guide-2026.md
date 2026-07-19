@@ -35,4 +35,6 @@ Use the employer's wording first. Then one natural synonym if space allows. If t
 
 ## Measure before you apply
 
-Score the resume against the JD. If match rate is low, rewrite bullets — don't spam the skills list. Tools like [HireReady](/#analyzer) show missing terms and help weave them into real experience.
+Score the resume against the JD. If match rate is low, rewrite bullets — don't spam the skills list. Pair this with [tailoring to the job description](/blog/tailor-resume-to-job-description-20260718) and a [free ATS resume scanner](/blog/free-ats-resume-scanner-20260719) workflow.
+
+[HireReady](https://hire-ready.app/#analyzer) shows missing terms and helps weave them into real experience.
