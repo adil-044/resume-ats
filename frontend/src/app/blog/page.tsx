@@ -3,16 +3,18 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { getAllPosts } from '@/lib/blog';
+import { SITE_URL } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: 'Blog | HireReady — ATS & Resume Guides',
   description:
     'Practical ATS, resume keyword, and job-application guides from HireReady. Written for people who are done getting filtered.',
+  alternates: { canonical: `${SITE_URL}/blog` },
   openGraph: {
     title: 'HireReady Blog',
     description: 'ATS and resume guides that actually help you get past the filter.',
     type: 'website',
-    url: 'https://hireready.app/blog',
+    url: `${SITE_URL}/blog`,
   },
 };
 

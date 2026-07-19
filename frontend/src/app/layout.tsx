@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Instrument_Serif, Source_Sans_3, JetBrains_Mono, Syne, DM_Sans } from "next/font/google";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const instrument = Instrument_Serif({
@@ -35,6 +36,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "HireReady | Break the ATS Filter",
   description:
     "HireReady analyzes your resume against any job description and tells you exactly why you're being rejected — then fixes it. 100% free.",
@@ -44,7 +46,7 @@ export const metadata: Metadata = {
     description:
       "Stop getting rejected by robots. Get a detailed ATS match score and AI-powered suggestions to fix your resume. Free forever.",
     type: "website",
-    url: "https://hireready.app",
+    url: SITE_URL,
     siteName: "HireReady",
   },
   twitter: {

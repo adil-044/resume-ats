@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import BlogMarkdown from '@/components/BlogMarkdown';
 import { getAllPosts, getPostBySlug } from '@/lib/blog';
+import { SITE_URL } from '@/lib/site';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -20,11 +21,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: `${post.title} | HireReady`,
     description: post.description,
     keywords: [post.keyword, ...post.tags].filter(Boolean),
+    alternates: { canonical: `${SITE_URL}/blog/${post.slug}` },
     openGraph: {
       title: post.title,
       description: post.description,
       type: 'article',
-      url: `https://hireready.app/blog/${post.slug}`,
+      url: `${SITE_URL}/blog/${post.slug}`,
       publishedTime: post.date,
     },
   };
