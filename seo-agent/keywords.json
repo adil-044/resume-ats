@@ -1,0 +1,25 @@
+{
+  "genre": "ATS resume optimization and job application",
+  "brand": "HireReady",
+  "site_url": "https://hireready.app",
+  "cta_path": "/#analyzer",
+  "voice": [
+    "Confrontational clarity",
+    "Practical checklists",
+    "No career-coach fluff",
+    "No fabricated experience advice",
+    "Soft CTA to free analyzer"
+  ],
+  "pillars": [
+    "how ATS resume screening works",
+    "ATS keyword matching",
+    "resume rejected by Workday",
+    "tailor resume to job description",
+    "Greenhouse ATS resume tips",
+    "free ATS resume scanner",
+    "resume parse errors ATS",
+    "job application rejection reasons"
+  ],
+  "model": "tencent/hy3:free",
+  "openrouter_base": "https://openrouter.ai/api/v1"
+}

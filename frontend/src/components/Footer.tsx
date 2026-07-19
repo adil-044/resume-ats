@@ -23,12 +23,17 @@ export default function Footer() {
               </h4>
               <ul className="space-y-3 font-body text-sm text-[#A39E93]">
                 <li>
-                  <Link href="#analyzer" className="hover:text-[#F2EFE8] transition-colors">
+                  <Link href="/#analyzer" className="hover:text-[#F2EFE8] transition-colors">
                     Analyze
                   </Link>
                 </li>
                 <li>
-                  <Link href="#how-it-works" className="hover:text-[#F2EFE8] transition-colors">
+                  <Link href="/blog" className="hover:text-[#F2EFE8] transition-colors">
+                    Blog
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/#how-it-works" className="hover:text-[#F2EFE8] transition-colors">
                     How it works
                   </Link>
                 </li>

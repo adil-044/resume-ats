@@ -42,13 +42,19 @@ export default function Navbar() {
 
             <div className="hidden md:flex items-center gap-8">
               <Link
+                href="/blog"
+                className="font-body text-sm text-[#A39E93] hover:text-[#F2EFE8] transition-colors"
+              >
+                Blog
+              </Link>
+              <Link
                 href="/auth/login"
                 className="font-body text-sm text-[#A39E93] hover:text-[#F2EFE8] transition-colors"
               >
                 Log in
               </Link>
               <Link
-                href="#analyzer"
+                href="/#analyzer"
                 className="btn-signal px-5 py-2.5 rounded-md text-sm"
               >
                 Analyze free
@@ -78,6 +84,13 @@ export default function Navbar() {
             <X className="h-5 w-5" />
           </button>
           <Link
+            href="/blog"
+            onClick={() => setIsMobileOpen(false)}
+            className="font-body text-lg text-[#A39E93]"
+          >
+            Blog
+          </Link>
+          <Link
             href="/auth/login"
             onClick={() => setIsMobileOpen(false)}
             className="font-body text-lg text-[#A39E93]"
@@ -85,7 +98,7 @@ export default function Navbar() {
             Log in
           </Link>
           <Link
-            href="#analyzer"
+            href="/#analyzer"
             onClick={() => setIsMobileOpen(false)}
             className="btn-signal px-8 py-3.5 rounded-md text-sm"
           >
