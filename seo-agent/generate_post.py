@@ -19,6 +19,12 @@ KEYWORDS_PATH = AGENT / "keywords.json"
 
 OPENROUTER_BASE = "https://openrouter.ai/api/v1"
 DEFAULT_MODEL = "tencent/hy3:free"
+FREE_MODELS = [
+    "tencent/hy3:free",
+    "openai/gpt-oss-20b:free",
+    "google/gemma-4-31b-it:free",
+    "nvidia/nemotron-nano-9b-v2:free",
+]
 
 
 def slugify(text: str) -> str:
@@ -50,7 +56,22 @@ def next_topic(queue: dict, published: dict) -> dict | None:
     return remaining[0]
 
 
-def call_openrouter(prompt: str, model: str) -> str:
+def free_model_chain(cfg: dict) -> list[str]:
+    models = list(cfg.get("free_models") or FREE_MODELS)
+    primary = cfg.get("model") or DEFAULT_MODEL
+    if primary not in models:
+        models.insert(0, primary)
+    # de-dupe preserve order
+    seen: set[str] = set()
+    out: list[str] = []
+    for m in models:
+        if m not in seen:
+            seen.add(m)
+            out.append(m)
+    return out
+
+
+def call_openrouter(prompt: str, models: list[str]) -> tuple[str, str]:
     api_key = os.getenv("OPENROUTER_API_KEY")
     if not api_key:
         raise RuntimeError("OPENROUTER_API_KEY not set")
@@ -61,14 +82,23 @@ def call_openrouter(prompt: str, model: str) -> str:
         raise RuntimeError("Install openai: pip install openai") from e
 
     client = OpenAI(api_key=api_key, base_url=OPENROUTER_BASE)
-    response = client.chat.completions.create(
-        model=model,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    content = (response.choices[0].message.content or "").strip()
-    if not content:
-        raise RuntimeError("OpenRouter returned empty content")
-    return content
+    errors: list[str] = []
+    for model in models:
+        try:
+            print(f"Trying free model: {model}")
+            response = client.chat.completions.create(
+                model=model,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            content = (response.choices[0].message.content or "").strip()
+            if not content:
+                errors.append(f"{model}: empty content")
+                continue
+            return content, model
+        except Exception as e:
+            errors.append(f"{model}: {e}")
+            print(f"Model failed: {model} — {e}")
+    raise RuntimeError("All free models failed: " + " | ".join(errors))
 
 
 def build_prompt(topic: dict, cfg: dict, today: str) -> str:
@@ -194,7 +224,6 @@ def main() -> int:
         print("Queue empty — nothing to publish.")
         return 0
 
-    model = cfg.get("model", DEFAULT_MODEL)
     print(f"Topic: {topic['keyword']}")
 
     use_fallback = force_fallback or not os.getenv("OPENROUTER_API_KEY")
@@ -203,7 +232,11 @@ def main() -> int:
         print("Using fallback template (no API / --fallback).")
     else:
         try:
-            markdown = strip_fences(call_openrouter(build_prompt(topic, cfg, today), model))
+            raw, used_model = call_openrouter(
+                build_prompt(topic, cfg, today), free_model_chain(cfg)
+            )
+            markdown = strip_fences(raw)
+            print(f"Generated with: {used_model}")
             if not markdown.startswith("---"):
                 raise RuntimeError("Model output missing frontmatter")
         except Exception as e:
