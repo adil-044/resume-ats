@@ -8,8 +8,7 @@ import {
   Upload, FileText, Loader2, Sparkles,
   LogOut, Plus, Search,
   Clock, CheckCircle2, Briefcase,
-  Zap, Menu, X,
-  ChevronRight, Mail
+  Zap, ChevronRight, Mail
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -40,7 +39,6 @@ export default function Dashboard() {
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isGapModalOpen, setIsGapModalOpen] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [clFile, setClFile] = useState<File | null>(null);
   const [clJobDescription, setClJobDescription] = useState('');
@@ -97,13 +95,6 @@ export default function Dashboard() {
     const { data } = await supabase.from('job_pipeline').select('*').eq('user_id', userId).order('created_at', { ascending: false });
     setPipelineJobs(data || []);
   };
-
-  useEffect(() => {
-    if (!sidebarOpen) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = prev; };
-  }, [sidebarOpen]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -194,21 +185,11 @@ export default function Dashboard() {
         )}
       </AnimatePresence>
 
-      {/* Mobile top bar */}
+      {/* Mobile top bar — no burger; tabs live at bottom */}
       <header className="lg:hidden sticky top-0 z-[95] flex items-center justify-between gap-3 px-4 py-3 border-b border-[#2A2824] bg-[#0C0C0B]/95 backdrop-blur-md pt-[max(0.75rem,env(safe-area-inset-top))]">
-        <div className="flex items-center gap-3 min-w-0">
-          <button
-            type="button"
-            aria-label="Open menu"
-            onClick={() => setSidebarOpen(true)}
-            className="p-2.5 rounded-xl bg-[#161614] border border-[#2A2824] text-[#A39E93] shrink-0"
-          >
-            <Menu className="h-5 w-5" />
-          </button>
-          <span className="font-display text-lg text-[#F2EFE8] tracking-tight truncate">
-            HireReady
-          </span>
-        </div>
+        <span className="font-display text-lg text-[#F2EFE8] tracking-tight truncate">
+          HireReady
+        </span>
         <button
           type="button"
           onClick={handleLogout}
@@ -220,29 +201,14 @@ export default function Dashboard() {
       </header>
 
       <div className="flex-1 min-h-0 flex relative z-[1]">
-        {/* Sidebar */}
+        {/* Desktop sidebar only — GSAP chrome transform was fighting mobile hide */}
         <aside
-          data-chrome
-          className={`
-          fixed lg:relative inset-y-0 left-0 w-[min(18rem,88vw)] z-[100]
-          flex flex-col
-          bg-[#0C0C0B] border-r border-[#2A2824]
-          transition-transform duration-300 ease-out
-          pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-        `}>
-          <div className="px-5 py-5 border-b border-[#2A2824] flex items-center justify-between gap-3">
+          className="hidden lg:flex relative w-72 shrink-0 flex-col bg-[#0C0C0B] border-r border-[#2A2824]"
+        >
+          <div className="px-5 py-5 border-b border-[#2A2824]">
             <span className="font-display text-xl text-[#F2EFE8] tracking-tight">
               HireReady
             </span>
-            <button
-              type="button"
-              aria-label="Close menu"
-              onClick={() => setSidebarOpen(false)}
-              className="lg:hidden p-2 rounded-lg text-[#A39E93] hover:text-[#F2EFE8] hover:bg-[#161614]"
-            >
-              <X className="h-5 w-5" />
-            </button>
           </div>
 
           <div className="flex-1 p-3 space-y-1 overflow-y-auto overscroll-contain">
@@ -253,7 +219,7 @@ export default function Dashboard() {
               <button
                 key={tab.id}
                 type="button"
-                onClick={() => { setActiveTab(tab.id as typeof activeTab); setSidebarOpen(false); }}
+                onClick={() => setActiveTab(tab.id as typeof activeTab)}
                 className={`w-full flex items-center gap-3 px-3.5 py-3.5 rounded-xl font-display font-bold text-[11px] uppercase tracking-widest transition-all duration-200 ${
                   activeTab === tab.id
                     ? 'bg-[#C4A574]/10 border border-[#C4A574]/20 text-[#C4A574]'
@@ -284,22 +250,13 @@ export default function Dashboard() {
             <button
               type="button"
               onClick={handleLogout}
-              className="hidden lg:flex w-full items-center gap-3 px-4 py-3 rounded-xl font-display font-bold text-xs uppercase tracking-widest text-[#A39E93] hover:text-[#EF4444] hover:bg-[#EF4444]/5 border border-transparent hover:border-[#EF4444]/20 transition-all"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-display font-bold text-xs uppercase tracking-widest text-[#A39E93] hover:text-[#EF4444] hover:bg-[#EF4444]/5 border border-transparent hover:border-[#EF4444]/20 transition-all"
             >
               <LogOut className="h-4 w-4" />
               Log Out
             </button>
           </div>
         </aside>
-
-        {sidebarOpen && (
-          <button
-            type="button"
-            aria-label="Close menu overlay"
-            className="fixed inset-0 bg-black/60 z-[99] lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
 
         {/* Main Content — min-h-0 is required for mobile scroll */}
         <main
