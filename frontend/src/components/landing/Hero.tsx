@@ -1,127 +1,64 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import dynamic from 'next/dynamic';
 import Link from 'next/link';
-import { useHeroTimeline } from './useLandingGsap';
-import {
-  CinematicMedia,
-  resolveHeroMedia,
-  type MediaSources,
-} from '@/components/cinematic/CinematicMedia';
-import SvgHeroScene from '@/components/assets/SvgHeroScene';
+import { HeroHighlight, Highlight } from '@/components/ui/hero-highlight';
+import { Spotlight } from '@/components/ui/spotlight-new';
 import MatchArtifact from './MatchArtifact';
 
-const HeroCanvas = dynamic(() => import('@/components/HeroCanvas'), {
-  ssr: false,
-  loading: () => <div className="absolute inset-0 -z-10 bg-[#0C0C0B]" />,
-});
-
-const LINE_1 = ['Stop', 'getting'];
-const LINE_2 = ['ghosted', 'by', 'ATS.'];
-
 /**
- * Scene: anxious job seeker, night laptop — graphite + copper restrained + paper artifact.
- * Hero budget: brand · one headline · one support · CTA group · one dominant visual.
+ * Built on Aceternity free blocks:
+ * - @aceternity/hero-highlight
+ * - @aceternity/spotlight-new
+ * Remapped to HireReady graphite/paper/copper.
  */
 export default function Hero() {
-  const root = useRef<HTMLElement>(null);
-  useHeroTimeline(root);
-  const [media, setMedia] = useState<MediaSources>({});
-  const [prefer3d, setPrefer3d] = useState(false);
-
-  useEffect(() => {
-    resolveHeroMedia().then(setMedia);
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setPrefer3d(
-      new URLSearchParams(window.location.search).get('hero') === '3d' && !mq.matches
-    );
-  }, []);
-
-  const hasFilm = Boolean(media.video || media.poster);
-
   return (
-    <section
-      ref={root}
-      className="relative min-h-[100svh] flex items-center overflow-hidden copper-spotlight px-5 md:px-8 pt-28 pb-16 md:pb-24"
+    <HeroHighlight
+      containerClassName="min-h-[100svh] h-auto py-28 md:py-32"
+      className="mx-auto w-full max-w-[1200px] px-5 md:px-8"
     >
-      {hasFilm ? (
-        <div className="absolute inset-0 -z-10 opacity-40">
-          <CinematicMedia sources={media} intensity={0.9} />
-        </div>
-      ) : prefer3d ? (
-        <HeroCanvas />
-      ) : (
-        <div className="absolute inset-0 -z-10 opacity-[0.35] hidden lg:block">
-          <SvgHeroScene />
-        </div>
-      )}
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        <Spotlight />
+      </div>
 
-      <div className="relative z-10 mx-auto w-full max-w-[1200px] grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
+      <div className="relative z-10 grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10">
         <div className="lg:col-span-6 xl:col-span-7">
-          <p
-            data-hero="brand"
-            className="font-display text-3xl sm:text-4xl md:text-5xl text-[#F2EFE8] mb-8 tracking-[-0.02em] opacity-0"
-          >
+          <p className="font-display mb-6 text-3xl tracking-[-0.02em] text-[#F2EFE8] sm:text-4xl">
             HireReady
           </p>
 
-          <h1 className="font-display text-[clamp(2.5rem,6vw,4.5rem)] text-[#F2EFE8] leading-[0.98] tracking-[-0.03em] mb-6">
-            <span className="block">
-              {LINE_1.map((word) => (
-                <span
-                  key={word}
-                  data-hero="word"
-                  className="inline-block mr-[0.28em] opacity-0 last:mr-0"
-                >
-                  {word}
-                </span>
-              ))}
-            </span>
-            <span className="block text-[#C4A574]">
-              {LINE_2.map((word) => (
-                <span
-                  key={word}
-                  data-hero="word"
-                  className="inline-block mr-[0.28em] opacity-0 last:mr-0"
-                >
-                  {word}
-                </span>
-              ))}
+          <h1 className="font-display text-[clamp(2.5rem,6vw,4.5rem)] leading-[0.98] tracking-[-0.03em] text-[#F2EFE8]">
+            <span className="block">Stop getting</span>
+            <span className="mt-1 block">
+              <Highlight className="text-[#0C0C0B]">ghosted by ATS.</Highlight>
             </span>
           </h1>
 
-          <p
-            data-hero="sub"
-            className="font-body text-base md:text-lg text-[#A39E93] max-w-md leading-relaxed mb-10 opacity-0 prose-landing"
-          >
+          <p className="font-body prose-landing mt-8 max-w-md text-base leading-relaxed text-[#A39E93] md:text-lg">
             Paste resume + job description. See the match score, keyword gaps, and a rewrite the
             filter can read — before a human never sees you.
           </p>
 
-          <div data-hero="cta" className="flex flex-wrap items-center gap-5 opacity-0">
+          <div className="mt-10 flex flex-wrap items-center gap-5">
             <Link
               href="/auth/login"
-              className="btn-signal inline-flex items-center px-8 py-4 rounded-md text-sm tracking-wide focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C4A574]"
+              className="btn-signal inline-flex items-center rounded-md px-8 py-4 text-sm tracking-wide focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C4A574]"
             >
               Get ATS-ready
             </Link>
             <a
               href="#how-it-works"
-              className="font-body text-sm text-[#A39E93] hover:text-[#F2EFE8] transition-colors underline underline-offset-4 decoration-[#2A2824] hover:decoration-[#C4A574]"
+              className="font-body text-sm text-[#A39E93] underline decoration-[#2A2824] underline-offset-4 transition-colors hover:text-[#F2EFE8] hover:decoration-[#C4A574]"
             >
               How it works
             </a>
           </div>
         </div>
 
-        <div
-          data-hero="visual"
-          className="lg:col-span-6 xl:col-span-5 opacity-0 lg:justify-self-end"
-        >
+        <div className="lg:col-span-6 xl:col-span-5 lg:justify-self-end">
           <MatchArtifact />
         </div>
       </div>
-    </section>
+    </HeroHighlight>
   );
 }

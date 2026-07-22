@@ -1,82 +1,53 @@
 'use client';
 
-import { useRef } from 'react';
-import Link from 'next/link';
-import { useSectionReveal } from './useLandingGsap';
+import { HoverEffect } from '@/components/ui/card-hover-effect';
 
 /**
- * Honest product recognition — replaces fake Stripe/Shopify quotes.
- * SixArm: no fake testimonials.
+ * Aceternity Card Hover Effect — product outcomes (not fake testimonials).
+ * Source: @aceternity/card-hover-effect
  */
 export default function Social() {
-  const root = useRef<HTMLElement>(null);
-  useSectionReveal(root);
-
   return (
     <section
       id="what-you-get"
-      ref={root}
-      className="py-20 md:py-28 px-5 md:px-8 border-t border-[#2A2824]"
+      className="border-t border-[#2A2824] px-5 py-20 md:px-8 md:py-28"
     >
-      <div className="max-w-[1200px] mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
-          <div className="lg:col-span-4">
-            <h2
-              data-reveal
-              className="font-display text-[clamp(2rem,4vw,3rem)] text-[#F2EFE8] leading-[1.05] tracking-[-0.02em] opacity-0"
-            >
-              What you actually leave with.
-            </h2>
-            <p
-              data-reveal
-              className="font-body mt-5 text-[#A39E93] leading-relaxed opacity-0 prose-landing"
-            >
-              No invented hire rates. No fake names at Stripe. The product is the proof.
-            </p>
-            <div data-reveal className="mt-8 opacity-0">
-              <Link
-                href="/#analyzer"
-                className="font-body text-sm text-[#C4A574] underline underline-offset-4 decoration-[#C4A574]/40 hover:decoration-[#C4A574]"
-              >
-                Run a free scan
-              </Link>
-            </div>
-          </div>
+      <div className="mx-auto max-w-7xl">
+        <h2 className="font-display max-w-xl text-[clamp(2rem,4vw,3rem)] leading-[1.05] tracking-[-0.02em] text-[#F2EFE8]">
+          What you actually leave with.
+        </h2>
+        <p className="font-body prose-landing mt-4 max-w-lg text-[#A39E93]">
+          No invented hire rates. The product is the proof.
+        </p>
 
-          <ul data-reveal className="lg:col-span-8 space-y-0 opacity-0">
-            {[
-              {
-                title: 'Match score',
-                body: 'A clear percentage against the job you pasted — not a mystery “optimize” score.',
-              },
-              {
-                title: 'Keyword gaps',
-                body: 'The language the ATS expects, listed so you can decide what is true for you.',
-              },
-              {
-                title: 'Editable rewrite',
-                body: 'Bullets remapped to the JD. You keep the facts; the robot gets the phrasing.',
-              },
-              {
-                title: 'Export',
-                body: 'Take a clean PDF out. Core toolkit stays free — no card required.',
-              },
-            ].map((item, i) => (
-              <li
-                key={item.title}
-                className="grid grid-cols-[3rem_1fr] gap-4 border-t border-[#2A2824] py-7 first:border-t-0 first:pt-0"
-              >
-                <span className="font-mono text-sm text-[#6B675F]">{String(i + 1).padStart(2, '0')}</span>
-                <div>
-                  <h3 className="font-display text-xl text-[#F2EFE8] mb-2">{item.title}</h3>
-                  <p className="font-body text-sm text-[#A39E93] leading-relaxed max-w-xl">
-                    {item.body}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <HoverEffect
+          className="lg:grid-cols-4"
+          items={[
+            {
+              title: 'Match score',
+              description:
+                'A clear percentage against the job you pasted — not a mystery optimize score.',
+              link: '/#analyzer',
+            },
+            {
+              title: 'Keyword gaps',
+              description:
+                'The language the ATS expects, listed so you decide what is true for you.',
+              link: '/#analyzer',
+            },
+            {
+              title: 'Editable rewrite',
+              description:
+                'Bullets remapped to the JD. You keep the facts; the robot gets the phrasing.',
+              link: '/auth/login',
+            },
+            {
+              title: 'Export PDF',
+              description: 'Clean export. Core toolkit stays free — no card required.',
+              link: '/auth/login',
+            },
+          ]}
+        />
       </div>
     </section>
   );

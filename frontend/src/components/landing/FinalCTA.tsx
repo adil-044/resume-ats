@@ -1,29 +1,27 @@
 'use client';
 
-import { useRef } from 'react';
 import Link from 'next/link';
-import { useSectionReveal } from './useLandingGsap';
+import { BackgroundBeams } from '@/components/ui/background-beams';
 
+/**
+ * Aceternity Background Beams CTA — copper remapped.
+ * Source: @aceternity/background-beams
+ */
 export default function FinalCTA() {
-  const root = useRef<HTMLElement>(null);
-  useSectionReveal(root);
-
   return (
-    <section ref={root} className="py-20 md:py-28 px-5 md:px-8">
-      <div
-        data-reveal
-        className="max-w-[1200px] mx-auto paper-panel px-8 py-14 md:px-16 md:py-20 opacity-0"
-      >
-        <div className="max-w-2xl">
-          <h2 className="font-display text-[clamp(2rem,4.5vw,3.5rem)] text-[#1A1814] leading-[1.05] tracking-[-0.02em] mb-5">
-            Make the robot let you through.
-          </h2>
-          <p className="font-body text-base md:text-lg text-[#1A1814]/70 max-w-lg mb-10 prose-landing">
-            Free core forever. No card. Upload, paste a job, leave with a resume that speaks ATS.
-          </p>
+    <section className="relative overflow-hidden border-t border-[#2A2824] px-5 py-24 md:px-8 md:py-32">
+      <BackgroundBeams className="opacity-70" />
+      <div className="relative z-10 mx-auto max-w-3xl text-center">
+        <h2 className="font-display text-[clamp(2rem,5vw,3.75rem)] leading-[1.05] tracking-[-0.02em] text-[#F2EFE8]">
+          Make the robot let you through.
+        </h2>
+        <p className="font-body prose-landing mx-auto mt-6 max-w-lg text-base text-[#A39E93] md:text-lg">
+          Free core forever. No card. Upload, paste a job, leave with a resume that speaks ATS.
+        </p>
+        <div className="mt-10">
           <Link
             href="/auth/login"
-            className="inline-flex items-center px-10 py-4 rounded-md text-sm font-body font-semibold bg-[#1A1814] text-[#EDE6D9] hover:bg-[#0C0C0B] transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C4A574]"
+            className="btn-signal inline-flex items-center rounded-md px-10 py-4 text-sm tracking-wide focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C4A574]"
           >
             Get ATS-ready
           </Link>

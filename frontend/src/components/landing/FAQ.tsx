@@ -1,7 +1,11 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import { useSectionReveal } from './useLandingGsap';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 const ITEMS = [
   {
@@ -26,50 +30,31 @@ const ITEMS = [
   },
 ];
 
-function Item({ q, a }: { q: string; a: string }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="border-b border-[#2A2824]">
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        aria-expanded={open}
-        className="w-full flex items-start justify-between gap-6 py-6 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C4A574]"
-      >
-        <span className="font-display text-xl md:text-2xl text-[#F2EFE8] tracking-[-0.02em]">
-          {q}
-        </span>
-        <span className="font-mono text-[#C4A574] text-lg shrink-0 mt-1" aria-hidden>
-          {open ? '−' : '+'}
-        </span>
-      </button>
-      {open && (
-        <p className="font-body text-sm text-[#A39E93] leading-relaxed pb-6 max-w-2xl prose-landing">
-          {a}
-        </p>
-      )}
-    </div>
-  );
-}
-
+/** shadcn Accordion — FAQ chrome. */
 export default function FAQ() {
-  const root = useRef<HTMLElement>(null);
-  useSectionReveal(root);
-
   return (
-    <section ref={root} className="py-20 md:py-28 px-5 md:px-8 border-t border-[#2A2824]">
-      <div className="max-w-[800px] mx-auto">
-        <h2
-          data-reveal
-          className="font-display text-[clamp(2rem,4vw,3rem)] text-[#F2EFE8] leading-[1.05] tracking-[-0.02em] mb-10 opacity-0"
-        >
+    <section id="faq" className="border-t border-[#2A2824] px-5 py-20 md:px-8 md:py-28">
+      <div className="mx-auto max-w-[800px]">
+        <h2 className="font-display mb-10 text-[clamp(2rem,4vw,3rem)] leading-[1.05] tracking-[-0.02em] text-[#F2EFE8]">
           Straight answers.
         </h2>
-        <div data-reveal className="opacity-0">
-          {ITEMS.map((item) => (
-            <Item key={item.q} q={item.q} a={item.a} />
+
+        <Accordion>
+          {ITEMS.map((item, i) => (
+            <AccordionItem
+              key={item.q}
+              value={`item-${i}`}
+              className="border-[#2A2824]"
+            >
+              <AccordionTrigger className="font-display py-5 text-left text-xl text-[#F2EFE8] hover:no-underline md:text-2xl">
+                {item.q}
+              </AccordionTrigger>
+              <AccordionContent className="font-body pb-5 text-sm leading-relaxed text-[#A39E93]">
+                {item.a}
+              </AccordionContent>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
       </div>
     </section>
   );
