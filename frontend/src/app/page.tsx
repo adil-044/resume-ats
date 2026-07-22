@@ -11,6 +11,10 @@ import Social from '@/components/landing/Social';
 import FAQ from '@/components/landing/FAQ';
 import FinalCTA from '@/components/landing/FinalCTA';
 
+/**
+ * Landing architecture (MoSCoW):
+ * Hero → Problem → HowItWorks → Ambient → Proof → Recognition → FAQ → FinalCTA
+ */
 export default function Home() {
   return (
     <div className="bg-[#0C0C0B] text-[#F2EFE8] overflow-x-hidden landing-grain">

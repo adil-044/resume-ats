@@ -11,7 +11,7 @@ function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
-/** Hero entrance: brand → headline words → sub → CTA */
+/** Hero entrance: brand → headline words → sub → CTA → visual */
 export function useHeroTimeline(root: RefObject<HTMLElement | null>) {
   useLayoutEffect(() => {
     const el = root.current;
@@ -44,6 +44,12 @@ export function useHeroTimeline(root: RefObject<HTMLElement | null>) {
           { opacity: 0, y: 14 },
           { opacity: 1, y: 0, duration: 0.45 },
           '-=0.15'
+        )
+        .fromTo(
+          el.querySelectorAll('[data-hero="visual"]'),
+          { opacity: 0, y: 24, scale: 0.98 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.7 },
+          '-=0.35'
         );
     }, el);
 

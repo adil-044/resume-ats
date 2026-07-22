@@ -158,21 +158,6 @@
     transform: scale(0.98);
   }
 
-  /* Legacy app utilities (dashboard still hardcodes many colors) */
-  .text-gradient-violet {
-    background: linear-gradient(135deg, #C4A574 0%, #EDE6D9 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .text-gradient-coral {
-    background: linear-gradient(135deg, #C4785A 0%, #C4A574 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
   .card {
     background: var(--color-bg-surface);
     border: 1px solid var(--color-border);
@@ -192,18 +177,26 @@
       #0C0C0B;
   }
 
-  .bg-grid {
-    background-image:
-      linear-gradient(rgba(237, 230, 217, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(237, 230, 217, 0.03) 1px, transparent 1px);
-    background-size: 56px 56px;
-  }
-
   .text-display {
     font-family: var(--font-instrument), ui-serif, Georgia, serif;
     font-weight: 400;
     letter-spacing: -0.02em;
     line-height: 0.95;
+  }
+
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+
+  .prose-landing {
+    text-wrap: pretty;
+  }
+
+  .copper-spotlight {
+    background:
+      radial-gradient(ellipse 55% 45% at 78% 28%, rgba(196, 165, 116, 0.11) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 35% at 12% 70%, rgba(237, 230, 217, 0.04) 0%, transparent 55%),
+      #0C0C0B;
   }
 
   .landing-grain {

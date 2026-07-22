@@ -50,22 +50,22 @@ export default function Proof() {
     <section
       id="analyzer"
       ref={root}
-      className="py-28 md:py-36 px-6 border-t border-[#2A2824]"
+      className="py-20 md:py-28 px-5 md:px-8 border-t border-[#2A2824]"
     >
       <div className="max-w-[1000px] mx-auto">
-        <div className="mb-14 max-w-2xl">
-          <p
-            data-reveal
-            className="font-body text-xs uppercase tracking-[0.2em] text-[#C4A574] mb-6 opacity-0"
-          >
-            Try it
-          </p>
+        <div className="mb-12 max-w-2xl">
           <h2
             data-reveal
-            className="font-display text-4xl md:text-5xl text-[#F2EFE8] leading-[1.05] tracking-tight opacity-0"
+            className="font-display text-[clamp(2rem,4vw,3rem)] text-[#F2EFE8] leading-[1.05] tracking-[-0.02em] opacity-0"
           >
             Score a resume against a real job.
           </h2>
+          <p
+            data-reveal
+            className="font-body mt-4 text-[#A39E93] leading-relaxed opacity-0 prose-landing"
+          >
+            Free scan. No account required to see the teaser score — sign in for the full rewrite.
+          </p>
         </div>
 
         <div
@@ -76,7 +76,7 @@ export default function Proof() {
             <label className="font-body text-xs uppercase tracking-widest text-[#6B675F] block mb-3">
               Resume
             </label>
-            <label className="flex flex-col items-center justify-center border border-dashed border-[#2A2824] rounded-md p-10 cursor-pointer hover:border-[#C4A574]/40 transition-colors bg-[#0C0C0B]">
+            <label className="flex flex-col items-center justify-center border border-dashed border-[#2A2824] rounded-md p-10 cursor-pointer hover:border-[#C4A574]/40 transition-colors bg-[#0C0C0B] focus-within:border-[#C4A574]/50">
               <input
                 type="file"
                 accept=".pdf,.docx"
@@ -98,7 +98,7 @@ export default function Proof() {
               value={localJD}
               onChange={(e) => setLocalJD(e.target.value)}
               placeholder="Paste the posting…"
-              className="flex-1 min-h-[160px] w-full bg-[#0C0C0B] border border-[#2A2824] rounded-md p-4 font-body text-sm text-[#F2EFE8] outline-none focus:border-[#C4A574]/50 resize-none placeholder:text-[#6B675F]"
+              className="flex-1 min-h-[160px] w-full bg-[#0C0C0B] border border-[#2A2824] rounded-md p-4 font-body text-sm text-[#F2EFE8] outline-none focus:border-[#C4A574]/50 focus-visible:ring-2 focus-visible:ring-[#C4A574]/30 resize-none placeholder:text-[#6B675F]"
             />
           </div>
 
@@ -107,23 +107,30 @@ export default function Proof() {
               type="button"
               onClick={handleAnalyze}
               disabled={!localFile || !localJD || isAnalyzing}
-              className="btn-signal px-8 py-3.5 rounded-md text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+              className="btn-signal px-8 py-3.5 rounded-md text-sm disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C4A574]"
             >
-              {isAnalyzing ? `Analyzing… ${Math.round(progress)}%` : 'Run free scan'}
+              {isAnalyzing ? `Scoring against JD… ${Math.round(progress)}%` : 'Analyze match'}
             </button>
-            {error && <p className="font-body text-sm text-[#C45C5C]">{error}</p>}
+            {error && (
+              <p className="font-body text-sm text-[#C45C5C]">
+                {error.includes('PDF') || error.includes('parse')
+                  ? `Couldn’t parse file — try DOCX. (${error})`
+                  : error}
+              </p>
+            )}
           </div>
 
           {showUpsell && teaserScore !== null && (
             <div className="lg:col-span-2 paper-panel p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div className="flex items-center gap-6">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/media/svg/match-gauge.svg" alt="" className="w-20 h-20 shrink-0" />
                 <div>
                   <p className="font-body text-xs uppercase tracking-widest text-[#1A1814]/50 mb-2">
                     Teaser match
                   </p>
-                  <p className="font-display text-5xl text-[#1A1814]">{Math.round(teaserScore)}</p>
+                  <p className="font-mono text-5xl text-[#1A1814] tracking-tight">
+                    {Math.round(teaserScore)}
+                    <span className="text-2xl text-[#1A1814]/40">%</span>
+                  </p>
                   <p className="font-body text-sm text-[#1A1814]/70 mt-2">
                     Sign in to unlock the full rewrite and workspace.
                   </p>
@@ -131,17 +138,13 @@ export default function Proof() {
               </div>
               <Link
                 href="/auth/login"
-                className="inline-flex items-center justify-center px-6 py-3 bg-[#1A1814] text-[#EDE6D9] rounded-md text-sm font-body font-semibold hover:opacity-90 transition-opacity"
+                className="inline-flex items-center justify-center px-6 py-3 bg-[#1A1814] text-[#EDE6D9] rounded-md text-sm font-body font-semibold hover:opacity-90 transition-opacity focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C4A574]"
               >
                 Continue free
               </Link>
             </div>
           )}
         </div>
-
-        <p className="mt-8 font-body text-xs text-[#6B675F] max-w-xl">
-          <sup>1</sup> Jobiwa ATS Industry Report 2024 · Core features permanently free. No card required.
-        </p>
       </div>
     </section>
   );

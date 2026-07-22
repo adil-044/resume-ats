@@ -5,18 +5,21 @@ import Link from 'next/link';
 export default function Footer() {
   return (
     <footer className="relative bg-[#0C0C0B] border-t border-[#2A2824]">
-      <div className="max-w-[1200px] mx-auto px-6 py-16 md:py-20">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-14">
-          <div>
-            <Link href="/" className="font-display text-2xl text-[#F2EFE8] tracking-tight">
+      <div className="max-w-[1200px] mx-auto px-5 md:px-8 py-16 md:py-20">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-14">
+          <div className="md:col-span-5">
+            <Link
+              href="/"
+              className="font-display text-2xl text-[#F2EFE8] tracking-[-0.02em]"
+            >
               HireReady
             </Link>
-            <p className="mt-4 font-body text-sm text-[#A39E93] leading-relaxed max-w-xs">
-              ATS matching and rewrites for people who are done guessing why they got filtered.
+            <p className="mt-4 font-body text-sm text-[#A39E93] leading-relaxed max-w-xs prose-landing">
+              ATS matching and rewrites for people done guessing why they got filtered.
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-8">
+          <div className="md:col-span-3 grid grid-cols-2 gap-8 md:col-start-7">
             <div>
               <h4 className="font-body text-xs uppercase tracking-[0.15em] text-[#6B675F] mb-5">
                 Product
@@ -28,13 +31,13 @@ export default function Footer() {
                   </Link>
                 </li>
                 <li>
-                  <Link href="/blog" className="hover:text-[#F2EFE8] transition-colors">
-                    Blog
+                  <Link href="/#how-it-works" className="hover:text-[#F2EFE8] transition-colors">
+                    How it works
                   </Link>
                 </li>
                 <li>
-                  <Link href="/#how-it-works" className="hover:text-[#F2EFE8] transition-colors">
-                    How it works
+                  <Link href="/blog" className="hover:text-[#F2EFE8] transition-colors">
+                    Blog
                   </Link>
                 </li>
                 <li>
@@ -63,7 +66,7 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="surface-panel p-6">
+          <div className="md:col-span-3 md:col-start-10">
             <p className="font-display text-lg text-[#F2EFE8] mb-2">Your data stays yours</p>
             <p className="font-body text-xs text-[#A39E93] leading-relaxed">
               Encrypted in transit and at rest. Never sold. Delete anytime.

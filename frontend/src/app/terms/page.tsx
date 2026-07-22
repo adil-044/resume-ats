@@ -26,10 +26,10 @@ export default function TermsPage() {
 
       <main className="max-w-[800px] mx-auto px-6 py-32 relative z-10">
         <Reveal className="text-center mb-20">
-          <div className="w-16 h-16 rounded-2xl bg-[#7C3AED]/10 border border-[#7C3AED]/20 flex items-center justify-center mx-auto mb-8">
-            <Scale className="h-8 w-8 text-[#7C3AED]" />
+          <div className="w-16 h-16 rounded-2xl bg-[#C4A574]/10 border border-[#C4A574]/20 flex items-center justify-center mx-auto mb-8">
+            <Scale className="h-8 w-8 text-[#C4A574]" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-syne font-extrabold text-[#F1F0F5] tracking-tight mb-4">
+          <h1 className="text-4xl md:text-5xl font-display font-extrabold text-[#F1F0F5] tracking-tight mb-4">
             Terms of Service
           </h1>
           <p className="text-[#9090A8] font-dm-sans text-sm">Effective 2026</p>
@@ -66,8 +66,8 @@ export default function TermsPage() {
             <Reveal key={i} delay={i * 0.07}>
               <div className="card p-8">
                 <div className="flex items-center gap-4 mb-5">
-                  <span className="text-xs font-syne font-bold text-[#7C3AED] bg-[#7C3AED]/10 px-3 py-1.5 rounded-lg">{section.num}</span>
-                  <h2 className="text-lg font-syne font-bold text-[#F1F0F5]">{section.title}</h2>
+                  <span className="text-xs font-display font-bold text-[#C4A574] bg-[#C4A574]/10 px-3 py-1.5 rounded-lg">{section.num}</span>
+                  <h2 className="text-lg font-display font-bold text-[#F1F0F5]">{section.title}</h2>
                 </div>
                 <p className="text-sm text-[#9090A8] leading-relaxed font-dm-sans">{section.body}</p>
               </div>
@@ -80,7 +80,7 @@ export default function TermsPage() {
                 <div className="w-10 h-10 rounded-xl bg-[#10B981]/10 border border-[#10B981]/20 flex items-center justify-center text-[#10B981]">
                   <ShieldCheck className="h-5 w-5" />
                 </div>
-                <h2 className="text-lg font-syne font-bold text-[#F1F0F5]">Our Commitment</h2>
+                <h2 className="text-lg font-display font-bold text-[#F1F0F5]">Our Commitment</h2>
               </div>
               <p className="text-sm text-[#9090A8] leading-relaxed font-dm-sans">
                 We're building HireReady to help real people navigate an unfair job market. We will always be transparent about what the tool can and cannot do — and we'll never hide behind jargon to oversell it.

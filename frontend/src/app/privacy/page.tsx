@@ -26,10 +26,10 @@ export default function PrivacyPage() {
 
       <main className="max-w-[800px] mx-auto px-6 py-32 relative z-10">
         <Reveal className="text-center mb-20">
-          <div className="w-16 h-16 rounded-2xl bg-[#7C3AED]/10 border border-[#7C3AED]/20 flex items-center justify-center mx-auto mb-8">
-            <Shield className="h-8 w-8 text-[#7C3AED]" />
+          <div className="w-16 h-16 rounded-2xl bg-[#C4A574]/10 border border-[#C4A574]/20 flex items-center justify-center mx-auto mb-8">
+            <Shield className="h-8 w-8 text-[#C4A574]" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-syne font-extrabold text-[#F1F0F5] tracking-tight mb-4">
+          <h1 className="text-4xl md:text-5xl font-display font-extrabold text-[#F1F0F5] tracking-tight mb-4">
             Privacy Policy
           </h1>
           <p className="text-[#9090A8] font-dm-sans text-sm">Last updated: 2026</p>
@@ -61,10 +61,10 @@ export default function PrivacyPage() {
             <Reveal key={i} delay={i * 0.07}>
               <div className="card p-8">
                 <div className="flex items-center gap-4 mb-5">
-                  <div className="w-10 h-10 rounded-xl bg-[#7C3AED]/10 border border-[#7C3AED]/20 flex items-center justify-center text-[#7C3AED]">
+                  <div className="w-10 h-10 rounded-xl bg-[#C4A574]/10 border border-[#C4A574]/20 flex items-center justify-center text-[#C4A574]">
                     {section.icon}
                   </div>
-                  <h2 className="text-lg font-syne font-bold text-[#F1F0F5]">{section.title}</h2>
+                  <h2 className="text-lg font-display font-bold text-[#F1F0F5]">{section.title}</h2>
                 </div>
                 <p className="text-sm text-[#9090A8] leading-relaxed font-dm-sans">{section.body}</p>
               </div>
@@ -73,10 +73,10 @@ export default function PrivacyPage() {
 
           <Reveal delay={0.3}>
             <div className="card p-8">
-              <h2 className="text-lg font-syne font-bold text-[#F1F0F5] mb-5">Contact Us</h2>
+              <h2 className="text-lg font-display font-bold text-[#F1F0F5] mb-5">Contact Us</h2>
               <p className="text-sm text-[#9090A8] leading-relaxed font-dm-sans">
                 If you have any questions about this policy or want to request data deletion, contact us at{' '}
-                <span className="text-[#7C3AED]">privacy@hireready.app</span>. We respond within 48 hours.
+                <span className="text-[#C4A574]">privacy@hireready.app</span>. We respond within 48 hours.
               </p>
             </div>
           </Reveal>

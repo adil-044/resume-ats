@@ -33,13 +33,20 @@ function Item({ q, a }: { q: string; a: string }) {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full flex items-start justify-between gap-6 py-6 text-left"
+        aria-expanded={open}
+        className="w-full flex items-start justify-between gap-6 py-6 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#C4A574]"
       >
-        <span className="font-display text-xl md:text-2xl text-[#F2EFE8]">{q}</span>
-        <span className="font-mono text-[#C4A574] text-lg shrink-0 mt-1">{open ? '−' : '+'}</span>
+        <span className="font-display text-xl md:text-2xl text-[#F2EFE8] tracking-[-0.02em]">
+          {q}
+        </span>
+        <span className="font-mono text-[#C4A574] text-lg shrink-0 mt-1" aria-hidden>
+          {open ? '−' : '+'}
+        </span>
       </button>
       {open && (
-        <p className="font-body text-sm text-[#A39E93] leading-relaxed pb-6 max-w-2xl">{a}</p>
+        <p className="font-body text-sm text-[#A39E93] leading-relaxed pb-6 max-w-2xl prose-landing">
+          {a}
+        </p>
       )}
     </div>
   );
@@ -50,17 +57,11 @@ export default function FAQ() {
   useSectionReveal(root);
 
   return (
-    <section ref={root} className="py-28 md:py-36 px-6 border-t border-[#2A2824]">
+    <section ref={root} className="py-20 md:py-28 px-5 md:px-8 border-t border-[#2A2824]">
       <div className="max-w-[800px] mx-auto">
-        <p
-          data-reveal
-          className="font-body text-xs uppercase tracking-[0.2em] text-[#C4A574] mb-6 opacity-0"
-        >
-          FAQ
-        </p>
         <h2
           data-reveal
-          className="font-display text-4xl md:text-5xl text-[#F2EFE8] leading-[1.05] tracking-tight mb-12 opacity-0"
+          className="font-display text-[clamp(2rem,4vw,3rem)] text-[#F2EFE8] leading-[1.05] tracking-[-0.02em] mb-10 opacity-0"
         >
           Straight answers.
         </h2>

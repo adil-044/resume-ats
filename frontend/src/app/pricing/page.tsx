@@ -70,7 +70,7 @@ export default function PricingPage() {
             <Reveal delay={0.1}>
               <h1 className="text-5xl md:text-7xl font-display font-extrabold text-[#F2EFE8] tracking-tighter leading-[0.88] mb-8">
                 Free.<br />
-                <span className="text-gradient-violet">Forever.</span>
+                <span className="text-signal">Forever.</span>
               </h1>
             </Reveal>
 
@@ -104,7 +104,7 @@ export default function PricingPage() {
               </div>
               <h2 className="text-4xl md:text-6xl font-display font-extrabold text-[#F2EFE8] tracking-tighter leading-[0.9]">
                 The job market is brutal.<br />
-                <span className="text-gradient-violet">We're not adding to it.</span>
+                <span className="text-signal">We're not adding to it.</span>
               </h2>
             </Reveal>
 
@@ -180,7 +180,7 @@ export default function PricingPage() {
               </div>
               <h2 className="text-4xl md:text-6xl font-display font-extrabold text-[#F2EFE8] tracking-tighter leading-[0.9]">
                 Everything.<br />
-                <span className="text-gradient-violet">Yours. Free.</span>
+                <span className="text-signal">Yours. Free.</span>
               </h2>
             </Reveal>
 
@@ -240,7 +240,7 @@ export default function PricingPage() {
           <div className="max-w-[700px] mx-auto text-center relative z-10">
             <Reveal>
               <h2 className="text-5xl md:text-7xl font-display font-extrabold text-[#F2EFE8] tracking-tighter leading-[0.9] mb-8">
-                You deserve a<br /><span className="text-gradient-violet">fighting chance.</span>
+                You deserve a<br /><span className="text-signal">fighting chance.</span>
               </h2>
             </Reveal>
             <Reveal delay={0.1}>
