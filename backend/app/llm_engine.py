@@ -8,8 +8,8 @@ OPENROUTER_BASE = "https://openrouter.ai/api/v1"
 
 # tencent/hy3:free often disappears from the free catalog — keep a live fallback chain.
 DEFAULT_FREE_MODELS = [
-    "openai/gpt-oss-20b:free",
     "nvidia/nemotron-nano-9b-v2:free",
+    "openai/gpt-oss-20b:free",
     "openrouter/free",
     "google/gemma-4-31b-it:free",
     "google/gemma-4-26b-a4b-it:free",
@@ -64,6 +64,7 @@ def _call_model(prompt: str, *, max_tokens: Optional[int] = None) -> Tuple[str, 
             kwargs = {
                 "model": model,
                 "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0.2,
             }
             if max_tokens is not None:
                 kwargs["max_tokens"] = max_tokens
@@ -91,19 +92,21 @@ def optimize_resume_text(resume_markdown: str, job_description: str, missing_key
 
     prompt = f"""
 ROLE: Elite Executive Resume Architect & ATS Logic Expert.
-TASK: Transform the 'NOISY RAW TEXT' into a world-class, deduplicated, 95%+ ATS-optimized Executive Resume.
+TASK: Transform the 'NOISY RAW TEXT' into a world-class, deduplicated, ATS-optimized Executive Resume in clean Markdown.
 
 ---
 CRITICAL RULES (FORBIDDEN ACTIONS):
-1. DO NOT repeat the Name, Email, or Address after the initial header.
-2. DO NOT dump keywords in a random list at the end. Every keyword MUST be woven into a specific bullet point or a categorized skill section.
-3. DO NOT include meta-text like 'PROFESSIONAL SUMMARY' or 'EXPERIENCE' inside the actual section content.
+1. DO NOT invent employers, job titles, dates, degrees, certifications, metrics, or skills that are not supported by the raw resume or the user's stated details.
+2. DO NOT repeat the Name, Email, or Address after the initial header.
+3. DO NOT dump keywords in a random list at the end. Every keyword MUST be woven into a specific bullet point or a categorized skill section.
+4. Output MUST be English only — no other scripts, languages, or random characters.
+5. If a missing keyword cannot be honestly supported by the resume, put it only under a skills section labeled clearly — do not fabricate experience bullets for it.
 
 ---
 CLEANING PROTOCOL:
 1. EXTRACT: Find the Name and Contact info ONCE. Place it at the very top.
-2. CATEGORIZE: Group these keywords into the TECHNICAL SKILLS section: {', '.join(missing_keywords)}
-3. INJECT: Rewrite Experience bullets to naturally include relevant keywords from the JD. Bold them: **Keyword**.
+2. CATEGORIZE: Group these keywords into the TECHNICAL SKILLS section when relevant: {', '.join(missing_keywords)}
+3. INJECT: Rewrite Experience bullets to naturally include relevant keywords from the JD only when truthful. Bold them: **Keyword**.
 
 ---
 REQUIRED STRUCTURE (Markdown):
@@ -118,18 +121,18 @@ REQUIRED STRUCTURE (Markdown):
 ---
 
 ## TECHNICAL SKILLS & COMPETENCIES
-[Categorized list: e.g., Culinary Operations, Management & Leadership, Compliance, etc. Categorize every keyword provided above here.]
+[Categorized list grounded in the resume + JD keywords.]
 
 ---
 
 ## PROFESSIONAL EXPERIENCE
 [Company Name | Job Title | Dates]
-- [High-impact bullet using Action + Context + Result formula. Weave in keywords naturally.]
+- [High-impact bullet using Action + Context + Result. Only use metrics present in the source.]
 
 ---
 
 ## EDUCATION & CERTIFICATIONS
-[Clean list of degrees and certifications.]
+[Clean list from the source only.]
 
 ---
 
@@ -139,7 +142,7 @@ JOB DESCRIPTION:
 RAW DATA TO PROCESS:
 {resume_markdown}
 
-OUTPUT FINAL EXECUTIVE MARKDOWN:
+OUTPUT FINAL EXECUTIVE MARKDOWN ONLY:
 """
 
     try:
@@ -209,7 +212,9 @@ CONTEXT:
 3. NEW USER DETAILS: {user_answers}
 
 TASK:
-- Rewrite the resume to INTEGRATE every detail from the New User Details.
+- Rewrite the resume to INTEGRATE every detail from the New User Details when truthful.
+- Do NOT invent employers, titles, dates, or metrics.
+- English only. No other scripts or languages.
 - Ensure keywords from the user answers are **bolded**.
 - RESTRUCTURE into a clean Executive Markdown format with --- dividers.
 - Maintain single-column, professional objective language.

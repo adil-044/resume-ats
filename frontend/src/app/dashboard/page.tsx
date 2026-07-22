@@ -422,7 +422,11 @@ export default function Dashboard() {
                         key={item.id}
                         whileHover={{ y: -4, borderColor: 'rgba(196,165,116,0.3)' }}
                         className="card p-6 cursor-pointer transition-all duration-200 flex flex-col gap-4"
-                        onClick={() => { setAnalysisResult(item); router.push(`/workspace/${item.id}`); }}
+                      onClick={() => {
+                        setAnalysisResult(item);
+                        if (item.job_description) setJobDescription(item.job_description);
+                        router.push(`/workspace/${item.id}`);
+                      }}
                       >
                         <div className="flex justify-between items-start">
                           <div className="w-12 h-12 rounded-xl bg-[#C4A574]/10 border border-[#C4A574]/20 flex items-center justify-center">

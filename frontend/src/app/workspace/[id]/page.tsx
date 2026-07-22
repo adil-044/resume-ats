@@ -19,7 +19,7 @@ import BridgeGapModal from '@/components/BridgeGapModal';
 type Pane = 'editor' | 'preview' | 'split';
 
 export default function Workspace() {
-  const { analysisResult, setAnalysisResult, jobDescription } = useResumeStore();
+  const { analysisResult, setAnalysisResult, jobDescription, setJobDescription } = useResumeStore();
   const [markdown, setMarkdown] = useState('');
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [activePane, setActivePane] = useState<Pane>('preview');
@@ -72,6 +72,9 @@ export default function Workspace() {
 
       if (storeMatches) {
         setMarkdown(analysisResult!.optimized_content.raw_text);
+        if (analysisResult!.job_description) {
+          setJobDescription(analysisResult!.job_description);
+        }
         setLoading(false);
         return;
       }
@@ -109,6 +112,7 @@ export default function Workspace() {
           original_text: data.original_text
         };
         setAnalysisResult(result);
+        if (data.job_description) setJobDescription(data.job_description);
         setMarkdown(rawText);
       } catch (error) {
         console.error('Failed to fetch analysis', error);
@@ -121,22 +125,41 @@ export default function Workspace() {
   }, [id]);
 
   const handleAIRephrase = async () => {
+    const jd = (analysisResult?.job_description || jobDescription || '').trim();
+    if (!jd) {
+      alert('Missing job description for this resume. Re-run analysis from the dashboard with a JD pasted.');
+      return;
+    }
+    if (!markdown.trim()) {
+      alert('Resume is empty — nothing to optimize.');
+      return;
+    }
     setIsOptimizing(true);
     try {
-      const result = await optimizeResume(markdown, jobDescription);
-      setMarkdown(result.optimized_text);
+      const result = await optimizeResume(markdown, jd);
+      const text = (result.optimized_text || '').trim();
+      if (!text || text.includes('AI OPTIMIZATION ERROR')) {
+        throw new Error('AI returned an error. Retry in a moment.');
+      }
+      setMarkdown(text);
       if (analysisResult) {
         const currentScore = analysisResult.overall_score || 0;
         const newScore = currentScore < 95 ? Math.min(99, currentScore + Math.floor(Math.random() * 10) + 15) : currentScore;
         const updatedResult = {
           ...analysisResult,
           overall_score: newScore,
-          optimized_content: { ...analysisResult.optimized_content, raw_text: result.optimized_text }
+          job_description: jd,
+          optimized_content: { ...analysisResult.optimized_content, raw_text: text }
         };
         setAnalysisResult(updatedResult);
-        await supabase.from('resumes').update({ optimized_text: result.optimized_text, after_score: newScore }).eq('id', id);
+        await supabase.from('resumes').update({ optimized_text: text, after_score: newScore }).eq('id', id);
       }
-    } catch (error) { alert('Optimization failed.'); } finally { setIsOptimizing(false); }
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Optimization failed.';
+      alert(msg);
+    } finally {
+      setIsOptimizing(false);
+    }
   };
 
   if (loading) {

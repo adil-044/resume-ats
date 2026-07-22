@@ -49,7 +49,11 @@ export async function optimizeResume(resumeText: string, jobDescription: string)
   });
 
   if (!response.ok) {
-    throw new Error('Failed to optimize resume');
+    const errorMsg = await response.text();
+    let detail = 'Failed to optimize resume';
+    try { detail = JSON.parse(errorMsg).detail || detail; } catch { /* keep default */ }
+    if (typeof detail !== 'string') detail = JSON.stringify(detail);
+    throw new Error(detail);
   }
 
   return response.json();
@@ -75,7 +79,11 @@ export async function getGapQuestions(
   });
 
   if (!response.ok) {
-    throw new Error('Failed to fetch gap questions');
+    const errorMsg = await response.text();
+    let detail = 'Failed to fetch gap questions';
+    try { detail = JSON.parse(errorMsg).detail || detail; } catch { /* keep */ }
+    if (typeof detail !== 'string') detail = JSON.stringify(detail);
+    throw new Error(detail);
   }
 
   return response.json();
@@ -100,7 +108,11 @@ export async function bridgeGapOptimize(
   });
 
   if (!response.ok) {
-    throw new Error('Failed to perform bridge-gap optimization');
+    const errorMsg = await response.text();
+    let detail = 'Failed to perform bridge-gap optimization';
+    try { detail = JSON.parse(errorMsg).detail || detail; } catch { /* keep */ }
+    if (typeof detail !== 'string') detail = JSON.stringify(detail);
+    throw new Error(detail);
   }
 
   return response.json();

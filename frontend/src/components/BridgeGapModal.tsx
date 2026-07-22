@@ -95,8 +95,9 @@ export default function BridgeGapModal({ isOpen, onClose, taskId, onComplete }: 
       setAnalysisResult(finalResult);
       onComplete(finalResult.optimized_content.raw_text);
       onClose();
-    } catch {
-      alert('Optimization failed. Please try again.');
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : 'Optimization failed. Please try again.';
+      alert(msg);
     } finally {
       setIsSubmitting(false);
     }
