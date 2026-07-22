@@ -1,11 +1,40 @@
 import os
 import json
 from openai import OpenAI
-from typing import List
+from typing import List, Optional, Tuple
 
 # OpenRouter configuration
 OPENROUTER_BASE = "https://openrouter.ai/api/v1"
-MODEL_ID = "tencent/hy3:free"
+
+# tencent/hy3:free often disappears from the free catalog — keep a live fallback chain.
+DEFAULT_FREE_MODELS = [
+    "openai/gpt-oss-20b:free",
+    "nvidia/nemotron-nano-9b-v2:free",
+    "openrouter/free",
+    "google/gemma-4-31b-it:free",
+    "google/gemma-4-26b-a4b-it:free",
+    "nvidia/nemotron-3-nano-30b-a3b:free",
+    "poolside/laguna-xs-2.1:free",
+]
+
+
+def _model_chain() -> List[str]:
+    """Ordered free-model fallback list. Override via env."""
+    primary = (os.getenv("OPENROUTER_MODEL") or "").strip()
+    extra = (os.getenv("OPENROUTER_FREE_MODELS") or "").strip()
+    models: List[str] = []
+    if primary:
+        models.append(primary)
+    if extra:
+        models.extend(m.strip() for m in extra.split(",") if m.strip())
+    models.extend(DEFAULT_FREE_MODELS)
+    seen = set()
+    out: List[str] = []
+    for m in models:
+        if m not in seen:
+            seen.add(m)
+            out.append(m)
+    return out
 
 
 def _get_client() -> OpenAI:
@@ -13,34 +42,53 @@ def _get_client() -> OpenAI:
     api_key = os.getenv("OPENROUTER_API_KEY")
     if not api_key:
         raise RuntimeError("OPENROUTER_API_KEY environment variable not set")
-    return OpenAI(api_key=api_key, base_url=OPENROUTER_BASE)
+    return OpenAI(
+        api_key=api_key,
+        base_url=OPENROUTER_BASE,
+        default_headers={
+            "HTTP-Referer": os.getenv("OPENROUTER_SITE_URL", "https://hire-ready.app"),
+            "X-Title": os.getenv("OPENROUTER_APP_NAME", "HireReady"),
+        },
+    )
 
 
-def _call_model(prompt: str) -> str:
-    """Make an OpenRouter API call, handling errors consistently."""
+def _call_model(prompt: str, *, max_tokens: Optional[int] = None) -> Tuple[str, str]:
+    """Try free OpenRouter models in order until one returns content."""
     print(f"--- AI STATUS: _call_model called, prompt length = {len(prompt)} chars ---")
-    try:
-        client = _get_client()
-        print(f"--- AI STATUS: OpenRouter client initialized, calling API... ---")
-        response = client.chat.completions.create(
-            model=MODEL_ID,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        content = (response.choices[0].message.content or "").strip()
-        print(f"--- AI STATUS: API response received, {len(content)} chars ---")
-        if not content:
-            raise RuntimeError("OpenRouter returned empty content")
-        return content
-    except Exception as e:
-        print(f"--- AI ERROR: _call_model exception: {str(e)} ---")
-        raise RuntimeError(f"OpenRouter API error: {str(e)}")
+    client = _get_client()
+    errors: List[str] = []
+
+    for model in _model_chain():
+        try:
+            print(f"--- AI STATUS: trying model {model} ---")
+            kwargs = {
+                "model": model,
+                "messages": [{"role": "user", "content": prompt}],
+            }
+            if max_tokens is not None:
+                kwargs["max_tokens"] = max_tokens
+            response = client.chat.completions.create(**kwargs)
+            content = (response.choices[0].message.content or "").strip()
+            if not content:
+                errors.append(f"{model}: empty content")
+                print(f"--- AI STATUS: {model} returned empty ---")
+                continue
+            print(f"--- AI STATUS: {model} ok, {len(content)} chars ---")
+            return content, model
+        except Exception as e:
+            msg = str(e)
+            errors.append(f"{model}: {msg}")
+            print(f"--- AI ERROR: {model} failed: {msg} ---")
+            continue
+
+    raise RuntimeError("All OpenRouter free models failed: " + " | ".join(errors))
 
 
 def optimize_resume_text(resume_markdown: str, job_description: str, missing_keywords: List[str] = []) -> str:
-    """Use Tencent Hy3 via OpenRouter to rewrite the resume for maximum ATS compatibility."""
+    """Rewrite the resume for ATS compatibility via OpenRouter free models."""
     print(f"--- AI STATUS: optimize_resume_text called ---")
     print(f"Resume length: {len(resume_markdown)} chars, JD length: {len(job_description)} chars")
-    
+
     prompt = f"""
 ROLE: Elite Executive Resume Architect & ATS Logic Expert.
 TASK: Transform the 'NOISY RAW TEXT' into a world-class, deduplicated, 95%+ ATS-optimized Executive Resume.
@@ -95,7 +143,8 @@ OUTPUT FINAL EXECUTIVE MARKDOWN:
 """
 
     try:
-        text = _call_model(prompt)
+        text, used = _call_model(prompt)
+        print(f"--- AI STATUS: optimize used {used} ---")
         text = text.replace('```markdown', '').replace('```', '').strip()
         return text
     except Exception as e:
@@ -124,14 +173,26 @@ OUTPUT FORMAT: ["Question 1", "Question 2", "Question 3", "Question 4", "Questio
 """
 
     try:
-        text = _call_model(prompt)
+        text, used = _call_model(prompt, max_tokens=1200)
+        print(f"--- AI STATUS: gap questions used {used} ---")
         text = text.replace('```json', '').replace('```', '').strip()
         if '[' in text and ']' in text:
             text = text[text.find('['):text.rfind(']')+1]
-        return json.loads(text)
+        parsed = json.loads(text)
+        if isinstance(parsed, list) and parsed:
+            return [str(q) for q in parsed][:5]
+        raise ValueError("Gap questions JSON was not a non-empty list")
     except Exception as e:
         print(f"Deep Gap Gen Error: {e}")
-        return [f"How have you applied {kw} in your professional career?" for kw in missing_keywords[:5]]
+        if missing_keywords:
+            return [f"How have you applied {kw} in your professional career?" for kw in missing_keywords[:5]]
+        return [
+            "Which tools or systems from this job posting have you used hands-on?",
+            "Describe a metric-driven result that maps to this role's top priority.",
+            "What leadership or collaboration experience matches this team's needs?",
+            "Which required skill are you strongest in, and what is the evidence?",
+            "What gap in your resume should we clarify with a concrete example?",
+        ]
 
 
 def optimize_with_context(resume_markdown: str, job_description: str, user_answers: str) -> str:
@@ -157,7 +218,8 @@ OUTPUT: ONLY the optimized Markdown.
 """
 
     try:
-        text = _call_model(prompt)
+        text, used = _call_model(prompt)
+        print(f"--- AI STATUS: bridge optimize used {used} ---")
         text = text.replace('```markdown', '').replace('```', '').strip()
         return text
     except Exception as e:
@@ -166,7 +228,7 @@ OUTPUT: ONLY the optimized Markdown.
 
 
 def generate_cover_letter(resume_text: str, job_description: str) -> str:
-    """Use Tencent Hy3 via OpenRouter to generate a tailored, professional cover letter."""
+    """Generate a tailored cover letter via OpenRouter free models."""
     prompt = f"""
 ROLE: Professional Career Writer & Cover Letter Specialist.
 TASK: Write a compelling, personalized cover letter for the candidate below.
@@ -210,7 +272,8 @@ OUTPUT THE COVER LETTER IN MARKDOWN:
 """
 
     try:
-        text = _call_model(prompt)
+        text, used = _call_model(prompt)
+        print(f"--- AI STATUS: cover letter used {used} ---")
         text = text.replace('```markdown', '').replace('```', '').strip()
         return text
     except Exception as e:

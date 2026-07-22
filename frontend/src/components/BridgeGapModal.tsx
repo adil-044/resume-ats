@@ -28,10 +28,15 @@ export default function BridgeGapModal({ isOpen, onClose, taskId, onComplete }: 
       setIsLoading(true);
       setCurrentStep(0);
       try {
+        const resumeCtx =
+          analysisResult?.original_text ||
+          analysisResult?.optimized_content?.raw_text ||
+          '';
         const res = await getGapQuestions(
           taskId,
-          analysisResult?.original_text,
-          analysisResult?.job_description
+          resumeCtx,
+          analysisResult?.job_description,
+          analysisResult?.missing_keywords,
         );
         const qList = Array.isArray(res.questions) ? res.questions : [res.questions];
         setQuestions(qList);
@@ -64,13 +69,29 @@ export default function BridgeGapModal({ isOpen, onClose, taskId, onComplete }: 
     setIsSubmitting(true);
     try {
       const combinedAnswers = questions.map((q, i) => `Q: ${q}\nA: ${answers[i]}`).join('\n\n');
-      const result = await bridgeGapOptimize(taskId, combinedAnswers);
+      const resumeCtx =
+        analysisResult?.optimized_content?.raw_text ||
+        analysisResult?.original_text ||
+        '';
+      const result = await bridgeGapOptimize(taskId, combinedAnswers, {
+        resumeText: resumeCtx,
+        jobDescription: analysisResult?.job_description,
+      });
       const currentScore = analysisResult?.overall_score || 0;
       const newScore =
         currentScore < 95
           ? Math.min(99, currentScore + Math.floor(Math.random() * 8) + 20)
           : currentScore;
-      const finalResult = { ...result, overall_score: newScore, after_score: newScore };
+      const finalResult = {
+        ...analysisResult,
+        ...result,
+        overall_score: result.overall_score ?? newScore,
+        after_score: result.overall_score ?? newScore,
+        optimized_content: result.optimized_content || {
+          format: 'markdown',
+          raw_text: resumeCtx,
+        },
+      };
       setAnalysisResult(finalResult);
       onComplete(finalResult.optimized_content.raw_text);
       onClose();

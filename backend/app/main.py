@@ -9,7 +9,14 @@ import traceback
 import re
 from .parser import parse_file
 from .nlp import get_match_score
-from .llm_engine import optimize_resume_text, generate_gap_questions, optimize_with_context, generate_cover_letter, _get_client
+from .llm_engine import (
+    optimize_resume_text,
+    generate_gap_questions,
+    optimize_with_context,
+    generate_cover_letter,
+    _call_model,
+    _model_chain,
+)
 from .pdf_gen import generate_ats_pdf
 
 class ExportRequest(BaseModel):
@@ -18,6 +25,10 @@ class ExportRequest(BaseModel):
 class BridgeGapRequest(BaseModel):
     task_id: str
     answers: str
+    # Workspace loads from Supabase — in-memory analysis_store is often empty after refresh.
+    resume_text: Optional[str] = None
+    job_description: Optional[str] = None
+    missing_keywords: Optional[List[str]] = None
 
 app = FastAPI(title="ATS-Optimized Resume API v2")
 
@@ -35,16 +46,12 @@ analysis_store = {}
 
 @app.get("/api/v1/test-ai")
 async def test_ai():
-    """Direct test of OpenRouter AI call — bypasses all parsing. Use to diagnose AI issues."""
+    """Direct test of OpenRouter free-model chain — bypasses all parsing."""
     try:
-        client = _get_client()
-        response = client.chat.completions.create(
-            model="tencent/hy3:free",
-            messages=[{"role": "user", "content": "Say 'AI works' in exactly those 2 words."}]
-        )
-        return {"status": "ok", "model": response.model, "response": response.choices[0].message.content}
+        content, model = _call_model("Say 'AI works' in exactly those 2 words.", max_tokens=32)
+        return {"status": "ok", "model": model, "response": content, "chain": _model_chain()}
     except Exception as e:
-        return {"status": "error", "error": str(e)}
+        return {"status": "error", "error": str(e), "chain": _model_chain()}
 
 @app.get("/")
 async def root():
@@ -126,18 +133,30 @@ async def optimize(
     job_description: str = Form(...)
 ):
     optimized_text = optimize_resume_text(resume_text, job_description)
+    if not (optimized_text or "").strip() or "AI OPTIMIZATION ERROR" in optimized_text:
+        raise HTTPException(status_code=502, detail="AI optimization failed across free models. Retry shortly.")
     return {"optimized_text": optimized_text}
 
 @app.post("/api/v1/bridge-gap/questions")
 async def get_bridge_questions(
     task_id: str = Form(...),
     resume_text: Optional[str] = Form(None),
-    job_description: Optional[str] = Form(None)
+    job_description: Optional[str] = Form(None),
+    missing_keywords: Optional[str] = Form(None),
 ):
     result = analysis_store.get(task_id)
-    final_resume = resume_text or (result["original_text"] if result else None)
+    final_resume = resume_text or (result["original_text"] if result else None) or (
+        result["optimized_content"]["raw_text"] if result and result.get("optimized_content") else None
+    )
     final_jd = job_description or (result["job_description"] if result else None)
     final_keywords = result["missing_keywords"] if result else []
+    if missing_keywords:
+        try:
+            parsed = json.loads(missing_keywords)
+            if isinstance(parsed, list):
+                final_keywords = [str(k) for k in parsed]
+        except Exception:
+            final_keywords = [k.strip() for k in missing_keywords.split(",") if k.strip()] or final_keywords
 
     if not final_resume or not final_jd:
         raise HTTPException(status_code=404, detail="Analysis context not found. Please provide resume_text and job_description.")
@@ -147,26 +166,50 @@ async def get_bridge_questions(
 
 @app.post("/api/v1/bridge-gap/optimize")
 async def bridge_gap_optimize(request: BridgeGapRequest):
-    if request.task_id not in analysis_store:
-        raise HTTPException(status_code=404, detail="Task session expired. Please re-upload or refresh.")
-    
     try:
-        result = analysis_store[request.task_id]
-        optimized_text = optimize_with_context(
-            result["optimized_content"]["raw_text"],
-            result["job_description"],
-            request.answers
-        )
-        
-        new_analysis = get_match_score(optimized_text, result["job_description"])
-        
-        analysis_store[request.task_id]["optimized_content"]["raw_text"] = optimized_text
-        analysis_store[request.task_id]["overall_score"] = new_analysis["overall_score"]
-        analysis_store[request.task_id]["breakdown"] = new_analysis["breakdown"]
-        analysis_store[request.task_id]["missing_keywords"] = new_analysis["missing_keywords"]
-        analysis_store[request.task_id]["matched_keywords"] = new_analysis.get("matched_keywords", [])
-        
-        return analysis_store[request.task_id]
+        result = analysis_store.get(request.task_id)
+
+        resume_md = None
+        if result and result.get("optimized_content"):
+            resume_md = result["optimized_content"].get("raw_text")
+        resume_md = request.resume_text or resume_md
+
+        jd = request.job_description or (result.get("job_description") if result else None)
+
+        if not resume_md or not jd:
+            raise HTTPException(
+                status_code=404,
+                detail="Task session expired. Re-open the resume from History, or send resume_text + job_description.",
+            )
+
+        optimized_text = optimize_with_context(resume_md, jd, request.answers)
+        if not (optimized_text or "").strip() or "AI OPTIMIZATION ERROR" in optimized_text:
+            raise HTTPException(status_code=502, detail="AI optimization failed across free models. Retry shortly.")
+
+        new_analysis = get_match_score(optimized_text, jd)
+
+        payload = {
+            "id": request.task_id,
+            "overall_score": new_analysis["overall_score"],
+            "breakdown": new_analysis["breakdown"],
+            "missing_keywords": new_analysis["missing_keywords"],
+            "matched_keywords": new_analysis.get("matched_keywords", []),
+            "optimized_content": {"format": "markdown", "raw_text": optimized_text},
+            "job_description": jd,
+            "original_text": (result or {}).get("original_text") or resume_md,
+        }
+
+        if result is not None:
+            analysis_store[request.task_id]["optimized_content"]["raw_text"] = optimized_text
+            analysis_store[request.task_id]["overall_score"] = new_analysis["overall_score"]
+            analysis_store[request.task_id]["breakdown"] = new_analysis["breakdown"]
+            analysis_store[request.task_id]["missing_keywords"] = new_analysis["missing_keywords"]
+            analysis_store[request.task_id]["matched_keywords"] = new_analysis.get("matched_keywords", [])
+            return analysis_store[request.task_id]
+
+        return payload
+    except HTTPException:
+        raise
     except Exception as e:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))

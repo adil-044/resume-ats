@@ -67,7 +67,7 @@ Built for people filtered by Workday, Greenhouse, Lever — not soft career coac
 | Layer | Tech |
 |---|---|
 | Frontend | Next.js 16 · TypeScript · Tailwind v4 · GSAP · R3F · Supabase |
-| Backend | FastAPI · OpenRouter (`tencent/hy3:free` + fallbacks) |
+| Backend | FastAPI · OpenRouter free-model chain (`gpt-oss-20b`, Nemotron, Gemma, `openrouter/free`) |
 | Design | `#0C0C0B` graphite · `#EDE6D9` paper · `#C4A574` copper |
 
 ---

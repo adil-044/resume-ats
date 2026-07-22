@@ -18,13 +18,13 @@ PUBLISHED_PATH = AGENT / "published.json"
 KEYWORDS_PATH = AGENT / "keywords.json"
 
 OPENROUTER_BASE = "https://openrouter.ai/api/v1"
-DEFAULT_MODEL = "tencent/hy3:free"
 FREE_MODELS = [
-    "tencent/hy3:free",
     "openai/gpt-oss-20b:free",
-    "google/gemma-4-31b-it:free",
     "nvidia/nemotron-nano-9b-v2:free",
+    "openrouter/free",
+    "google/gemma-4-31b-it:free",
 ]
+DEFAULT_MODEL = "openai/gpt-oss-20b:free"
 
 
 def slugify(text: str) -> str:

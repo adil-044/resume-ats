@@ -55,11 +55,19 @@ export async function optimizeResume(resumeText: string, jobDescription: string)
   return response.json();
 }
 
-export async function getGapQuestions(taskId: string, resumeText?: string, jobDescription?: string) {
+export async function getGapQuestions(
+  taskId: string,
+  resumeText?: string,
+  jobDescription?: string,
+  missingKeywords?: string[],
+) {
   const formData = new FormData();
   formData.append('task_id', taskId);
   if (resumeText) formData.append('resume_text', resumeText);
   if (jobDescription) formData.append('job_description', jobDescription);
+  if (missingKeywords?.length) {
+    formData.append('missing_keywords', JSON.stringify(missingKeywords));
+  }
 
   const response = await fetch(`${API_BASE_URL}/bridge-gap/questions`, {
     method: 'POST',
@@ -73,13 +81,22 @@ export async function getGapQuestions(taskId: string, resumeText?: string, jobDe
   return response.json();
 }
 
-export async function bridgeGapOptimize(taskId: string, answers: string) {
+export async function bridgeGapOptimize(
+  taskId: string,
+  answers: string,
+  context?: { resumeText?: string; jobDescription?: string },
+) {
   const response = await fetch(`${API_BASE_URL}/bridge-gap/optimize`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ task_id: taskId, answers }),
+    body: JSON.stringify({
+      task_id: taskId,
+      answers,
+      resume_text: context?.resumeText,
+      job_description: context?.jobDescription,
+    }),
   });
 
   if (!response.ok) {
