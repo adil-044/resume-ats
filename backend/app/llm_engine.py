@@ -1,5 +1,6 @@
 import os
 import json
+import re
 from openai import OpenAI
 from typing import List, Optional, Tuple
 
@@ -15,6 +16,25 @@ DEFAULT_FREE_MODELS = [
     "google/gemma-4-26b-a4b-it:free",
     "nvidia/nemotron-3-nano-30b-a3b:free",
     "poolside/laguna-xs-2.1:free",
+]
+
+# Ban generic resume-generator slop
+_SLOP_PHRASES = [
+    "results-driven",
+    "detail-oriented",
+    "self-starter",
+    "team player",
+    "proven track record",
+    "passionate about",
+    "highly motivated",
+    "dynamic professional",
+    "seasoned professional",
+    "leveraged synergies",
+    "go-getter",
+    "hard worker",
+    "think outside the box",
+    "best of breed",
+    "synergistic",
 ]
 
 
@@ -64,7 +84,7 @@ def _call_model(prompt: str, *, max_tokens: Optional[int] = None) -> Tuple[str, 
             kwargs = {
                 "model": model,
                 "messages": [{"role": "user", "content": prompt}],
-                "temperature": 0.2,
+                "temperature": 0.25,
             }
             if max_tokens is not None:
                 kwargs["max_tokens"] = max_tokens
@@ -85,71 +105,114 @@ def _call_model(prompt: str, *, max_tokens: Optional[int] = None) -> Tuple[str, 
     raise RuntimeError("All OpenRouter free models failed: " + " | ".join(errors))
 
 
+def _clean_markdown(text: str) -> str:
+    text = text.replace("```markdown", "").replace("```", "").strip()
+    # Strip common model preambles
+    text = re.sub(
+        r"^(here(?:'s| is) (?:the )?(?:optimized |rewritten )?resume[:\s]*)",
+        "",
+        text,
+        flags=re.I,
+    ).strip()
+    return text
+
+
+def _rewrite_contract(missing_keywords: List[str]) -> str:
+    kw = ", ".join(missing_keywords[:20]) if missing_keywords else "(derive from JD)"
+    return f"""
+YOU ARE NOT A GENERIC RESUME GENERATOR.
+You are a human resume editor rewriting ONE real candidate against ONE job posting.
+
+PRIMARY JOB (do this first — not optional):
+Rewrite EVERY Professional Experience bullet so duties align to the job description.
+Do NOT leave original duty wording intact. Do NOT only edit the Skills section.
+Skills are secondary. Experience bullets carry the ATS match.
+
+XYZ BULLET FORMULA (required for every experience bullet):
+Accomplished [X] as measured by [Y], by doing [Z].
+- X = outcome / ownership tied to a JD requirement
+- Y = metric or scope ONLY if present in the source resume (%, $, #, volume, seats, team size, hours, SKUs, covers, tickets). If no number exists, use concrete scope from the source (e.g. "nightly service", "multi-station line") — NEVER invent fake percentages or dollar amounts.
+- Z = method / tools / process that mirrors JD language when truthful
+
+JD ALIGNMENT RULES:
+1. Pull the posting's required duties, tools, and outcomes. Map each existing role's real work onto those themes.
+2. Prefer the posting's verbs and nouns inside bullets when the candidate's work supports them (e.g. if they managed stock and JD says inventory, write inventory).
+3. Bold **JD keywords** inside bullets and summary when woven naturally — not as a dump list.
+4. Keep the same employers, titles, and dates as the source. Never invent jobs, companies, degrees, or certifications.
+5. Keep roughly the same number of roles. Expand thin bullets into 3–5 strong XYZ bullets per recent role when source content supports it; merge fluff.
+
+ANTI-SLOP (forbidden):
+- Skills-only "optimization" while Experience stays copy-pasted
+- Keyword stuffing footer / random skill clouds
+- Phrases: {", ".join(_SLOP_PHRASES)}
+- Fake metrics, fake employers, fake certifications
+- First-person ("I", "my")
+- Non-English characters or random scripts
+- "Executive Summary" that could fit any candidate
+
+SUMMARY:
+3–4 lines, role-specific, grounded in THIS resume + THIS JD. No fluff adjectives.
+
+SKILLS:
+Short categorized list AFTER experience logic is done. Only skills evidenced in resume or honestly implied by stated work. Include relevant gaps only as soft skills the candidate already demonstrated nearby — never claim tools they never used.
+
+MISSING / TARGET KEYWORDS TO WEAVE WHEN TRUE: {kw}
+"""
+
+
 def optimize_resume_text(resume_markdown: str, job_description: str, missing_keywords: List[str] = []) -> str:
-    """Rewrite the resume for ATS compatibility via OpenRouter free models."""
-    print(f"--- AI STATUS: optimize_resume_text called ---")
+    """Full JD-aligned resume rewrite (XYZ bullets) via OpenRouter free models."""
+    print("--- AI STATUS: optimize_resume_text called ---")
     print(f"Resume length: {len(resume_markdown)} chars, JD length: {len(job_description)} chars")
 
     prompt = f"""
-ROLE: Elite Executive Resume Architect & ATS Logic Expert.
-TASK: Transform the 'NOISY RAW TEXT' into a world-class, deduplicated, ATS-optimized Executive Resume in clean Markdown.
+{_rewrite_contract(missing_keywords)}
 
----
-CRITICAL RULES (FORBIDDEN ACTIONS):
-1. DO NOT invent employers, job titles, dates, degrees, certifications, metrics, or skills that are not supported by the raw resume or the user's stated details.
-2. DO NOT repeat the Name, Email, or Address after the initial header.
-3. DO NOT dump keywords in a random list at the end. Every keyword MUST be woven into a specific bullet point or a categorized skill section.
-4. Output MUST be English only — no other scripts, languages, or random characters.
-5. If a missing keyword cannot be honestly supported by the resume, put it only under a skills section labeled clearly — do not fabricate experience bullets for it.
-
----
-CLEANING PROTOCOL:
-1. EXTRACT: Find the Name and Contact info ONCE. Place it at the very top.
-2. CATEGORIZE: Group these keywords into the TECHNICAL SKILLS section when relevant: {', '.join(missing_keywords)}
-3. INJECT: Rewrite Experience bullets to naturally include relevant keywords from the JD only when truthful. Bold them: **Keyword**.
-
----
-REQUIRED STRUCTURE (Markdown):
+OUTPUT FORMAT (Markdown only — no preamble):
 # [FULL NAME]
 [Email | Phone | LinkedIn | Location]
 
 ---
 
-## EXECUTIVE SUMMARY
-[A 3-4 sentence professional narrative. Integrate 2-3 core keywords here. No first-person pronouns.]
-
----
-
-## TECHNICAL SKILLS & COMPETENCIES
-[Categorized list grounded in the resume + JD keywords.]
+## PROFESSIONAL SUMMARY
+[3–4 lines tailored to this JD]
 
 ---
 
 ## PROFESSIONAL EXPERIENCE
-[Company Name | Job Title | Dates]
-- [High-impact bullet using Action + Context + Result. Only use metrics present in the source.]
+### [Job Title] | [Company] | [Dates]
+- [XYZ bullet aligned to JD]
+- [XYZ bullet aligned to JD]
+- [XYZ bullet aligned to JD]
+
+### [Next role...]
+- ...
+
+---
+
+## SKILLS
+[Short categorized list — last, not the main change]
 
 ---
 
 ## EDUCATION & CERTIFICATIONS
-[Clean list from the source only.]
+[From source only]
 
 ---
 
-JOB DESCRIPTION:
-{job_description}
+TARGET JOB DESCRIPTION:
+{job_description[:6000]}
 
-RAW DATA TO PROCESS:
-{resume_markdown}
+SOURCE RESUME (rewrite duties; keep identity facts):
+{resume_markdown[:12000]}
 
-OUTPUT FINAL EXECUTIVE MARKDOWN ONLY:
+Write the FULL rewritten resume now. Experience section must be substantially rewritten — not a skills tweak.
 """
 
     try:
-        text, used = _call_model(prompt)
+        text, used = _call_model(prompt, max_tokens=4500)
         print(f"--- AI STATUS: optimize used {used} ---")
-        text = text.replace('```markdown', '').replace('```', '').strip()
-        return text
+        return _clean_markdown(text)
     except Exception as e:
         error_msg = f"--- AI ERROR: {str(e)} ---"
         print(error_msg)
@@ -157,30 +220,34 @@ OUTPUT FINAL EXECUTIVE MARKDOWN ONLY:
 
 
 def generate_gap_questions(missing_keywords: List[str], job_description: str, resume_content: str = "") -> List[str]:
-    """Perform a deep delta analysis to generate high-signal questions."""
+    """Ask for real metrics / evidence the rewrite can use in XYZ bullets."""
     prompt = f"""
-ROLE: Expert Technical Recruiter & ATS Analyst.
-TASK: Analyze the 'GAP' between the Candidate's Resume and the Job Description.
+ROLE: Technical recruiter closing gaps between a resume and a job posting.
+TASK: Ask for SPECIFIC evidence so a resume can be rewritten with XYZ bullets (Accomplished X as measured by Y by doing Z).
 
-CANDIDATE DATA: {resume_content[:2000]}
-JOB REQUIREMENTS: {job_description[:2000]}
-IDENTIFIED MISSING KEYWORDS: {', '.join(missing_keywords[:15])}
+CANDIDATE RESUME (excerpt):
+{resume_content[:2500]}
 
-INSTRUCTIONS:
-1. Identify the 5 most critical missing technical or leadership skills that are in the JD but NOT in the resume.
-2. Generate EXACTLY 5 targeted, distinct interview questions (one per skill).
-3. Each question MUST ask for SPECIFIC evidence, metrics, or tools used.
-4. Format the output as a clean JSON list of 5 strings. No preamble.
+JOB DESCRIPTION (excerpt):
+{job_description[:2500]}
 
-OUTPUT FORMAT: ["Question 1", "Question 2", "Question 3", "Question 4", "Question 5"]
+MISSING KEYWORDS: {', '.join(missing_keywords[:15])}
+
+RULES:
+1. Exactly 5 distinct questions.
+2. Each question must demand a metric, tool, volume, or concrete example — not vague soft skills.
+3. Prefer gaps that would improve Experience bullets, not just a skills list.
+4. JSON array of 5 strings only. No preamble.
+
+OUTPUT: ["Q1", "Q2", "Q3", "Q4", "Q5"]
 """
 
     try:
         text, used = _call_model(prompt, max_tokens=1200)
         print(f"--- AI STATUS: gap questions used {used} ---")
-        text = text.replace('```json', '').replace('```', '').strip()
-        if '[' in text and ']' in text:
-            text = text[text.find('['):text.rfind(']')+1]
+        text = text.replace("```json", "").replace("```", "").strip()
+        if "[" in text and "]" in text:
+            text = text[text.find("[") : text.rfind("]") + 1]
         parsed = json.loads(text)
         if isinstance(parsed, list) and parsed:
             return [str(q) for q in parsed][:5]
@@ -188,45 +255,47 @@ OUTPUT FORMAT: ["Question 1", "Question 2", "Question 3", "Question 4", "Questio
     except Exception as e:
         print(f"Deep Gap Gen Error: {e}")
         if missing_keywords:
-            return [f"How have you applied {kw} in your professional career?" for kw in missing_keywords[:5]]
+            return [
+                f"For {kw}: what measurable result did you own (%, $, #, volume), and what did you do to get it?"
+                for kw in missing_keywords[:5]
+            ]
         return [
-            "Which tools or systems from this job posting have you used hands-on?",
-            "Describe a metric-driven result that maps to this role's top priority.",
-            "What leadership or collaboration experience matches this team's needs?",
-            "Which required skill are you strongest in, and what is the evidence?",
-            "What gap in your resume should we clarify with a concrete example?",
+            "Which JD tool/system have you used hands-on, and on what scale (users, tickets, covers, SKUs)?",
+            "Pick the strongest metric from your last role — what changed because of your work?",
+            "Describe one duty from the posting that matches work you already did — include numbers if you have them.",
+            "Where did you lead people or process? Team size and outcome?",
+            "What gap in your resume should we clarify with a concrete before/after example?",
         ]
 
 
 def optimize_with_context(resume_markdown: str, job_description: str, user_answers: str) -> str:
-    """Aggressive 90%+ optimization pass integrating user answers."""
+    """Second-pass rewrite: fold gap answers into XYZ experience bullets."""
     prompt = f"""
-ROLE: Expert Resume Architect.
-GOAL: Achieve a 95%+ ATS match score.
+{_rewrite_contract([])}
 
-CRITICAL: Extract Name/Contact info ONCE at the top. Remove any duplicates found in the body.
+SECOND PASS — use NEW USER DETAILS as primary evidence for metrics and missing JD themes.
+Rewrite the WHOLE resume again (especially Experience). Do not only patch Skills.
 
-CONTEXT:
-1. CURRENT RESUME: {resume_markdown}
-2. TARGET JOB: {job_description}
-3. NEW USER DETAILS: {user_answers}
+Integrate user answers into XYZ bullets. Bold new keywords when natural.
+Do NOT invent employers, titles, dates, or metrics beyond what the resume + answers support.
+English only.
 
-TASK:
-- Rewrite the resume to INTEGRATE every detail from the New User Details when truthful.
-- Do NOT invent employers, titles, dates, or metrics.
-- English only. No other scripts or languages.
-- Ensure keywords from the user answers are **bolded**.
-- RESTRUCTURE into a clean Executive Markdown format with --- dividers.
-- Maintain single-column, professional objective language.
+OUTPUT: ONLY the full rewritten Markdown resume (same structure as a complete resume).
 
-OUTPUT: ONLY the optimized Markdown.
+CURRENT RESUME:
+{resume_markdown[:10000]}
+
+TARGET JOB:
+{job_description[:5000]}
+
+NEW USER DETAILS (metrics / evidence to weave into duties):
+{user_answers[:4000]}
 """
 
     try:
-        text, used = _call_model(prompt)
+        text, used = _call_model(prompt, max_tokens=4500)
         print(f"--- AI STATUS: bridge optimize used {used} ---")
-        text = text.replace('```markdown', '').replace('```', '').strip()
-        return text
+        return _clean_markdown(text)
     except Exception as e:
         print(f"Final Optimization Error: {e}")
         return resume_markdown
@@ -241,13 +310,12 @@ TASK: Write a compelling, personalized cover letter for the candidate below.
 ---
 RULES:
 1. The letter MUST be tailored to the specific job description provided.
-2. Reference 2-3 SPECIFIC achievements or experiences from the candidate's resume that directly relate to the job requirements.
-3. Use a professional but warm tone. Avoid generic phrases like "I am writing to express my interest".
-4. Keep it concise: 3-4 paragraphs maximum (Opening, Body 1-2, Closing).
-5. Do NOT fabricate any experience — only reference what is in the resume.
-6. Include placeholders for [Company Name] and [Hiring Manager Name] if not known.
-7. Output clean Markdown format.
-8. Do NOT include the candidate's address or date header — just the letter body.
+2. Reference 2-3 SPECIFIC achievements from the resume that map to JD duties — use real metrics if present.
+3. Professional, concrete tone. Ban: "I am writing to express my interest", "passionate", "results-driven".
+4. 3–4 paragraphs max (Opening, Body 1–2, Closing).
+5. Do NOT fabricate experience.
+6. Placeholders OK for [Company Name] and [Hiring Manager Name].
+7. Clean Markdown. No address/date header.
 
 ---
 STRUCTURE:
@@ -255,13 +323,13 @@ STRUCTURE:
 
 Dear [Hiring Manager Name],
 
-[Opening paragraph: Hook + why this role + why this company]
+[Opening: why this role + one concrete proof point]
 
-[Body paragraph 1: Most relevant achievement from resume, connected to a key job requirement. Use specific metrics/results.]
+[Body 1: XYZ-style achievement mapped to a JD requirement]
 
-[Body paragraph 2: Second relevant skill/experience. Show how it maps to another job requirement.]
+[Body 2: Second mapped achievement / skill]
 
-[Closing paragraph: Enthusiasm + call to action + thank you]
+[Closing: clear ask]
 
 Sincerely,
 [Candidate Name]
@@ -277,10 +345,9 @@ OUTPUT THE COVER LETTER IN MARKDOWN:
 """
 
     try:
-        text, used = _call_model(prompt)
+        text, used = _call_model(prompt, max_tokens=2000)
         print(f"--- AI STATUS: cover letter used {used} ---")
-        text = text.replace('```markdown', '').replace('```', '').strip()
-        return text
+        return _clean_markdown(text)
     except Exception as e:
         print(f"Cover Letter Generation Error: {e}")
         return f"# Cover Letter Generation Error\n\n{str(e)}\n\nPlease try again."

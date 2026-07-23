@@ -136,7 +136,11 @@ export default function Workspace() {
     }
     setIsOptimizing(true);
     try {
-      const result = await optimizeResume(markdown, jd);
+      const result = await optimizeResume(
+        markdown,
+        jd,
+        analysisResult?.missing_keywords,
+      );
       const text = (result.optimized_text || '').trim();
       if (!text || text.includes('AI OPTIMIZATION ERROR')) {
         throw new Error('AI returned an error. Retry in a moment.');

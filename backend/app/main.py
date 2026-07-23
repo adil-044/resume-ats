@@ -130,9 +130,25 @@ async def get_analysis(task_id: str):
 @app.post("/api/v1/optimize")
 async def optimize(
     resume_text: str = Form(...),
-    job_description: str = Form(...)
+    job_description: str = Form(...),
+    missing_keywords: Optional[str] = Form(None),
 ):
-    optimized_text = optimize_resume_text(resume_text, job_description)
+    keywords: List[str] = []
+    if missing_keywords:
+        try:
+            parsed = json.loads(missing_keywords)
+            if isinstance(parsed, list):
+                keywords = [str(k) for k in parsed]
+        except Exception:
+            keywords = [k.strip() for k in missing_keywords.split(",") if k.strip()]
+    if not keywords:
+        # Derive gaps so optimize isn't skills-blind when client omits them
+        try:
+            keywords = get_match_score(resume_text, job_description).get("missing_keywords", [])
+        except Exception:
+            keywords = []
+
+    optimized_text = optimize_resume_text(resume_text, job_description, keywords)
     if not (optimized_text or "").strip() or "AI OPTIMIZATION ERROR" in optimized_text:
         raise HTTPException(status_code=502, detail="AI optimization failed across free models. Retry shortly.")
     return {"optimized_text": optimized_text}

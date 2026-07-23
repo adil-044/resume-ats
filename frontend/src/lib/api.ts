@@ -38,10 +38,17 @@ export async function getAnalysis(taskId: string) {
   return response.json();
 }
 
-export async function optimizeResume(resumeText: string, jobDescription: string) {
+export async function optimizeResume(
+  resumeText: string,
+  jobDescription: string,
+  missingKeywords?: string[],
+) {
   const formData = new FormData();
   formData.append('resume_text', resumeText);
   formData.append('job_description', jobDescription);
+  if (missingKeywords?.length) {
+    formData.append('missing_keywords', JSON.stringify(missingKeywords));
+  }
 
   const response = await fetch(`${API_BASE_URL}/optimize`, {
     method: 'POST',
