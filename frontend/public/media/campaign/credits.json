@@ -1,0 +1,40 @@
+[
+  {
+    "slug": "hero",
+    "id": 880989,
+    "photographer": "Julien Bachelet",
+    "url": "https://www.pexels.com/photo/black-digital-alarm-clock-at-1-00-880989/",
+    "file": "hero.jpg",
+    "query": "laptop desk night dark"
+  },
+  {
+    "slug": "paper",
+    "id": 5668869,
+    "photographer": "Sora Shimazaki",
+    "url": "https://www.pexels.com/photo/focused-woman-writing-in-clipboard-while-hiring-candidate-5668869/",
+    "file": "paper.jpg",
+    "query": "resume document desk"
+  },
+  {
+    "slug": "focus",
+    "id": 30215680,
+    "photographer": "Oktay K\u00f6seo\u011flu",
+    "url": "https://www.pexels.com/photo/woman-working-on-laptop-in-a-dimly-lit-room-30215680/",
+    "file": "focus.jpg",
+    "query": "person typing laptop dark"
+  },
+  {
+    "slug": "city",
+    "id": 15389576,
+    "photographer": "Carsten Ruthemann",
+    "url": "https://www.pexels.com/photo/exterior-of-a-building-in-a-city-15389576/",
+    "file": "city.jpg",
+    "query": "city window night office"
+  },
+  {
+    "slug": "ambient",
+    "id": 4841394,
+    "user": "Tima Miroshnichenko",
+    "file": "ambient.mp4"
+  }
+]
