@@ -7,3 +7,7 @@ backend/.venv/
 seo-agent/.venv/
 seo-agent/.env
 seo-agent/logs/
+
+backend/.env
+__pycache__/
+*.pyc

@@ -7,15 +7,16 @@ from typing import List, Optional, Tuple
 # OpenRouter configuration
 OPENROUTER_BASE = "https://openrouter.ai/api/v1"
 
-# tencent/hy3:free often disappears from the free catalog — keep a live fallback chain.
+# Free catalog rotates constantly — chain re-verified 2026-10-06 (probe: /root/hr-probe.log).
 DEFAULT_FREE_MODELS = [
-    "nvidia/nemotron-nano-9b-v2:free",
-    "openai/gpt-oss-20b:free",
-    "openrouter/free",
-    "google/gemma-4-31b-it:free",
-    "google/gemma-4-26b-a4b-it:free",
-    "nvidia/nemotron-3-nano-30b-a3b:free",
+    "inclusionai/ling-3.0-flash-sante:free",
+    "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+    "poolside/laguna-s-2.1:free",
     "poolside/laguna-xs-2.1:free",
+    "google/gemma-4-26b-a4b-it:free",
+    "google/gemma-4-31b-it:free",
+    "nvidia/nemotron-3.5-lightning:free",
+    "openrouter/free",
 ]
 
 # Ban generic resume-generator slop
@@ -85,11 +86,14 @@ def _call_model(prompt: str, *, max_tokens: Optional[int] = None) -> Tuple[str, 
                 "model": model,
                 "messages": [{"role": "user", "content": prompt}],
                 "temperature": 0.25,
+                # Reasoning models: keep chain-of-thought out of content
+                "extra_body": {"reasoning": {"exclude": True}},
             }
             if max_tokens is not None:
                 kwargs["max_tokens"] = max_tokens
             response = client.chat.completions.create(**kwargs)
             content = (response.choices[0].message.content or "").strip()
+            content = _strip_reasoning_leak(content)
             if not content:
                 errors.append(f"{model}: empty content")
                 print(f"--- AI STATUS: {model} returned empty ---")
@@ -103,6 +107,31 @@ def _call_model(prompt: str, *, max_tokens: Optional[int] = None) -> Tuple[str, 
             continue
 
     raise RuntimeError("All OpenRouter free models failed: " + " | ".join(errors))
+
+
+_REASONING_OPENERS = (
+    "we need to",
+    "the user wants",
+    "the user is asking",
+    "let's think",
+    "let me think",
+    "okay, so",
+    "first, i",
+    "here's a thinking process",
+)
+
+
+def _strip_reasoning_leak(text: str) -> str:
+    """Some free reasoning models leak chain-of-thought into content.
+    If the reply opens like internal monologue, keep only from the first
+    markdown heading onward; if none exists, treat as unusable."""
+    stripped = text.lstrip()
+    if not stripped.lower().startswith(_REASONING_OPENERS):
+        return text
+    m = re.search(r"^#{1,3} .+$", stripped, flags=re.M)
+    if m:
+        return stripped[m.start():].strip()
+    return ""
 
 
 def _clean_markdown(text: str) -> str:
